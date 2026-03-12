@@ -43,6 +43,14 @@ export async function POST(request: NextRequest) {
       [session_id]
     );
 
+    const projectInfo = await queryOne<{ project_id: string; project_title: string; start_time: string; total_duration_seconds: number }>(
+      `SELECT ws.project_id, p.title as project_title, ws.start_time, ws.total_duration_seconds
+       FROM work_sessions ws
+       JOIN projects p ON p.id = ws.project_id
+       WHERE ws.id = $1`,
+      [session_id]
+    );
+
     // Create notification for admin
     await query(
       `INSERT INTO notifications (user_type, user_id, title, message, type)
@@ -55,7 +63,20 @@ export async function POST(request: NextRequest) {
       ]
     );
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({
+      success: true,
+      session: projectInfo
+        ? {
+            id: session_id,
+            project_id: projectInfo.project_id,
+            project_title: projectInfo.project_title,
+            status: 'running',
+            start_time: projectInfo.start_time,
+            pause_time: null,
+            total_duration_seconds: projectInfo.total_duration_seconds,
+          }
+        : null,
+    });
   } catch (error) {
     console.error('Resume work session error:', error);
     return NextResponse.json(

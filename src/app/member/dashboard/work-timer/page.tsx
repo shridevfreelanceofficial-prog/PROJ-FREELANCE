@@ -26,6 +26,7 @@ export default function WorkTimerPage() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const activeSessionFetchIdRef = useRef(0);
 
   useEffect(() => {
     fetchProjects();
@@ -34,11 +35,17 @@ export default function WorkTimerPage() {
 
   useEffect(() => {
     if (activeSession && activeSession.status === 'running') {
+      // Set immediately so the UI changes without waiting for the first interval tick
+      const startTime = new Date(activeSession.start_time!).getTime();
+      const now = Date.now();
+      const initialElapsed = Math.floor((now - startTime) / 1000) + activeSession.total_duration_seconds;
+      setElapsedSeconds(initialElapsed);
+
       intervalRef.current = setInterval(() => {
-        const startTime = new Date(activeSession.start_time!).getTime();
-        const now = Date.now();
-        const elapsed = Math.floor((now - startTime) / 1000) + activeSession.total_duration_seconds;
-        setElapsedSeconds(elapsed);
+        const st = new Date(activeSession.start_time!).getTime();
+        const n = Date.now();
+        const e = Math.floor((n - st) / 1000) + activeSession.total_duration_seconds;
+        setElapsedSeconds(e);
       }, 1000);
     } else if (activeSession) {
       setElapsedSeconds(activeSession.total_duration_seconds);
@@ -64,10 +71,14 @@ export default function WorkTimerPage() {
   };
 
   const fetchActiveSession = async () => {
+    const fetchId = ++activeSessionFetchIdRef.current;
     try {
       const response = await fetch('/api/member/work-session/active');
       if (response.ok) {
         const data = await response.json();
+        // Avoid overwriting a newer UI state (e.g. user pressed Start) with an older response
+        if (fetchId !== activeSessionFetchIdRef.current) return;
+
         setActiveSession(data.session);
         if (data.session) {
           setSelectedProject(data.session.project_id);
@@ -76,7 +87,9 @@ export default function WorkTimerPage() {
     } catch (error) {
       console.error('Error fetching active session:', error);
     } finally {
-      setLoading(false);
+      if (fetchId === activeSessionFetchIdRef.current) {
+        setLoading(false);
+      }
     }
   };
 
@@ -92,7 +105,13 @@ export default function WorkTimerPage() {
       });
 
       if (response.ok) {
-        fetchActiveSession();
+        const data = await response.json();
+        if (data.session) {
+          setActiveSession(data.session);
+          setSelectedProject(data.session.project_id);
+        } else {
+          await fetchActiveSession();
+        }
       }
     } catch (error) {
       console.error('Error starting work:', error);
@@ -113,7 +132,12 @@ export default function WorkTimerPage() {
       });
 
       if (response.ok) {
-        fetchActiveSession();
+        const data = await response.json();
+        if (data.session) {
+          setActiveSession(data.session);
+        } else {
+          await fetchActiveSession();
+        }
       }
     } catch (error) {
       console.error('Error pausing work:', error);
@@ -134,7 +158,12 @@ export default function WorkTimerPage() {
       });
 
       if (response.ok) {
-        fetchActiveSession();
+        const data = await response.json();
+        if (data.session) {
+          setActiveSession(data.session);
+        } else {
+          await fetchActiveSession();
+        }
       }
     } catch (error) {
       console.error('Error resuming work:', error);
@@ -159,6 +188,7 @@ export default function WorkTimerPage() {
         setActiveSession(null);
         setElapsedSeconds(0);
         setSelectedProject('');
+        await fetchActiveSession();
       }
     } catch (error) {
       console.error('Error stopping work:', error);

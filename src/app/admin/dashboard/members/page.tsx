@@ -160,14 +160,17 @@ export default function MembersPage() {
                         >
                           Edit
                         </Link>
-                        <button
-                          onClick={() => handleToggleActive(member.id, member.is_active)}
-                          className={`${
-                            member.is_active ? 'text-[#DC2626]' : 'text-[#10B981]'
-                          } hover:opacity-80`}
+                        <Button
+                          variant={member.is_active ? 'danger' : 'primary'}
+                          size="sm"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleToggleActive(member.id, member.is_active);
+                          }}
                         >
                           {member.is_active ? 'Deactivate' : 'Activate'}
-                        </button>
+                        </Button>
                       </td>
                     </tr>
                   ))}

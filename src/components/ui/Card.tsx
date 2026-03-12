@@ -9,9 +9,9 @@ interface CardProps extends HTMLAttributes<HTMLDivElement> {
 const Card = forwardRef<HTMLDivElement, CardProps>(
   ({ className = '', variant = 'default', children, ...props }, ref) => {
     const variants = {
-      default: 'bg-white shadow-md',
-      bordered: 'bg-white border-2 border-[#D1FAE5]',
-      elevated: 'bg-white shadow-lg hover:shadow-xl transition-shadow duration-200',
+      default: 'bg-white dark:bg-[#111827] shadow-md',
+      bordered: 'bg-white dark:bg-[#111827] border-2 border-[#D1FAE5] dark:border-[#1F2937]',
+      elevated: 'bg-white dark:bg-[#111827] shadow-lg hover:shadow-xl transition-shadow duration-200',
     };
 
     return (
@@ -32,7 +32,7 @@ export const CardHeader = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivEleme
   ({ className = '', children, ...props }, ref) => (
     <div
       ref={ref}
-      className={`px-6 py-4 border-b border-[#D1FAE5] ${className}`}
+      className={`px-6 py-4 border-b border-[#D1FAE5] dark:border-[#1F2937] ${className}`}
       {...props}
     >
       {children}
@@ -60,7 +60,7 @@ export const CardFooter = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivEleme
   ({ className = '', children, ...props }, ref) => (
     <div
       ref={ref}
-      className={`px-6 py-4 border-t border-[#D1FAE5] bg-[#F8FAFC] rounded-b-xl ${className}`}
+      className={`px-6 py-4 border-t border-[#D1FAE5] dark:border-[#1F2937] bg-[#F8FAFC] dark:bg-[#0B1220] rounded-b-xl ${className}`}
       {...props}
     >
       {children}

@@ -45,21 +45,37 @@ export async function POST(request: NextRequest) {
       [totalSeconds, session_id]
     );
 
-    // Create notification for admin
+    // Get project info for notification
+    const projectInfo = await query<{ project_id: string; project_name: string }>(
+      `SELECT ws.project_id, p.title as project_name 
+       FROM work_sessions ws 
+       JOIN projects p ON ws.project_id = p.id 
+       WHERE ws.id = $1`,
+      [session_id]
+    );
+    const projectName = projectInfo[0]?.project_name || 'Unknown Project';
+    const stopTime = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
+    
+    // Create notification for admin
     await query(
-      `INSERT INTO notifications (user_type, user_id, title, message, type)
-       SELECT 'admin', a.id, $1, $2, $3
+      `INSERT INTO notifications (user_type, user_id, title, message, type, action_url)
+       SELECT 'admin', a.id, $1, $2, $3, $4
        FROM administrators a`,
       [
         'Work Session Completed',
-        `${(result.user as any).full_name} completed their work session (${hours}h ${minutes}m)`,
+        `${(result.user as any).full_name} completed working on "${projectName}" at ${stopTime} (${hours}h ${minutes}m total)`,
         'work_session',
+        `/admin/dashboard/projects/${projectInfo[0]?.project_id}`,
       ]
     );
 
-    return NextResponse.json({ success: true, total_seconds: totalSeconds });
+    return NextResponse.json({
+      success: true,
+      total_seconds: totalSeconds,
+      session: null,
+    });
   } catch (error) {
     console.error('Stop work session error:', error);
     return NextResponse.json(

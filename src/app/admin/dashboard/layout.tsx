@@ -25,6 +25,12 @@ export default function AdminDashboardLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
+    try {
+      const savedTheme = localStorage.getItem('theme');
+      document.documentElement.classList.toggle('dark', savedTheme === 'dark');
+    } catch {
+      // ignore
+    }
     checkAuth();
   }, []);
 
@@ -68,7 +74,7 @@ export default function AdminDashboardLayout({
   ];
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC]">
+    <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0B1220]">
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div
@@ -79,7 +85,7 @@ export default function AdminDashboardLayout({
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 z-50 h-full w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+        className={`fixed top-0 left-0 z-50 h-full w-64 bg-white dark:bg-[#111827] shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -90,7 +96,7 @@ export default function AdminDashboardLayout({
               <div className="w-10 h-10 bg-gradient-to-br from-[#10B981] to-[#0F766E] rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-xl">S</span>
               </div>
-              <span className="text-lg font-bold text-[#111827]">ShriDev</span>
+              <span className="text-lg font-bold text-[#111827] dark:text-[#F9FAFB]">ShriDev</span>
             </Link>
           </div>
 
@@ -103,7 +109,7 @@ export default function AdminDashboardLayout({
                 className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                   pathname === item.href
                     ? 'bg-[#D1FAE5] text-[#0F766E] font-medium'
-                    : 'text-[#6B7280] hover:bg-[#F8FAFC] hover:text-[#111827]'
+                    : 'text-[#6B7280] dark:text-[#9CA3AF] hover:bg-[#F8FAFC] dark:hover:bg-[#0B1220] hover:text-[#111827] dark:hover:text-[#F9FAFB]'
                 }`}
                 onClick={() => setSidebarOpen(false)}
               >
@@ -124,10 +130,10 @@ export default function AdminDashboardLayout({
                 </span>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-[#111827] truncate">
+                <p className="text-sm font-medium text-[#111827] dark:text-[#F9FAFB] truncate">
                   {user?.name || user?.username}
                 </p>
-                <p className="text-xs text-[#6B7280] truncate">{user?.email}</p>
+                <p className="text-xs text-[#6B7280] dark:text-[#9CA3AF] truncate">{user?.email}</p>
               </div>
             </div>
             <button
@@ -146,7 +152,7 @@ export default function AdminDashboardLayout({
       {/* Main content */}
       <div className="lg:ml-64">
         {/* Top bar */}
-        <header className="bg-white shadow-sm sticky top-0 z-30">
+        <header className="bg-white dark:bg-[#111827] shadow-sm sticky top-0 z-30">
           <div className="px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
             <button
               onClick={() => setSidebarOpen(true)}
@@ -156,11 +162,11 @@ export default function AdminDashboardLayout({
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
-            <h1 className="text-xl font-semibold text-[#111827]">
+            <h1 className="text-xl font-semibold text-[#111827] dark:text-[#F9FAFB]">
               {navItems.find(item => item.href === pathname)?.label || 'Dashboard'}
             </h1>
             <div className="flex items-center gap-4">
-              <span className="text-sm text-[#6B7280]">Administrator</span>
+              <span className="text-sm text-[#6B7280] dark:text-[#9CA3AF]">Administrator</span>
             </div>
           </div>
         </header>

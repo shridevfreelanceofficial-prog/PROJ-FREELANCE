@@ -21,6 +21,16 @@ interface AdminUser {
   is_profile_complete: boolean;
 }
 
+interface Notification {
+  id: string;
+  title: string;
+  message: string;
+  type: string;
+  is_read: boolean;
+  created_at: string;
+  action_url: string | null;
+}
+
 export default function AdminDashboardPage() {
   const router = useRouter();
   const [user, setUser] = useState<AdminUser | null>(null);
@@ -31,11 +41,19 @@ export default function AdminDashboardPage() {
     pendingPayments: 0,
     upcomingMeetings: 0,
   });
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchUserData();
     fetchStats();
+    fetchNotifications();
+
+    const interval = setInterval(() => {
+      fetchNotifications();
+    }, 5000);
+
+    return () => clearInterval(interval);
   }, []);
 
   const fetchUserData = async () => {
@@ -66,6 +84,27 @@ export default function AdminDashboardPage() {
       console.error('Error fetching stats:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchNotifications = async () => {
+    try {
+      const response = await fetch('/api/admin/notifications');
+      if (response.ok) {
+        const data = await response.json();
+        setNotifications(data.notifications || []);
+      }
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+    }
+  };
+
+  const markNotificationRead = async (id: string) => {
+    try {
+      await fetch(`/api/admin/notifications/${id}/read`, { method: 'PATCH' });
+      fetchNotifications();
+    } catch (error) {
+      console.error('Error marking notification read:', error);
     }
   };
 
@@ -170,15 +209,48 @@ export default function AdminDashboardPage() {
         </Card>
 
         <Card>
-          <CardHeader>
-            <h3 className="text-lg font-semibold text-[#111827]">Recent Activity</h3>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <h3 className="text-lg font-semibold text-[#111827]">Notifications</h3>
+            <span className="px-2 py-1 bg-[#10B981] text-white text-xs rounded-full">
+              {notifications.filter(n => !n.is_read).length} new
+            </span>
           </CardHeader>
-          <CardBody>
-            <div className="space-y-4">
+          <CardBody className="p-0">
+            {notifications.length === 0 ? (
               <p className="text-[#6B7280] text-center py-8">
-                No recent activity to display.
+                No notifications yet.
               </p>
-            </div>
+            ) : (
+              <div className="divide-y divide-[#D1FAE5] max-h-80 overflow-y-auto">
+                {notifications.slice(0, 5).map((notification) => (
+                  <div
+                    key={notification.id}
+                    className={`p-4 hover:bg-[#F8FAFC] cursor-pointer ${
+                      !notification.is_read ? 'bg-[#D1FAE5]/20' : ''
+                    }`}
+                    onClick={() => markNotificationRead(notification.id)}
+                  >
+                    {notification.action_url ? (
+                      <Link href={notification.action_url}>
+                        <p className="font-medium text-[#111827]">{notification.title}</p>
+                        <p className="text-sm text-[#6B7280] line-clamp-2">{notification.message}</p>
+                        <p className="text-xs text-[#6B7280] mt-1">
+                          {new Date(notification.created_at).toLocaleString()}
+                        </p>
+                      </Link>
+                    ) : (
+                      <div>
+                        <p className="font-medium text-[#111827]">{notification.title}</p>
+                        <p className="text-sm text-[#6B7280] line-clamp-2">{notification.message}</p>
+                        <p className="text-xs text-[#6B7280] mt-1">
+                          {new Date(notification.created_at).toLocaleString()}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </CardBody>
         </Card>
       </div>

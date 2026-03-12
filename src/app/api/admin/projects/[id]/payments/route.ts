@@ -25,8 +25,17 @@ export async function GET(
       amount: string;
       status: string;
       confirmed_by_member: boolean;
+      due_date: string;
+      paid_date: string | null;
     }>(
-      `SELECT p.id, p.member_id, m.full_name as member_name, p.amount, p.status, p.confirmed_by_member
+      `SELECT p.id,
+              p.member_id,
+              m.full_name as member_name,
+              p.amount,
+              p.status,
+              p.confirmed_by_member,
+              p.created_at as due_date,
+              p.payment_date as paid_date
        FROM payments p
        JOIN members m ON p.member_id = m.id
        WHERE p.project_id = $1
@@ -34,7 +43,14 @@ export async function GET(
       [id]
     );
 
-    return NextResponse.json({ payments });
+    return NextResponse.json(
+      { payments },
+      {
+        headers: {
+          'Cache-Control': 'no-store',
+        },
+      }
+    );
   } catch (error) {
     console.error('Get project payments error:', error);
     return NextResponse.json(
@@ -59,22 +75,57 @@ export async function POST(
     }
 
     const { id } = await params;
-    const { payments } = await request.json();
+    const body = await request.json().catch(() => ({}));
 
-    // Create or update payments for each member
-    for (const payment of payments) {
-      if (payment.amount && parseFloat(payment.amount) > 0) {
-        await query(
-          `INSERT INTO payments (project_id, member_id, amount, status)
-           VALUES ($1, $2, $3, 'unpaid')
-           ON CONFLICT (project_id, member_id) 
-           DO UPDATE SET amount = $3`,
-          [id, payment.member_id, payment.amount]
+    // Support both shapes:
+    // 1) UI sends: { member_id, amount, due_date }
+    // 2) Bulk sends: { payments: [{ member_id, amount }] }
+    const incomingPayments: Array<{ member_id?: string; amount?: string | number }> = Array.isArray(body?.payments)
+      ? body.payments
+      : [body];
+
+    let insertedCount = 0;
+
+    for (const payment of incomingPayments) {
+      const memberId = payment?.member_id;
+      const amountRaw = payment?.amount;
+      const amount = typeof amountRaw === 'string' ? parseFloat(amountRaw) : amountRaw;
+
+      if (!memberId) continue;
+      // DB uses UUIDs for member_id; prevent 500s when user inputs numeric IDs.
+      if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(memberId)) {
+        return NextResponse.json(
+          { error: 'Invalid member_id. Please select a valid member (UUID).' },
+          { status: 400 }
         );
       }
+      if (typeof amount !== 'number' || Number.isNaN(amount) || amount <= 0) continue;
+
+      await query(
+        `INSERT INTO payments (project_id, member_id, amount, status)
+         VALUES ($1, $2, $3, 'unpaid')
+         ON CONFLICT (project_id, member_id)
+         DO UPDATE SET amount = $3, updated_at = CURRENT_TIMESTAMP`,
+        [id, memberId, amount]
+      );
+      insertedCount += 1;
     }
 
-    return NextResponse.json({ success: true });
+    if (insertedCount === 0) {
+      return NextResponse.json(
+        { error: 'No valid payment data provided' },
+        { status: 400 }
+      );
+    }
+
+    return NextResponse.json(
+      { success: true },
+      {
+        headers: {
+          'Cache-Control': 'no-store',
+        },
+      }
+    );
   } catch (error) {
     console.error('Create project payments error:', error);
     return NextResponse.json(

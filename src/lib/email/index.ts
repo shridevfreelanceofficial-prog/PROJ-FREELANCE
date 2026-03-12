@@ -6,10 +6,21 @@ const transporter = nodemailer.createTransport({
   port: parseInt(process.env.BREVO_SMTP_PORT || '587'),
   secure: false,
   auth: {
-    user: process.env.BREVO_SMTP_USER || 'a4a3ce001@smtp-brevo.com',
-    pass: process.env.BREVO_SMTP_PASS || '7OkZQY9jGvKW0fVE',
+    user: process.env.BREVO_SMTP_USER,
+    pass: process.env.BREVO_SMTP_PASS,
   },
 });
+
+function getFromAddress(): string {
+  const fromEmail = process.env.BREVO_FROM_EMAIL || process.env.BREVO_SMTP_USER;
+  const fromName = process.env.BREVO_FROM_NAME || 'ShriDev Freelance';
+
+  if (!fromEmail) {
+    throw new Error('BREVO_FROM_EMAIL (or BREVO_SMTP_USER) is not configured');
+  }
+
+  return `"${fromName}" <${fromEmail}>`;
+}
 
 export interface EmailOptions {
   to: string;
@@ -25,8 +36,12 @@ export interface EmailOptions {
 // Send email
 export async function sendEmail(options: EmailOptions): Promise<boolean> {
   try {
+    if (!process.env.BREVO_SMTP_USER || !process.env.BREVO_SMTP_PASS) {
+      throw new Error('Brevo SMTP is not configured (BREVO_SMTP_USER / BREVO_SMTP_PASS)');
+    }
+
     await transporter.sendMail({
-      from: `"ShriDev Freelance" <${process.env.BREVO_SMTP_USER}>`,
+      from: getFromAddress(),
       to: options.to,
       subject: options.subject,
       html: options.html,

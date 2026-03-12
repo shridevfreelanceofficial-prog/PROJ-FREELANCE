@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* Neo Mint Theme - ShriDev Freelance */
 :root {
   /* Primary Colors */
@@ -30,6 +32,40 @@
   --radius-md: 0.5rem;
   --radius-lg: 0.75rem;
   --radius-xl: 1rem;
+}
+
+.dark {
+  --background: #0B1220;
+  --background-card: #111827;
+  --foreground: #F9FAFB;
+  --foreground-muted: #9CA3AF;
+}
+
+.dark .text-\[\#111827\] {
+  color: var(--foreground);
+}
+
+.dark .text-\[\#6B7280\] {
+  color: var(--foreground-muted);
+}
+
+.dark .bg-\[\#F8FAFC\] {
+  background-color: var(--background);
+}
+
+.dark .bg-white {
+  background-color: var(--background-card);
+}
+
+.dark select,
+.dark textarea {
+  background-color: var(--background-card);
+  color: var(--foreground);
+}
+
+.dark option {
+  background-color: var(--background-card);
+  color: var(--foreground);
 }
 
 @theme inline {

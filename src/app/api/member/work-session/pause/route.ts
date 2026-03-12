@@ -49,19 +49,43 @@ export async function POST(request: NextRequest) {
       [totalSeconds, session_id]
     );
 
+    // Get project info for notification
+    const projectInfo = await query<{ project_id: string; project_name: string }>(
+      `SELECT ws.project_id, p.title as project_name 
+       FROM work_sessions ws 
+       JOIN projects p ON ws.project_id = p.id 
+       WHERE ws.id = $1`,
+      [session_id]
+    );
+    const projectName = projectInfo[0]?.project_name || 'Unknown Project';
+    const pauseTime = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    const durationMinutes = Math.floor(totalSeconds / 60);
+    
     // Create notification for admin
     await query(
-      `INSERT INTO notifications (user_type, user_id, title, message, type)
-       SELECT 'admin', a.id, $1, $2, $3
+      `INSERT INTO notifications (user_type, user_id, title, message, type, action_url)
+       SELECT 'admin', a.id, $1, $2, $3, $4
        FROM administrators a`,
       [
         'Work Session Paused',
-        `${(result.user as any).full_name} paused their work session`,
+        `${(result.user as any).full_name} paused working on "${projectName}" at ${pauseTime} (${durationMinutes}m total)`,
         'work_session',
+        `/admin/dashboard/projects/${projectInfo[0]?.project_id}`,
       ]
     );
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({
+      success: true,
+      session: {
+        id: session_id,
+        project_id: projectInfo[0]?.project_id,
+        project_title: projectName,
+        status: 'paused',
+        start_time: session.start_time,
+        pause_time: new Date().toISOString(),
+        total_duration_seconds: totalSeconds,
+      },
+    });
   } catch (error) {
     console.error('Pause work session error:', error);
     return NextResponse.json(

@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
 import { queryOne } from '@/lib/db';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const result = await getCurrentUser();
@@ -30,7 +32,14 @@ export async function GET() {
       [result.user.id]
     );
 
-    return NextResponse.json({ session });
+    return NextResponse.json(
+      { session },
+      {
+        headers: {
+          'Cache-Control': 'no-store',
+        },
+      }
+    );
   } catch (error) {
     console.error('Get active work session error:', error);
     return NextResponse.json(

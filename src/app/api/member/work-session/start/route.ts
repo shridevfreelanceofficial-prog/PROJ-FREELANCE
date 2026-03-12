@@ -44,22 +44,35 @@ export async function POST(request: NextRequest) {
       [project_id, result.user.id]
     );
 
-    // Create notification for admin
+    const project = await query<{ title: string }>(
+      'SELECT title FROM projects WHERE id = $1',
+      [project_id]
+    );
+
+    // Create notification for admin with project details
+    const projectName = project[0]?.title || 'Unknown Project';
+    const startTime = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    
     await query(
-      `INSERT INTO notifications (user_type, user_id, title, message, type)
-       SELECT 'admin', a.id, $1, $2, $3
-       FROM administrators a
-       CROSS JOIN members m
-       WHERE m.id = $4`,
+      `INSERT INTO notifications (user_type, user_id, title, message, type, action_url)
+       SELECT 'admin', a.id, $1, $2, $3, $4
+       FROM administrators a`,
       [
         'Work Session Started',
-        `${(result.user as any).full_name} started working on a project`,
+        `${(result.user as any).full_name} started working on "${projectName}" at ${startTime}`,
         'work_session',
-        result.user.id,
+        `/admin/dashboard/projects/${project_id}`,
       ]
     );
 
-    return NextResponse.json({ success: true, session: session[0] });
+    return NextResponse.json({
+      success: true,
+      session: {
+        ...session[0],
+        project_title: projectName,
+        total_duration_seconds: 0,
+      },
+    });
   } catch (error) {
     console.error('Start work session error:', error);
     return NextResponse.json(

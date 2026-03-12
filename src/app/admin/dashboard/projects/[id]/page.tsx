@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button, Card, CardHeader, CardBody } from '@/components/ui';
+import { getSignedUrl } from '@/lib/blob';
 
 interface Project {
   id: string;
@@ -287,7 +288,7 @@ export default function ProjectDetailsPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <h3 className="text-lg font-semibold">Team Members ({members.length})</h3>
-              <Link href={`/admin/dashboard/projects/${project.id}/assign-members`}>
+              <Link href={`/admin/dashboard/projects/${project.id}/members`}>
                 <Button variant="outline" size="sm">Manage Members</Button>
               </Link>
             </CardHeader>
@@ -383,7 +384,7 @@ export default function ProjectDetailsPage() {
                         </p>
                       </div>
                       <a
-                        href={report.report_url}
+                        href={getSignedUrl(report.report_url)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-[#10B981] hover:underline text-sm"
@@ -405,9 +406,21 @@ export default function ProjectDetailsPage() {
                 <h3 className="text-lg font-semibold">Confirmation Reports</h3>
               </CardHeader>
               <CardBody>
-                <Link href={`/admin/dashboard/projects/${project.id}/generate-confirmation`}>
+                <Link href={`/admin/dashboard/projects/${project.id}/confirmation`}>
                   <Button variant="outline" className="w-full">
                     Generate Confirmation Reports
+                  </Button>
+                </Link>
+              </CardBody>
+            </Card>
+            <Card>
+              <CardHeader>
+                <h3 className="text-lg font-semibold">Mail Documents</h3>
+              </CardHeader>
+              <CardBody>
+                <Link href={`/admin/dashboard/projects/${project.id}/mail-documents`}>
+                  <Button variant="outline" className="w-full">
+                    Mail Documents
                   </Button>
                 </Link>
               </CardBody>

@@ -66,6 +66,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check if member is confirmed for this project
+    const projectMember = await query<{ participation_confirmed: boolean }>(
+      'SELECT participation_confirmed FROM project_members WHERE project_id = $1 AND member_id = $2',
+      [project_id, result.user.id]
+    );
+
+    if (!projectMember.length || !projectMember[0].participation_confirmed) {
+      return NextResponse.json(
+        { error: 'You must confirm your participation before submitting reports' },
+        { status: 403 }
+      );
+    }
+
     // Upload file to Vercel Blob
     const uploadResult = await uploadDailyReport(report_file, project_id, result.user.id);
 
@@ -77,15 +90,23 @@ export async function POST(request: NextRequest) {
       [project_id, result.user.id, report_date, uploadResult.url, work_hours, summary]
     );
 
-    // Create notification for admin
+    // Get project name for notification
+    const projectInfo = await query<{ name: string }>(
+      'SELECT name FROM projects WHERE id = $1',
+      [project_id]
+    );
+    const projectName = projectInfo[0]?.name || 'Unknown Project';
+
+    // Create notification for admin with project details
     await query(
-      `INSERT INTO notifications (user_type, user_id, title, message, type)
-       SELECT 'admin', id, $1, $2, $3
+      `INSERT INTO notifications (user_type, user_id, title, message, type, action_url)
+       SELECT 'admin', id, $1, $2, $3, $4
        FROM administrators`,
       [
         'Daily Report Submitted',
-        `${(result.user as any).full_name} submitted a daily report`,
+        `${(result.user as any).full_name} submitted a daily report for "${projectName}"`,
         'daily_report',
+        `/admin/dashboard/projects/${project_id}`,
       ]
     );
 

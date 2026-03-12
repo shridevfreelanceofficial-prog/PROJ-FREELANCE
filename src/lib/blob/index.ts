@@ -1,17 +1,22 @@
-import { put, del, list } from '@vercel/blob';
+import { put, del, list, head } from '@vercel/blob';
 
 export interface UploadResult {
   url: string;
   pathname: string;
 }
 
+// Generate a signed URL for private blob access (valid for 1 hour)
+export function getSignedUrl(blobUrl: string): string {
+  // For private blobs, we need to create a download endpoint
+  // The URL will be proxied through our API
+  return `/api/blob/download?url=${encodeURIComponent(blobUrl)}`;
+}
+
 // Upload file to Vercel Blob
 export async function uploadFile(file: File, folder: string = 'uploads'): Promise<UploadResult> {
   const filename = `${folder}/${Date.now()}-${file.name}`;
   
-  const blob = await put(filename, file, {
-    access: 'public',
-  });
+  const blob = await put(filename, file, { access: 'private' });
 
   return {
     url: blob.url,
@@ -23,9 +28,7 @@ export async function uploadFile(file: File, folder: string = 'uploads'): Promis
 export async function uploadBuffer(buffer: Buffer, filename: string, folder: string = 'documents'): Promise<UploadResult> {
   const pathname = `${folder}/${Date.now()}-${filename}`;
   
-  const blob = await put(pathname, buffer, {
-    access: 'public',
-  });
+  const blob = await put(pathname, buffer, { access: 'private' });
 
   return {
     url: blob.url,

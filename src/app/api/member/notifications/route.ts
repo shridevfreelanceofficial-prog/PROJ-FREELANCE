@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
 import { query } from '@/lib/db';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const result = await getCurrentUser();
@@ -14,15 +16,30 @@ export async function GET() {
     }
 
     const notifications = await query(
-      `SELECT id, title, message, type, is_read, created_at
-       FROM notifications
-       WHERE user_type = 'member' AND user_id = $1
-       ORDER BY created_at DESC
+      `WITH notif AS (
+         SELECT n.id, n.title, n.message, n.type, n.is_read, n.created_at, n.action_url,
+                substring(n.action_url from '/member/dashboard/projects/([0-9a-f\-]{36})')::uuid as project_id
+         FROM notifications n
+         WHERE n.user_type = 'member' AND n.user_id = $1
+       )
+       SELECT notif.id, notif.title, notif.message, notif.type, notif.is_read, notif.created_at
+       FROM notif
+       LEFT JOIN project_members pm
+         ON pm.project_id = notif.project_id AND pm.member_id = $1
+       WHERE notif.project_id IS NULL OR pm.participation_confirmed = true
+       ORDER BY notif.created_at DESC
        LIMIT 20`,
       [result.user.id]
     );
 
-    return NextResponse.json({ notifications });
+    return NextResponse.json(
+      { notifications },
+      {
+        headers: {
+          'Cache-Control': 'no-store',
+        },
+      }
+    );
   } catch (error) {
     console.error('Get member notifications error:', error);
     return NextResponse.json(

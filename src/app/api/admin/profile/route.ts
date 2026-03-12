@@ -3,6 +3,27 @@ import { getCurrentUser } from '@/lib/auth';
 import { query } from '@/lib/db';
 import { uploadSignature } from '@/lib/blob';
 
+export async function GET() {
+  try {
+    const result = await getCurrentUser();
+    
+    if (!result || result.userType !== 'admin') {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    return NextResponse.json({ admin: result.user });
+  } catch (error) {
+    console.error('Get profile error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
 export async function PUT(request: NextRequest) {
   try {
     const result = await getCurrentUser();
@@ -17,26 +38,12 @@ export async function PUT(request: NextRequest) {
     const formData = await request.formData();
     const name = formData.get('name') as string;
     const email = formData.get('email') as string;
-    const username = formData.get('username') as string;
     const signatureFile = formData.get('signature') as File | null;
 
-    // Validate required fields
-    if (!name || !email || !username) {
+    // Validate required fields (username is not required since it cannot be changed)
+    if (!name || !email) {
       return NextResponse.json(
-        { error: 'Name, email, and username are required' },
-        { status: 400 }
-      );
-    }
-
-    // Check if username is already taken by another admin
-    const existingAdmin = await query(
-      'SELECT id FROM administrators WHERE username = $1 AND id != $2',
-      [username, result.user.id]
-    );
-
-    if (existingAdmin.length > 0) {
-      return NextResponse.json(
-        { error: 'Username is already taken' },
+        { error: 'Name and email are required' },
         { status: 400 }
       );
     }
@@ -64,9 +71,9 @@ export async function PUT(request: NextRequest) {
     // Update admin profile
     await query(
       `UPDATE administrators 
-       SET name = $1, email = $2, username = $3, signature_url = $4, is_profile_complete = true, updated_at = CURRENT_TIMESTAMP
-       WHERE id = $5`,
-      [name, email, username, signatureUrl, result.user.id]
+       SET name = $1, email = $2, signature_url = $3, is_profile_complete = true, updated_at = CURRENT_TIMESTAMP
+       WHERE id = $4`,
+      [name, email, signatureUrl, result.user.id]
     );
 
     return NextResponse.json({
