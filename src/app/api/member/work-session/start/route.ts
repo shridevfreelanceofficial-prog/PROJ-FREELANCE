@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getCurrentUser } from '@/lib/auth';
+import { getCurrentUser, type MemberUser } from '@/lib/auth';
 import { query } from '@/lib/db';
+
+type WorkSessionInsertRow = {
+  id: string;
+  project_id: string;
+  start_time: string;
+  status: string;
+};
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,7 +20,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { project_id } = await request.json();
+    const body = (await request.json().catch(() => ({}))) as { project_id?: string };
+    const project_id = body.project_id;
 
     if (!project_id) {
       return NextResponse.json(
@@ -37,12 +45,19 @@ export async function POST(request: NextRequest) {
     }
 
     // Create new work session
-    const session = await query(
+    const session = await query<WorkSessionInsertRow>(
       `INSERT INTO work_sessions (project_id, member_id, start_time, status)
        VALUES ($1, $2, CURRENT_TIMESTAMP, 'running')
        RETURNING id, project_id, start_time, status`,
       [project_id, result.user.id]
     );
+
+    if (!session[0]) {
+      return NextResponse.json(
+        { error: 'Failed to start work session' },
+        { status: 500 }
+      );
+    }
 
     const project = await query<{ title: string }>(
       'SELECT title FROM projects WHERE id = $1',
@@ -52,6 +67,7 @@ export async function POST(request: NextRequest) {
     // Create notification for admin with project details
     const projectName = project[0]?.title || 'Unknown Project';
     const startTime = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    const member = result.user as MemberUser;
     
     await query(
       `INSERT INTO notifications (user_type, user_id, title, message, type, action_url)
@@ -59,7 +75,7 @@ export async function POST(request: NextRequest) {
        FROM administrators a`,
       [
         'Work Session Started',
-        `${(result.user as any).full_name} started working on "${projectName}" at ${startTime}`,
+        `${member.full_name} started working on "${projectName}" at ${startTime}`,
         'work_session',
         `/admin/dashboard/projects/${project_id}`,
       ]
