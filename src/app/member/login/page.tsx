@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Button, Input, Card, CardHeader, CardBody, CardFooter } from '@/components/ui';
 
 export default function MemberLoginPage() {
@@ -49,9 +50,13 @@ export default function MemberLoginPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-3">
-            <div className="w-12 h-12 bg-gradient-to-br from-[#10B981] to-[#0F766E] rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-2xl">S</span>
-            </div>
+            <Image
+              src="/images/logo/ShriDev_Freelance_logo.png"
+              alt="ShriDev Freelance"
+              width={48}
+              height={48}
+              className="w-12 h-12 rounded-lg"
+            />
             <span className="text-2xl font-bold text-[#111827]">ShriDev Freelance</span>
           </Link>
         </div>

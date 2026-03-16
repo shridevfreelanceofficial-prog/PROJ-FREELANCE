@@ -64,9 +64,16 @@ export async function uploadDeliverable(file: File, projectId: string): Promise<
   return uploadFile(file, `deliverables/${projectId}`);
 }
 
-// Upload certificate
+// Upload certificate (private access - served via API endpoint)
 export async function uploadCertificate(buffer: Buffer, certificateCode: string): Promise<UploadResult> {
-  return uploadBuffer(buffer, `certificate-${certificateCode}.pdf`, 'certificates');
+  const pathname = `certificates/${Date.now()}-certificate-${certificateCode}.pdf`;
+  
+  const blob = await put(pathname, buffer, { access: 'private' });
+
+  return {
+    url: blob.url,
+    pathname: blob.pathname,
+  };
 }
 
 // Upload confirmation report

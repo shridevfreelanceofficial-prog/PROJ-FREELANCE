@@ -74,7 +74,7 @@ export default function MemberCertificatesPage() {
                 </div>
                 <div className="flex items-center gap-4">
                   <Link
-                    href={cert.certificate_url}
+                    href={`/api/certificates/${cert.certificate_code}`}
                     target="_blank"
                     className="text-[#10B981] hover:underline text-sm font-medium"
                   >

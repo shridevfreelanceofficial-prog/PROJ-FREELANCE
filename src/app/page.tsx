@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function Home() {
   return (
@@ -7,9 +8,13 @@ export default function Home() {
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-[#10B981] to-[#0F766E] rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-xl">S</span>
-            </div>
+            <Image
+              src="/images/logo/ShriDev_Freelance_logo.png"
+              alt="ShriDev Freelance"
+              width={40}
+              height={40}
+              className="w-10 h-10 rounded-lg"
+            />
             <span className="text-xl font-bold text-[#111827]">ShriDev Freelance</span>
           </div>
           <div className="flex gap-4">

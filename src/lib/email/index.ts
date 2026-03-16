@@ -60,20 +60,29 @@ export async function sendCertificateEmail(
   memberName: string,
   projectName: string,
   certificateUrl: string,
-  certificateBuffer: Buffer
+  certificateBuffer: Buffer,
+  certificateCode?: string
 ): Promise<boolean> {
+  const verifyUrl = certificateCode
+    ? `https://shridevfreelance.com/certificate-verification?code=${encodeURIComponent(certificateCode)}`
+    : 'https://shridevfreelance.com/certificate-verification';
+  
   const html = `
     <!DOCTYPE html>
     <html>
     <head>
       <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; color: #111827; }
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #111827; margin: 0; padding: 0; }
         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-        .header { background: linear-gradient(135deg, #10B981, #0F766E); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+        .header { background: linear-gradient(135deg, #10B981, #0F766E); color: white; padding: 40px 30px; text-align: center; border-radius: 10px 10px 0 0; }
         .content { background: #FFFFFF; padding: 30px; border: 1px solid #D1FAE5; }
-        .footer { background: #F8FAFC; padding: 20px; text-align: center; border-radius: 0 0 10px 10px; }
-        .btn { display: inline-block; background: #10B981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin-top: 20px; }
-        .congrats { font-size: 24px; margin-bottom: 10px; }
+        .footer { background: #F8FAFC; padding: 25px; text-align: center; border-radius: 0 0 10px 10px; }
+        .btn { display: inline-block; background: #10B981; color: white; padding: 14px 28px; text-decoration: none; border-radius: 6px; margin: 10px 5px; font-weight: bold; }
+        .btn-secondary { background: #0F766E; }
+        .congrats { font-size: 32px; margin-bottom: 10px; }
+        .highlight-box { background: #D1FAE5; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #10B981; }
+        .certificate-id { font-family: monospace; font-size: 14px; color: #0F766E; background: #F0FDF4; padding: 8px 12px; border-radius: 4px; display: inline-block; }
+        .divider { height: 1px; background: #D1FAE5; margin: 25px 0; }
       </style>
     </head>
     <body>
@@ -84,14 +93,38 @@ export async function sendCertificateEmail(
         </div>
         <div class="content">
           <p>Dear <strong>${memberName}</strong>,</p>
-          <p>We are delighted to inform you that you have successfully completed the project <strong>${projectName}</strong> with ShriDev Freelance.</p>
-          <p>Your dedication and hard work have been instrumental in the success of this project. Please find your official completion certificate attached to this email.</p>
-          <p>You can also download your certificate anytime from your dashboard.</p>
-          <a href="${certificateUrl}" class="btn">View Certificate</a>
+          
+          <p>Congratulations on successfully completing <strong>${projectName}</strong> with <strong>ShriDev Freelance</strong>.</p>
+          
+          <div class="highlight-box">
+            <h3 style="margin: 0 0 10px 0; color: #0F766E;">📁 Project: ${projectName}</h3>
+            <p style="margin: 0; color: #111827;">We sincerely appreciate your commitment, professionalism, and contribution throughout the project. As a recognition of your efforts, your <strong>Project Completion Certificate</strong> is attached to this email.</p>
+          </div>
+          
+          <p>Please download and keep the attached certificate for your records. You can verify the authenticity of the certificate anytime using the button below.</p>
+          
+          ${certificateCode ? `
+          <div style="text-align: center; margin: 25px 0;">
+            <p style="margin-bottom: 8px; color: #6B7280; font-size: 14px;">Certificate ID:</p>
+            <span class="certificate-id">${certificateCode}</span>
+          </div>
+          ` : ''}
+          
+          <div class="divider"></div>
+          
+          <h3 style="color: #0F766E;">Next Steps</h3>
+          <ul style="color: #374151; margin-top: 8px;">
+            <li>Save the attached PDF for future reference</li>
+            <li>Use the verification link below whenever required (portfolio / client verification)</li>
+          </ul>
+          
+          <div style="text-align: center; margin-top: 25px;">
+            <a href="${verifyUrl}" class="btn btn-secondary">✓ Verify Certificate</a>
+          </div>
         </div>
         <div class="footer">
-          <p>Best regards,<br><strong>ShriDev Freelance Team</strong></p>
-          <p style="color: #6B7280; font-size: 12px;">This is an automated email. Please do not reply directly.</p>
+          <p style="margin-bottom: 10px;">Best regards,<br><strong>Shrikesh Uday Shetty</strong><br><span style="color: #6B7280;">Founder, ShriDev Freelance</span></p>
+          <p style="color: #9CA3AF; font-size: 12px; margin-top: 15px;">This is an automated email from ShriDev Freelance Project Management System.</p>
         </div>
       </div>
     </body>
@@ -100,11 +133,11 @@ export async function sendCertificateEmail(
 
   return sendEmail({
     to,
-    subject: `Certificate of Completion - ${projectName}`,
+    subject: `🎉 Congratulations! Your Certificate for ${projectName}`,
     html,
     attachments: [
       {
-        filename: `certificate-${projectName.replace(/\s+/g, '-')}.pdf`,
+        filename: `Certificate-${projectName.replace(/[^a-zA-Z0-9]/g, '-')}.pdf`,
         path: '',
         content: certificateBuffer,
       },

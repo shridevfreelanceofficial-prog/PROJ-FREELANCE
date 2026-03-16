@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
+import path from 'path';
+import fs from 'fs/promises';
 import { getCurrentUser } from '@/lib/auth';
 import { queryOne, query } from '@/lib/db';
 import { uploadConfirmationReport } from '@/lib/blob';
@@ -99,9 +101,36 @@ export async function POST(
     const muted = rgb(0.42, 0.45, 0.50);
 
     // Header
-    page.drawText('Shrikesh DevFreelance', {
-      x: marginX,
-      y,
+    const headerTopY = y;
+    const logoSize = 34;
+    let headerTextX = marginX;
+
+    try {
+      const logoPath = path.join(process.cwd(), 'public', 'images', 'logo', 'ShriDev_Freelance_logo.png');
+      const logoBytes = await fs.readFile(logoPath);
+      const logoImage = await pdfDoc.embedPng(logoBytes);
+
+      const dims = logoImage.scale(1);
+      const scale = Math.min(logoSize / dims.width, logoSize / dims.height);
+      const drawW = dims.width * scale;
+      const drawH = dims.height * scale;
+
+      // Place logo near the top-left
+      page.drawImage(logoImage, {
+        x: marginX,
+        y: headerTopY - drawH + 26,
+        width: drawW,
+        height: drawH,
+      });
+
+      headerTextX = marginX + logoSize + 10;
+    } catch {
+      // ignore if logo can't be read
+    }
+
+    page.drawText('ShriDev Freelance', {
+      x: headerTextX,
+      y: headerTopY,
       size: 20,
       font: fontBold,
       color: primary,

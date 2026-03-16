@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
 import { query, queryOne } from '@/lib/db';
-import { sendEmail } from '@/lib/email';
+import { sendCertificateEmail, sendEmail } from '@/lib/email';
 
 async function fetchBlobBuffer(url: string): Promise<Buffer> {
   const token = process.env.BLOB_READ_WRITE_TOKEN;
@@ -120,8 +120,8 @@ export async function POST(
 
     const docRow =
       docType === 'certificate'
-        ? await queryOne<{ url: string | null }>(
-            'SELECT certificate_url as url FROM certificates WHERE project_id = $1 AND member_id = $2 ORDER BY issued_at DESC LIMIT 1',
+        ? await queryOne<{ url: string | null; code: string | null }>(
+            'SELECT certificate_url as url, certificate_code as code FROM certificates WHERE project_id = $1 AND member_id = $2 ORDER BY issued_at DESC LIMIT 1',
             [projectId, memberId]
           )
         : await queryOne<{ url: string | null }>(
@@ -130,6 +130,10 @@ export async function POST(
           );
 
     const docUrl = docRow?.url || null;
+    const certificateCode: string | undefined =
+      docType === 'certificate'
+        ? ((docRow as { code: string | null } | null)?.code ?? undefined)
+        : undefined;
 
     if (!docUrl) {
       return NextResponse.json(
@@ -143,48 +147,56 @@ export async function POST(
     const prettyType = docType === 'certificate' ? 'Certificate' : 'Confirmation Report';
     const filename = `${prettyType.replace(/\s+/g, '-').toLowerCase()}-${project.title.replace(/\s+/g, '-').toLowerCase()}.pdf`;
 
-    const html = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <style>
-          body { font-family: Arial, sans-serif; line-height: 1.6; color: #111827; }
-          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-          .header { background: linear-gradient(135deg, #10B981, #0F766E); color: white; padding: 24px; text-align: center; border-radius: 10px 10px 0 0; }
-          .content { background: #FFFFFF; padding: 24px; border: 1px solid #D1FAE5; }
-          .footer { background: #F8FAFC; padding: 16px; text-align: center; border-radius: 0 0 10px 10px; }
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <div class="header">
-            <h2>${prettyType}</h2>
-          </div>
-          <div class="content">
-            <p>Dear <strong>${member.full_name}</strong>,</p>
-            <p>Please find your <strong>${prettyType}</strong> for the project <strong>${project.title}</strong> attached.</p>
-          </div>
-          <div class="footer">
-            <p>Best regards,<br><strong>ShriDev Freelance Team</strong></p>
-            <p style="color: #6B7280; font-size: 12px;">This is an automated email. Please do not reply directly.</p>
-          </div>
-        </div>
-      </body>
-      </html>
-    `;
-
-    const ok = await sendEmail({
-      to: member.email,
-      subject: `${prettyType} - ${project.title}`,
-      html,
-      attachments: [
-        {
-          filename,
-          path: '',
-          content: pdfBuffer,
-        },
-      ],
-    });
+    const ok =
+      docType === 'certificate'
+        ? await sendCertificateEmail(
+            member.email,
+            String(member.full_name),
+            String(project.title),
+            docUrl,
+            pdfBuffer,
+            certificateCode
+          )
+        : await sendEmail({
+            to: member.email,
+            subject: `${prettyType} - ${project.title}`,
+            html: `
+              <!DOCTYPE html>
+              <html>
+              <head>
+                <style>
+                  body { font-family: Arial, sans-serif; line-height: 1.6; color: #111827; }
+                  .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                  .header { background: linear-gradient(135deg, #10B981, #0F766E); color: white; padding: 24px; text-align: center; border-radius: 10px 10px 0 0; }
+                  .content { background: #FFFFFF; padding: 24px; border: 1px solid #D1FAE5; }
+                  .footer { background: #F8FAFC; padding: 16px; text-align: center; border-radius: 0 0 10px 10px; }
+                </style>
+              </head>
+              <body>
+                <div class="container">
+                  <div class="header">
+                    <h2>${prettyType}</h2>
+                  </div>
+                  <div class="content">
+                    <p>Dear <strong>${member.full_name}</strong>,</p>
+                    <p>Please find your <strong>${prettyType}</strong> for the project <strong>${project.title}</strong> attached.</p>
+                  </div>
+                  <div class="footer">
+                    <p>Best regards,<br><strong>ShriDev Freelance Team</strong></p>
+                    <p style="color: #6B7280; font-size: 12px;">This is an automated email. Please do not reply directly.</p>
+                  </div>
+                </div>
+              </body>
+              </html>
+            `,
+            attachments: [
+              {
+                filename,
+                path: '',
+                content: pdfBuffer,
+              },
+            ],
+          });
 
     if (!ok) {
       return NextResponse.json({ error: 'Failed to send email' }, { status: 500 });

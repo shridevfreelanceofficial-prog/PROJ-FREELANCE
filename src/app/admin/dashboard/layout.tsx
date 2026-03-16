@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface AdminUser {
   id: string;
@@ -93,9 +94,13 @@ export default function AdminDashboardLayout({
           {/* Logo */}
           <div className="px-6 py-4 border-b border-[#D1FAE5]">
             <Link href="/" className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-[#10B981] to-[#0F766E] rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-xl">S</span>
-              </div>
+              <Image
+                src="/images/logo/ShriDev_Freelance_logo.png"
+                alt="ShriDev Freelance"
+                width={40}
+                height={40}
+                className="w-10 h-10 rounded-lg"
+              />
               <span className="text-lg font-bold text-[#111827] dark:text-[#F9FAFB]">ShriDev</span>
             </Link>
           </div>
