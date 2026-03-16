@@ -19,7 +19,13 @@ export async function GET(
     const { id } = await params;
 
     const meetings = await query(
-      `SELECT id, title, meeting_link, meeting_date, meeting_time, reminder_sent, created_at
+      `SELECT id,
+              title,
+              meeting_link,
+              to_char(meeting_date, 'YYYY-MM-DD') as meeting_date,
+              to_char(meeting_time, 'HH24:MI') as meeting_time,
+              reminder_sent,
+              created_at
        FROM meetings
        WHERE project_id = $1
        ORDER BY meeting_date DESC, meeting_time DESC`,

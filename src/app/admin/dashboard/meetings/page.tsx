@@ -12,12 +12,21 @@ interface Meeting {
   meeting_date: string;
   meeting_time: string;
   meeting_link: string | null;
+  status: string | null;
+  cancelled_at: string | null;
   reminder_sent: boolean;
 }
 
 export default function MeetingsPage() {
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const normalizeMeetingLink = (link: string): string => {
+    const trimmed = link.trim();
+    if (!trimmed) return trimmed;
+    if (/^https?:\/\//i.test(trimmed)) return trimmed;
+    return `https://${trimmed}`;
+  };
 
   useEffect(() => {
     fetchMeetings();
@@ -34,6 +43,34 @@ export default function MeetingsPage() {
       console.error('Error fetching meetings:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const cancelMeeting = async (id: string) => {
+    try {
+      const ok = window.confirm('Cancel this meeting?');
+      if (!ok) return;
+
+      const res = await fetch(`/api/admin/meetings/${id}/cancel`, { method: 'POST' });
+      if (res.ok) {
+        await fetchMeetings();
+      }
+    } catch (error) {
+      console.error('Error cancelling meeting:', error);
+    }
+  };
+
+  const deleteMeeting = async (id: string) => {
+    try {
+      const ok = window.confirm('Delete this meeting? This cannot be undone.');
+      if (!ok) return;
+
+      const res = await fetch(`/api/admin/meetings/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        await fetchMeetings();
+      }
+    } catch (error) {
+      console.error('Error deleting meeting:', error);
     }
   };
 
@@ -78,14 +115,21 @@ export default function MeetingsPage() {
                     </p>
                   </div>
                   <div className="flex items-center gap-3">
+                    {meeting.status === 'cancelled' ? (
+                      <span className="px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+                        Cancelled
+                      </span>
+                    ) : (
                     <span className={`px-3 py-1 rounded-full text-sm font-medium ${
                       meeting.reminder_sent ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
                     }`}>
                       {meeting.reminder_sent ? 'Reminder Sent' : 'Scheduled'}
                     </span>
-                    {meeting.meeting_link && (
+                    )}
+
+                    {meeting.status !== 'cancelled' && meeting.meeting_link && (
                       <a
-                        href={meeting.meeting_link}
+                        href={normalizeMeetingLink(meeting.meeting_link)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-[#10B981] hover:underline text-sm"
@@ -93,6 +137,22 @@ export default function MeetingsPage() {
                         Join →
                       </a>
                     )}
+
+                    <button
+                      type="button"
+                      className="text-sm text-[#DC2626] hover:underline"
+                      onClick={() => cancelMeeting(meeting.id)}
+                      disabled={meeting.status === 'cancelled'}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      className="text-sm text-[#6B7280] hover:underline"
+                      onClick={() => deleteMeeting(meeting.id)}
+                    >
+                      Delete
+                    </button>
                   </div>
                 </div>
               ))}

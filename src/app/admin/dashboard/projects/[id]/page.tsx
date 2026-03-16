@@ -92,6 +92,13 @@ export default function ProjectDetailsPage() {
     }
   };
 
+  const normalizeMeetingLink = (link: string): string => {
+    const trimmed = link.trim();
+    if (!trimmed) return trimmed;
+    if (/^https?:\/\//i.test(trimmed)) return trimmed;
+    return `https://${trimmed}`;
+  };
+
   const handleStatusChange = async (newStatus: string) => {
     if (!project) return;
     
@@ -355,7 +362,7 @@ export default function ProjectDetailsPage() {
                       </div>
                       {meeting.meeting_link && (
                         <a
-                          href={meeting.meeting_link}
+                          href={normalizeMeetingLink(meeting.meeting_link)}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-[#10B981] hover:underline text-sm"

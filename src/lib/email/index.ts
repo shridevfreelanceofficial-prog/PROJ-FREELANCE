@@ -155,6 +155,12 @@ export async function sendMeetingNotificationEmail(
   meetingTime: string,
   projectName: string
 ): Promise<boolean> {
+  const normalizedMeetingLink = meetingLink?.trim()
+    ? /^https?:\/\//i.test(meetingLink.trim())
+      ? meetingLink.trim()
+      : `https://${meetingLink.trim()}`
+    : '';
+
   const html = `
     <!DOCTYPE html>
     <html>
@@ -172,7 +178,7 @@ export async function sendMeetingNotificationEmail(
     <body>
       <div class="container">
         <div class="header">
-          <h1>📅 Meeting Scheduled</h1>
+          <h1>Meeting Scheduled</h1>
         </div>
         <div class="content">
           <p>Dear <strong>${memberName}</strong>,</p>
@@ -183,7 +189,7 @@ export async function sendMeetingNotificationEmail(
             <p><strong>Time:</strong> ${meetingTime}</p>
           </div>
           <p>Please join the meeting on time using the link below:</p>
-          <a href="${meetingLink}" class="btn">Join Meeting</a>
+          <a href="${normalizedMeetingLink}" class="btn">Join Meeting</a>
         </div>
         <div class="footer">
           <p>Best regards,<br><strong>ShriDev Freelance Team</strong></p>
@@ -196,6 +202,58 @@ export async function sendMeetingNotificationEmail(
   return sendEmail({
     to,
     subject: `Meeting Scheduled: ${meetingTitle} - ${projectName}`,
+    html,
+  });
+}
+
+// Send meeting cancellation email
+export async function sendMeetingCancellationEmail(
+  to: string,
+  memberName: string,
+  meetingTitle: string,
+  meetingDate: string,
+  meetingTime: string,
+  projectName: string
+): Promise<boolean> {
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #111827; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #DC2626; color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+        .content { background: #FFFFFF; padding: 30px; border: 1px solid #FECACA; }
+        .footer { background: #F8FAFC; padding: 20px; text-align: center; border-radius: 0 0 10px 10px; }
+        .meeting-details { background: #FEE2E2; padding: 15px; border-radius: 8px; margin: 20px 0; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>Meeting Cancelled</h1>
+        </div>
+        <div class="content">
+          <p>Dear <strong>${memberName}</strong>,</p>
+          <p>The following meeting for the project <strong>${projectName}</strong> has been cancelled.</p>
+          <div class="meeting-details">
+            <p><strong>Meeting Title:</strong> ${meetingTitle}</p>
+            <p><strong>Date:</strong> ${meetingDate}</p>
+            <p><strong>Time:</strong> ${meetingTime}</p>
+          </div>
+          <p>Please wait for an updated schedule from the admin.</p>
+        </div>
+        <div class="footer">
+          <p>Best regards,<br><strong>ShriDev Freelance Team</strong></p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  return sendEmail({
+    to,
+    subject: `Meeting Cancelled: ${meetingTitle} - ${projectName}`,
     html,
   });
 }

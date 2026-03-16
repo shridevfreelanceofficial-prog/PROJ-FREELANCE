@@ -78,9 +78,17 @@ CREATE TABLE IF NOT EXISTS meetings (
     meeting_link TEXT,
     meeting_date DATE,
     meeting_time TIME,
+    status VARCHAR(20) DEFAULT 'scheduled',
     reminder_sent BOOLEAN DEFAULT FALSE,
+    cancelled_at TIMESTAMP WITH TIME ZONE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+
+ALTER TABLE meetings
+  ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'scheduled';
+
+ALTER TABLE meetings
+  ADD COLUMN IF NOT EXISTS cancelled_at TIMESTAMP WITH TIME ZONE;
 
 -- Daily reports table
 CREATE TABLE IF NOT EXISTS daily_reports (
