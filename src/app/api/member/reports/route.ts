@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
 import { query } from '@/lib/db';
 import { uploadDailyReport } from '@/lib/blob';
+import { notifyAdmins } from '@/lib/notifications';
 
 export async function GET() {
   try {
@@ -90,25 +91,15 @@ export async function POST(request: NextRequest) {
       [project_id, result.user.id, report_date, uploadResult.url, work_hours, summary]
     );
 
-    // Get project name for notification
-    const projectInfo = await query<{ name: string }>(
-      'SELECT name FROM projects WHERE id = $1',
-      [project_id]
-    );
-    const projectName = projectInfo[0]?.name || 'Unknown Project';
+    const projectInfo = await query<{ title: string }>('SELECT title FROM projects WHERE id = $1', [project_id]);
+    const projectName = projectInfo[0]?.title || 'Unknown Project';
 
-    // Create notification for admin with project details
-    await query(
-      `INSERT INTO notifications (user_type, user_id, title, message, type, action_url)
-       SELECT 'admin', id, $1, $2, $3, $4
-       FROM administrators`,
-      [
-        'Daily Report Submitted',
-        `${(result.user as any).full_name} submitted a daily report for "${projectName}"`,
-        'daily_report',
-        `/admin/dashboard/projects/${project_id}`,
-      ]
-    );
+    await notifyAdmins({
+      title: 'Daily Report Submitted',
+      message: `${(result.user as any).full_name} submitted a daily report for "${projectName}"`,
+      type: 'daily_report',
+      action_url: `/admin/dashboard/projects/${project_id}`,
+    });
 
     return NextResponse.json({ success: true, report: report[0] });
   } catch (error) {

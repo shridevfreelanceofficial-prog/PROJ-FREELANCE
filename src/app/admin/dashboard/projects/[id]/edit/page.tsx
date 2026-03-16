@@ -11,6 +11,7 @@ interface Project {
   description: string | null;
   requirements: string | null;
   media_drive_link: string | null;
+  github_link: string | null;
   start_date: string | null;
   end_date: string | null;
   final_website_url: string | null;
@@ -29,6 +30,7 @@ export default function EditProjectPage() {
     description: '',
     requirements: '',
     media_drive_link: '',
+    github_link: '',
     start_date: '',
     end_date: '',
     final_website_url: '',
@@ -58,6 +60,7 @@ export default function EditProjectPage() {
         description: p.description || '',
         requirements: p.requirements || '',
         media_drive_link: p.media_drive_link || '',
+        github_link: p.github_link || '',
         start_date: p.start_date || '',
         end_date: p.end_date || '',
         final_website_url: p.final_website_url || '',
@@ -90,6 +93,7 @@ export default function EditProjectPage() {
           description: formData.description || null,
           requirements: formData.requirements || null,
           media_drive_link: formData.media_drive_link || null,
+          github_link: formData.github_link || null,
           start_date: formData.start_date || null,
           end_date: formData.end_date || null,
           final_website_url: formData.final_website_url || null,
@@ -173,6 +177,13 @@ export default function EditProjectPage() {
               value={formData.media_drive_link}
               onChange={(e) => setFormData({ ...formData, media_drive_link: e.target.value })}
               placeholder="https://..."
+            />
+
+            <Input
+              label="GitHub Link"
+              value={formData.github_link}
+              onChange={(e) => setFormData({ ...formData, github_link: e.target.value })}
+              placeholder="https://github.com/..."
             />
 
             <Input

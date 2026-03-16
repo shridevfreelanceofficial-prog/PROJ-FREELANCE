@@ -19,7 +19,7 @@ export async function GET(
     const { id } = await params;
 
     const project = await queryOne(
-      `SELECT id, title, client_name, description, requirements, media_drive_link, start_date, end_date, final_website_url, status, created_at
+      `SELECT id, title, client_name, description, requirements, media_drive_link, github_link, start_date, end_date, final_website_url, status, created_at
        FROM projects WHERE id = $1`,
       [id]
     );
@@ -61,6 +61,7 @@ export async function PATCH(
       description,
       requirements,
       media_drive_link,
+      github_link,
       start_date,
       end_date,
       final_website_url,
@@ -82,17 +83,19 @@ export async function PATCH(
            description = $3,
            requirements = $4,
            media_drive_link = $5,
-           start_date = $6,
-           end_date = $7,
-           final_website_url = $8,
+           github_link = $6,
+           start_date = $7,
+           end_date = $8,
+           final_website_url = $9,
            updated_at = CURRENT_TIMESTAMP
-       WHERE id = $9`,
+       WHERE id = $10`,
       [
         title,
         client_name || null,
         description || null,
         requirements || null,
         media_drive_link || null,
+        github_link || null,
         start_date || null,
         end_date || null,
         final_website_url || null,

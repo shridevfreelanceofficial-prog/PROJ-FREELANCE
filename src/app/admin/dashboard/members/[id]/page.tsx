@@ -11,6 +11,7 @@ interface Member {
   full_name: string;
   email: string;
   phone: string | null;
+  github_username: string | null;
   residential_location: string | null;
   role: string | null;
   signature_url: string | null;
@@ -122,6 +123,10 @@ export default function MemberDetailPage() {
             <div>
               <p className="text-sm text-[#6B7280]">Phone</p>
               <p className="font-medium text-[#111827]">{member.phone || 'Not provided'}</p>
+            </div>
+            <div>
+              <p className="text-sm text-[#6B7280]">GitHub Username</p>
+              <p className="font-medium text-[#111827]">{member.github_username || 'Not provided'}</p>
             </div>
             <div>
               <p className="text-sm text-[#6B7280]">Location</p>

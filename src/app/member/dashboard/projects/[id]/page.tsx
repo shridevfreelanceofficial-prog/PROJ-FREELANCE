@@ -14,6 +14,7 @@ interface Project {
   end_date: string | null;
   status: string;
   client_name: string;
+  github_link?: string | null;
 }
 
 interface ProjectMember {
@@ -29,6 +30,13 @@ export default function MemberProjectDetailPage() {
   const [projectMember, setProjectMember] = useState<ProjectMember | null>(null);
   const [loading, setLoading] = useState(true);
   const [confirming, setConfirming] = useState(false);
+
+  const normalizeExternalUrl = (url: string): string => {
+    const trimmed = url.trim();
+    if (!trimmed) return trimmed;
+    if (/^https?:\/\//i.test(trimmed)) return trimmed;
+    return `https://${trimmed}`;
+  };
 
   useEffect(() => {
     fetchProjectData();
@@ -178,6 +186,20 @@ export default function MemberProjectDetailPage() {
                 </p>
               </div>
             )}
+
+            {projectMember?.participation_confirmed && project.github_link && project.github_link.trim() && (
+              <div>
+                <p className="text-sm text-[#6B7280]">GitHub Link</p>
+                <a
+                  href={normalizeExternalUrl(project.github_link)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium text-[#10B981] hover:underline"
+                >
+                  Open Repository →
+                </a>
+              </div>
+            )}
           </CardBody>
         </Card>
 
@@ -188,7 +210,7 @@ export default function MemberProjectDetailPage() {
           <CardBody className="space-y-3">
             {projectMember?.participation_confirmed && (
               <>
-                <Link href={`/member/dashboard/projects/${project.id}/reports`}>
+                <Link href={`/member/dashboard/reports?project_id=${encodeURIComponent(project.id)}`}>
                   <Button variant="outline" className="w-full">Upload Daily Report</Button>
                 </Link>
                 <Link href="/member/dashboard/work-timer">

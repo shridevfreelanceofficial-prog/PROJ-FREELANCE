@@ -46,6 +46,15 @@ interface DailyReport {
   work_hours: string;
 }
 
+interface Deliverable {
+  id: string;
+  title: string | null;
+  description: string | null;
+  file_url: string | null;
+  uploaded_at: string;
+  member_name: string;
+}
+
 export default function ProjectDetailsPage() {
   const params = useParams();
   const router = useRouter();
@@ -53,6 +62,7 @@ export default function ProjectDetailsPage() {
   const [members, setMembers] = useState<ProjectMember[]>([]);
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [reports, setReports] = useState<DailyReport[]>([]);
+  const [deliverables, setDeliverables] = useState<Deliverable[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
 
@@ -62,11 +72,12 @@ export default function ProjectDetailsPage() {
 
   const fetchProjectData = async () => {
     try {
-      const [projectRes, membersRes, meetingsRes, reportsRes] = await Promise.all([
+      const [projectRes, membersRes, meetingsRes, reportsRes, deliverablesRes] = await Promise.all([
         fetch(`/api/admin/projects/${params.id}`),
         fetch(`/api/admin/projects/${params.id}/members`),
         fetch(`/api/admin/projects/${params.id}/meetings`),
         fetch(`/api/admin/projects/${params.id}/reports`),
+        fetch(`/api/admin/projects/${params.id}/deliverables`),
       ]);
 
       if (projectRes.ok) {
@@ -84,6 +95,10 @@ export default function ProjectDetailsPage() {
       if (reportsRes.ok) {
         const data = await reportsRes.json();
         setReports(data.reports);
+      }
+      if (deliverablesRes.ok) {
+        const data = await deliverablesRes.json();
+        setDeliverables(data.deliverables);
       }
     } catch (error) {
       console.error('Error fetching project data:', error);
@@ -442,10 +457,38 @@ export default function ProjectDetailsPage() {
               <CardHeader>
                 <h3 className="text-lg font-semibold">Deliverables</h3>
               </CardHeader>
-              <CardBody>
-                <p className="text-[#6B7280] text-center py-4">
-                  Deliverables will appear here once uploaded by team members.
-                </p>
+              <CardBody className={deliverables.length === 0 ? undefined : 'p-0'}>
+                {deliverables.length === 0 ? (
+                  <p className="text-[#6B7280] text-center py-4">
+                    No deliverables uploaded yet.
+                  </p>
+                ) : (
+                  <div className="divide-y divide-[#D1FAE5]">
+                    {deliverables.map((d) => (
+                      <div key={d.id} className="p-4 flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-[#111827]">{d.title || 'Deliverable'}</p>
+                          <p className="text-sm text-[#6B7280]">
+                            {d.member_name} • {new Date(d.uploaded_at).toLocaleDateString()}
+                          </p>
+                          {d.description ? (
+                            <p className="text-sm text-[#6B7280] mt-1 line-clamp-1">{d.description}</p>
+                          ) : null}
+                        </div>
+                        {d.file_url ? (
+                          <a
+                            href={getSignedUrl(d.file_url)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[#10B981] hover:underline text-sm"
+                          >
+                            View File →
+                          </a>
+                        ) : null}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </CardBody>
             </Card>
           </div>

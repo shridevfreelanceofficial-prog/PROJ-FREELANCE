@@ -10,6 +10,7 @@ interface Member {
   full_name: string;
   email: string;
   phone: string | null;
+  github_username: string | null;
   residential_location: string | null;
   role: string | null;
   signature_url: string | null;
@@ -26,6 +27,7 @@ export default function EditMemberPage() {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [githubUsername, setGithubUsername] = useState('');
   const [location, setLocation] = useState('');
   const [role, setRole] = useState('');
   const [signatureFile, setSignatureFile] = useState<File | null>(null);
@@ -43,6 +45,7 @@ export default function EditMemberPage() {
         setFullName(data.member.full_name);
         setEmail(data.member.email);
         setPhone(data.member.phone || '');
+        setGithubUsername(data.member.github_username || '');
         setLocation(data.member.residential_location || '');
         setRole(data.member.role || '');
       }
@@ -62,6 +65,7 @@ export default function EditMemberPage() {
       formData.append('full_name', fullName);
       formData.append('email', email);
       formData.append('phone', phone);
+      formData.append('github_username', githubUsername);
       formData.append('residential_location', location);
       formData.append('role', role);
       if (signatureFile) {
@@ -139,6 +143,12 @@ export default function EditMemberPage() {
               label="Phone"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
+            />
+            <Input
+              label="GitHub Username"
+              value={githubUsername}
+              onChange={(e) => setGithubUsername(e.target.value)}
+              placeholder="e.g., octocat"
             />
             <Input
               label="Location"

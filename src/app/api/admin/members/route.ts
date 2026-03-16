@@ -14,7 +14,7 @@ export async function GET() {
     }
 
     const members = await query(
-      'SELECT id, full_name, email, phone, role, is_active, created_at FROM members ORDER BY created_at DESC'
+      'SELECT id, full_name, email, phone, github_username, role, is_active, created_at FROM members ORDER BY created_at DESC'
     );
 
     return NextResponse.json({ members });
@@ -42,14 +42,15 @@ export async function POST(request: Request) {
     const full_name = formData.get('full_name') as string;
     const email = formData.get('email') as string;
     const phone = formData.get('phone') as string;
+    const github_username = formData.get('github_username') as string;
     const password = formData.get('password') as string;
     const residential_location = formData.get('residential_location') as string;
     const role = formData.get('role') as string;
 
     // Validate required fields
-    if (!full_name || !email || !password) {
+    if (!full_name || !email || !password || !github_username) {
       return NextResponse.json(
-        { error: 'Full name, email, and password are required' },
+        { error: 'Full name, email, GitHub username, and password are required' },
         { status: 400 }
       );
     }
@@ -73,10 +74,10 @@ export async function POST(request: Request) {
 
     // Insert member
     const newMember = await query(
-      `INSERT INTO members (full_name, email, phone, password, residential_location, role)
-       VALUES ($1, $2, $3, $4, $5, $6)
-       RETURNING id, full_name, email, phone, role, is_active, created_at`,
-      [full_name, email, phone, hashedPassword, residential_location, role]
+      `INSERT INTO members (full_name, email, phone, github_username, password, residential_location, role)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
+       RETURNING id, full_name, email, phone, github_username, role, is_active, created_at`,
+      [full_name, email, phone, github_username || null, hashedPassword, residential_location, role]
     );
 
     return NextResponse.json({

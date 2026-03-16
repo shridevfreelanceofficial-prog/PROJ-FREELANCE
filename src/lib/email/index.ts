@@ -54,6 +54,58 @@ export async function sendEmail(options: EmailOptions): Promise<boolean> {
   }
 }
 
+export async function sendNotificationEmail(
+  to: string,
+  recipientName: string,
+  title: string,
+  message: string,
+  actionUrl?: string
+): Promise<boolean> {
+  const safeTitle = title || 'Notification';
+  const safeMessage = message || '';
+  const safeRecipient = recipientName || 'User';
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #111827; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #10B981, #0F766E); color: white; padding: 24px; text-align: center; border-radius: 10px 10px 0 0; }
+        .content { background: #FFFFFF; padding: 24px; border: 1px solid #D1FAE5; }
+        .footer { background: #F8FAFC; padding: 18px; text-align: center; border-radius: 0 0 10px 10px; }
+        .btn { display: inline-block; background: #10B981; color: white; padding: 12px 18px; text-decoration: none; border-radius: 6px; margin-top: 18px; font-weight: bold; }
+        .box { background: #F0FDF4; border: 1px solid #D1FAE5; padding: 14px; border-radius: 8px; margin-top: 14px; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1 style="margin:0; font-size: 20px;">${safeTitle}</h1>
+        </div>
+        <div class="content">
+          <p>Dear <strong>${safeRecipient}</strong>,</p>
+          <div class="box">
+            <p style="margin:0; color:#111827;">${safeMessage}</p>
+          </div>
+          ${actionUrl ? `<a href="${actionUrl}" class="btn">Open</a>` : ''}
+        </div>
+        <div class="footer">
+          <p style="margin:0; color:#6B7280;">Best regards,<br><strong>ShriDev Freelance Team</strong></p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  return sendEmail({
+    to,
+    subject: safeTitle,
+    html,
+  });
+}
+
 // Send certificate email
 export async function sendCertificateEmail(
   to: string,

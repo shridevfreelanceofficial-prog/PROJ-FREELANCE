@@ -24,13 +24,14 @@ export async function GET(
       full_name: string;
       email: string;
       phone: string | null;
+      github_username: string | null;
       residential_location: string | null;
       role: string | null;
       signature_url: string | null;
       is_active: boolean;
       created_at: string;
     }>(
-      'SELECT id, full_name, email, phone, residential_location, role, signature_url, is_active, created_at FROM members WHERE id = $1',
+      'SELECT id, full_name, email, phone, github_username, residential_location, role, signature_url, is_active, created_at FROM members WHERE id = $1',
       [id]
     );
 
@@ -71,6 +72,7 @@ export async function PUT(
     const fullName = formData.get('full_name') as string;
     const email = formData.get('email') as string;
     const phone = formData.get('phone') as string;
+    const githubUsername = formData.get('github_username') as string;
     const location = formData.get('residential_location') as string;
     const role = formData.get('role') as string;
     const signatureFile = formData.get('signature') as File | null;
@@ -99,10 +101,10 @@ export async function PUT(
     // Update member
     await query(
       `UPDATE members 
-       SET full_name = $1, email = $2, phone = $3, residential_location = $4, 
-           role = $5, signature_url = COALESCE($6, signature_url), updated_at = CURRENT_TIMESTAMP
-       WHERE id = $7`,
-      [fullName, email, phone || null, location || null, role || null, signatureUrl, id]
+       SET full_name = $1, email = $2, phone = $3, github_username = $4, residential_location = $5, 
+           role = $6, signature_url = COALESCE($7, signature_url), updated_at = CURRENT_TIMESTAMP
+       WHERE id = $8`,
+      [fullName, email, phone || null, githubUsername || null, location || null, role || null, signatureUrl, id]
     );
 
     return NextResponse.json({ success: true });

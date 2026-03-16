@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
 import { query, queryOne } from '@/lib/db';
+import { notifyAdmins } from '@/lib/notifications';
 
 export async function POST(
   request: NextRequest,
@@ -50,17 +51,12 @@ export async function POST(
       [id]
     );
 
-    await query(
-      `INSERT INTO notifications (user_type, user_id, title, message, type, action_url)
-       SELECT 'admin', a.id, $1, $2, $3, $4
-       FROM administrators a`,
-      [
-        'Project Participation Confirmed',
-        `${(result.user as any).full_name} confirmed participation for "${projectInfo?.title || 'Unknown Project'}"`,
-        'project',
-        `/admin/dashboard/projects/${id}`,
-      ]
-    );
+    await notifyAdmins({
+      title: 'Project Participation Confirmed',
+      message: `${(result.user as any).full_name} confirmed participation for "${projectInfo?.title || 'Unknown Project'}"`,
+      type: 'project',
+      action_url: `/admin/dashboard/projects/${id}`,
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {

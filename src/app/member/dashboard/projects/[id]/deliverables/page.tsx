@@ -9,7 +9,6 @@ interface Deliverable {
   title: string;
   description: string | null;
   file_url: string | null;
-  drive_link: string | null;
   uploaded_at: string;
 }
 
@@ -24,7 +23,6 @@ export default function DeliverablesPage() {
     title: '',
     description: '',
     file: null as File | null,
-    drive_link: '',
   });
 
   useEffect(() => {
@@ -48,6 +46,10 @@ export default function DeliverablesPage() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      if (file.type !== 'application/pdf') {
+        setError('Only PDF files are allowed');
+        return;
+      }
       if (file.size > 100 * 1024 * 1024) {
         setError('File size must be less than 100MB');
         return;
@@ -66,8 +68,8 @@ export default function DeliverablesPage() {
       return;
     }
 
-    if (!formData.file && !formData.drive_link) {
-      setError('Please upload a file or provide a drive link');
+    if (!formData.file) {
+      setError('Please upload a PDF file');
       return;
     }
 
@@ -77,7 +79,6 @@ export default function DeliverablesPage() {
       const submitData = new FormData();
       submitData.append('title', formData.title);
       submitData.append('description', formData.description);
-      submitData.append('drive_link', formData.drive_link);
       if (formData.file) {
         submitData.append('file', formData.file);
       }
@@ -99,7 +100,6 @@ export default function DeliverablesPage() {
         title: '',
         description: '',
         file: null,
-        drive_link: '',
       });
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
@@ -158,7 +158,7 @@ export default function DeliverablesPage() {
 
             <div>
               <label className="block text-sm font-medium text-[#111827] mb-1.5">
-                Upload File (ZIP, PDF, etc.)
+                Upload PDF
               </label>
               <div
                 onClick={() => fileInputRef.current?.click()}
@@ -183,27 +183,11 @@ export default function DeliverablesPage() {
               <input
                 ref={fileInputRef}
                 type="file"
+                accept="application/pdf"
                 onChange={handleFileChange}
                 className="hidden"
               />
             </div>
-
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-[#D1FAE5]"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-[#6B7280]">OR</span>
-              </div>
-            </div>
-
-            <Input
-              label="Google Drive / Dropbox Link"
-              value={formData.drive_link}
-              onChange={(e) => setFormData({ ...formData, drive_link: e.target.value })}
-              placeholder="https://drive.google.com/..."
-              helperText="Provide a shareable link to your files"
-            />
 
             <Button type="submit" className="w-full" isLoading={uploading}>
               Upload Deliverable
@@ -244,16 +228,6 @@ export default function DeliverablesPage() {
                         className="text-[#10B981] hover:underline text-sm"
                       >
                         View File →
-                      </a>
-                    )}
-                    {deliverable.drive_link && (
-                      <a
-                        href={deliverable.drive_link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-[#10B981] hover:underline text-sm"
-                      >
-                        Open Drive →
                       </a>
                     )}
                   </div>

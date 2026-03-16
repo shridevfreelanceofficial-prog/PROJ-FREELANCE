@@ -24,13 +24,14 @@ export async function GET(
       name: string;
       description: string | null;
       requirements: string | null;
+      github_link: string | null;
       start_date: string | null;
       end_date: string | null;
       status: string;
       client_name: string | null;
     }>(
-      `SELECT p.id, p.title as name, p.description, p.requirements, p.start_date, p.end_date, p.status,
-              NULL::text as client_name
+      `SELECT p.id, p.title as name, p.description, p.requirements, p.github_link, p.start_date, p.end_date, p.status,
+              p.client_name
        FROM projects p
        WHERE p.id = $1`,
       [id]

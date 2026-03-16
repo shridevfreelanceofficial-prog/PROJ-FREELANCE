@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
 import { query } from '@/lib/db';
 import { uploadDeliverable } from '@/lib/blob';
+import { notifyAdmins } from '@/lib/notifications';
 
 export async function GET(
   request: NextRequest,
@@ -24,13 +25,12 @@ export async function GET(
       title: string;
       description: string | null;
       file_url: string | null;
-      drive_link: string | null;
       uploaded_at: string;
     }>(
-      `SELECT id, title, description, file_url, drive_link, uploaded_at
+      `SELECT id, title, description, file_url, created_at as uploaded_at
        FROM deliverables
-       WHERE project_id = $1 AND member_id = $2
-       ORDER BY uploaded_at DESC`,
+       WHERE project_id = $1 AND uploaded_by = $2
+       ORDER BY created_at DESC`,
       [id, result.user.id]
     );
 
@@ -62,12 +62,25 @@ export async function POST(
     const formData = await request.formData();
     const title = formData.get('title') as string;
     const description = formData.get('description') as string;
-    const drive_link = formData.get('drive_link') as string;
     const file = formData.get('file') as File | null;
 
     if (!title) {
       return NextResponse.json(
         { error: 'Title is required' },
+        { status: 400 }
+      );
+    }
+
+    if (!file || file.size === 0) {
+      return NextResponse.json(
+        { error: 'Please upload a PDF file' },
+        { status: 400 }
+      );
+    }
+
+    if (file.type !== 'application/pdf') {
+      return NextResponse.json(
+        { error: 'Only PDF files are allowed' },
         { status: 400 }
       );
     }
@@ -80,23 +93,21 @@ export async function POST(
     }
 
     const deliverable = await query(
-      `INSERT INTO deliverables (project_id, member_id, title, description, file_url, drive_link)
-       VALUES ($1, $2, $3, $4, $5, $6)
-       RETURNING id, title, description, file_url, drive_link, uploaded_at`,
-      [id, result.user.id, title, description, file_url, drive_link]
+      `INSERT INTO deliverables (project_id, uploaded_by, title, description, file_url)
+       VALUES ($1, $2, $3, $4, $5)
+       RETURNING id, title, description, file_url, created_at as uploaded_at`,
+      [id, result.user.id, title, description, file_url]
     );
 
-    // Create notification for admin
-    await query(
-      `INSERT INTO notifications (user_type, user_id, title, message, type)
-       SELECT 'admin', id, $1, $2, $3
-       FROM administrators`,
-      [
-        'New Deliverable Uploaded',
-        `${(result.user as any).full_name} uploaded a deliverable`,
-        'deliverable',
-      ]
-    );
+    const project = await query<{ title: string }>('SELECT title FROM projects WHERE id = $1', [id]);
+    const projectName = project[0]?.title || 'Project';
+
+    await notifyAdmins({
+      title: 'New Deliverable Uploaded',
+      message: `${(result.user as any).full_name} uploaded a deliverable for "${projectName}"`,
+      type: 'deliverable',
+      action_url: `/admin/dashboard/projects/${id}`,
+    });
 
     return NextResponse.json({ success: true, deliverable: deliverable[0] });
   } catch (error) {

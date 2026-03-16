@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
 import { query, queryOne } from '@/lib/db';
+import { notifyAdmins } from '@/lib/notifications';
 
 export async function POST(
   request: NextRequest,
@@ -51,17 +52,11 @@ export async function POST(
       [id]
     );
 
-    // Create notification for admin
-    await query(
-      `INSERT INTO notifications (user_type, user_id, title, message, type)
-       SELECT 'admin', id, $1, $2, $3
-       FROM administrators`,
-      [
-        'Payment Confirmed',
-        `${(result.user as any).full_name} confirmed receipt of payment`,
-        'payment',
-      ]
-    );
+    await notifyAdmins({
+      title: 'Payment Confirmed',
+      message: `${(result.user as any).full_name} confirmed receipt of payment`,
+      type: 'payment',
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {

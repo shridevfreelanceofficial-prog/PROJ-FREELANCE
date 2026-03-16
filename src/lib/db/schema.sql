@@ -25,11 +25,15 @@ CREATE TABLE IF NOT EXISTS members (
     password VARCHAR(255) NOT NULL,
     residential_location TEXT,
     role VARCHAR(100),
+    github_username VARCHAR(255),
     signature_url TEXT,
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+
+ALTER TABLE members
+  ADD COLUMN IF NOT EXISTS github_username VARCHAR(255);
 
 -- Projects table
 CREATE TABLE IF NOT EXISTS projects (
@@ -39,6 +43,7 @@ CREATE TABLE IF NOT EXISTS projects (
     description TEXT,
     requirements TEXT,
     media_drive_link TEXT,
+    github_link TEXT,
     start_date DATE,
     end_date DATE,
     final_website_url TEXT,
@@ -47,6 +52,9 @@ CREATE TABLE IF NOT EXISTS projects (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+
+ALTER TABLE projects
+  ADD COLUMN IF NOT EXISTS github_link TEXT;
 
 -- Project members junction table (many-to-many relationship)
 CREATE TABLE IF NOT EXISTS project_members (

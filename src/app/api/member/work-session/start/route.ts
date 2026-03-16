@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser, type MemberUser } from '@/lib/auth';
 import { query } from '@/lib/db';
+import { notifyAdmins } from '@/lib/notifications';
 
 type WorkSessionInsertRow = {
   id: string;
@@ -69,17 +70,12 @@ export async function POST(request: NextRequest) {
     const startTime = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
     const member = result.user as MemberUser;
     
-    await query(
-      `INSERT INTO notifications (user_type, user_id, title, message, type, action_url)
-       SELECT 'admin', a.id, $1, $2, $3, $4
-       FROM administrators a`,
-      [
-        'Work Session Started',
-        `${member.full_name} started working on "${projectName}" at ${startTime}`,
-        'work_session',
-        `/admin/dashboard/projects/${project_id}`,
-      ]
-    );
+    await notifyAdmins({
+      title: 'Work Session Started',
+      message: `${member.full_name} started working on "${projectName}" at ${startTime}`,
+      type: 'work_session',
+      action_url: `/admin/dashboard/projects/${project_id}`,
+    });
 
     return NextResponse.json({
       success: true,

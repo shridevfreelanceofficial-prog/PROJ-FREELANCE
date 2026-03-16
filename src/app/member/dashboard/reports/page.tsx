@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Button, Input, Card, CardHeader, CardBody } from '@/components/ui';
 
 interface Project {
@@ -19,6 +20,7 @@ interface Report {
 }
 
 export default function DailyReportsPage() {
+  const searchParams = useSearchParams();
   const [projects, setProjects] = useState<Project[]>([]);
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
@@ -36,6 +38,12 @@ export default function DailyReportsPage() {
   useEffect(() => {
     fetchData();
   }, []);
+
+  useEffect(() => {
+    const pid = searchParams.get('project_id');
+    if (!pid) return;
+    setFormData((prev) => ({ ...prev, project_id: pid }));
+  }, [searchParams]);
 
   const fetchData = async () => {
     try {

@@ -47,6 +47,7 @@ export async function POST(request: Request) {
       description,
       requirements,
       media_drive_link,
+      github_link,
       start_date,
       end_date,
       assigned_members,
@@ -71,10 +72,10 @@ export async function POST(request: Request) {
     }
 
     const projectResult = await query<ProjectResult>(
-      `INSERT INTO projects (title, client_name, description, requirements, media_drive_link, start_date, end_date, created_by)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      `INSERT INTO projects (title, client_name, description, requirements, media_drive_link, github_link, start_date, end_date, created_by)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
        RETURNING id, title, description, start_date, end_date, status`,
-      [title, client_name || null, description, requirements, media_drive_link, start_date, end_date, result.user.id]
+      [title, client_name || null, description, requirements, media_drive_link, github_link || null, start_date, end_date, result.user.id]
     );
 
     const project = projectResult[0] as ProjectResult;

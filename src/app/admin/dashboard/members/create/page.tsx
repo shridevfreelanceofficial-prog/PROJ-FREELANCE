@@ -27,6 +27,7 @@ export default function CreateMemberPage() {
     full_name: '',
     email: '',
     phone: '',
+    github_username: '',
     password: '',
     residential_location: '',
     role: '',
@@ -59,6 +60,7 @@ export default function CreateMemberPage() {
       submitData.append('full_name', formData.full_name);
       submitData.append('email', formData.email);
       submitData.append('phone', formData.phone);
+      submitData.append('github_username', formData.github_username);
       submitData.append('password', formData.password);
       submitData.append('residential_location', formData.residential_location);
       submitData.append('role', formData.role);
@@ -128,6 +130,14 @@ export default function CreateMemberPage() {
               value={formData.phone}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
               placeholder="Enter phone number"
+            />
+
+            <Input
+              label="GitHub Username"
+              value={formData.github_username}
+              onChange={(e) => setFormData({ ...formData, github_username: e.target.value })}
+              placeholder="e.g., octocat"
+              required
             />
 
             <Input

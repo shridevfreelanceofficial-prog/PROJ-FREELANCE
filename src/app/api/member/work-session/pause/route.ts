@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
 import { query, queryOne } from '@/lib/db';
+import { notifyAdmins } from '@/lib/notifications';
 
 export async function POST(request: NextRequest) {
   try {
@@ -61,18 +62,12 @@ export async function POST(request: NextRequest) {
     const pauseTime = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
     const durationMinutes = Math.floor(totalSeconds / 60);
     
-    // Create notification for admin
-    await query(
-      `INSERT INTO notifications (user_type, user_id, title, message, type, action_url)
-       SELECT 'admin', a.id, $1, $2, $3, $4
-       FROM administrators a`,
-      [
-        'Work Session Paused',
-        `${(result.user as any).full_name} paused working on "${projectName}" at ${pauseTime} (${durationMinutes}m total)`,
-        'work_session',
-        `/admin/dashboard/projects/${projectInfo[0]?.project_id}`,
-      ]
-    );
+    await notifyAdmins({
+      title: 'Work Session Paused',
+      message: `${(result.user as any).full_name} paused working on "${projectName}" at ${pauseTime} (${durationMinutes}m total)`,
+      type: 'work_session',
+      action_url: projectInfo[0]?.project_id ? `/admin/dashboard/projects/${projectInfo[0]?.project_id}` : undefined,
+    });
 
     return NextResponse.json({
       success: true,

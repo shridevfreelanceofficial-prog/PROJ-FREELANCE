@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db';
+import { notifyAdmins, notifyMember } from '@/lib/notifications';
 
 // This endpoint should be called by a cron job daily at end of day
 // It checks for members who didn't submit daily reports and notifies admin
@@ -35,7 +36,7 @@ export async function GET(request: NextRequest) {
         m.full_name as member_name, 
         m.email as member_email,
         pm.project_id, 
-        p.name as project_name,
+        p.title as project_name,
         pm.daily_working_hours
        FROM project_members pm
        JOIN members m ON pm.member_id = m.id
@@ -68,30 +69,20 @@ export async function GET(request: NextRequest) {
       const projectName = members[0].project_name;
 
       // Notify admin about all missing reports for this project
-      await query(
-        `INSERT INTO notifications (user_type, user_id, title, message, type, action_url)
-         SELECT 'admin', id, $1, $2, $3, $4
-         FROM administrators`,
-        [
-          'Missing Daily Reports',
-          `${members.length} member(s) failed to submit daily reports for "${projectName}" today`,
-          'daily_report_missing',
-          `/admin/dashboard/projects/${projectId}`,
-        ]
-      );
+      await notifyAdmins({
+        title: 'Missing Daily Reports',
+        message: `${members.length} member(s) failed to submit daily reports for "${projectName}" today`,
+        type: 'daily_report_missing',
+        action_url: `/admin/dashboard/projects/${projectId}`,
+      });
 
       // Notify each team member who failed to submit
       for (const member of members) {
-        await query(
-          `INSERT INTO notifications (user_type, user_id, title, message, type)
-           VALUES ('member', $1, $2, $3, $4)`,
-          [
-            member.member_id,
-            'Daily Report Reminder',
-            `You haven't submitted your daily report for "${projectName}" today. Please submit it as soon as possible.`,
-            'daily_report_reminder',
-          ]
-        );
+        await notifyMember(member.member_id, {
+          title: 'Daily Report Reminder',
+          message: `You haven't submitted your daily report for "${projectName}" today. Please submit it as soon as possible.`,
+          type: 'daily_report_reminder',
+        });
       }
     }
 

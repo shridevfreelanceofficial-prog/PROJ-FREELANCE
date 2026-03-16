@@ -22,6 +22,7 @@ export default function CreateProjectPage() {
     description: '',
     requirements: '',
     media_drive_link: '',
+    github_link: '',
     start_date: '',
     end_date: '',
     assign_to_self: false,
@@ -162,6 +163,14 @@ export default function CreateProjectPage() {
               onChange={(e) => setFormData({ ...formData, media_drive_link: e.target.value })}
               placeholder="Google Drive or other media link"
               helperText="Link to project assets, designs, etc."
+            />
+
+            <Input
+              label="GitHub Link"
+              value={formData.github_link}
+              onChange={(e) => setFormData({ ...formData, github_link: e.target.value })}
+              placeholder="https://github.com/..."
+              helperText="Repository link for this project"
             />
 
             <div className="grid md:grid-cols-2 gap-4">
