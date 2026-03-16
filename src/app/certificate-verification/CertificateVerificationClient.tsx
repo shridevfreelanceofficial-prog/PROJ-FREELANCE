@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
 import { Button, Card, CardBody } from '@/components/ui';
 
@@ -186,8 +187,14 @@ export default function CertificateVerificationClient() {
 
                 <div className="mt-6 text-center">
                   <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#111827] rounded-full">
-                    <div className="w-6 h-6 bg-gradient-to-br from-[#10B981] to-[#34D399] rounded-full flex items-center justify-center">
-                      <span className="text-white text-xs font-bold">S</span>
+                    <div className="w-6 h-6 rounded-full overflow-hidden bg-white flex items-center justify-center">
+                      <Image
+                        src="/images/logo/ShriDev_Freelance_logo.png"
+                        alt="ShriDev Freelance"
+                        width={24}
+                        height={24}
+                        className="w-6 h-6 object-contain"
+                      />
                     </div>
                     <span className="text-white text-sm font-medium">ShriDev Freelance</span>
                   </div>
