@@ -154,10 +154,34 @@ export async function POST(
         // Add to project showcase (non-critical, don't throw on error)
         try {
           await query(
-            `INSERT INTO project_showcase (project_id, title, description, start_date, end_date, is_visible)
-             VALUES ($1, $2, $3, $4, $5, false)
-             ON CONFLICT (project_id) DO NOTHING`,
-            [id, project.title, project.description, project.start_date, project.end_date]
+            `INSERT INTO project_showcase (
+               project_id,
+               title,
+               description,
+               requirements,
+               media_drive_link,
+               start_date,
+               end_date,
+               is_visible
+             )
+             VALUES ($1, $2, $3, $4, $5, $6, $7, false)
+             ON CONFLICT (project_id)
+             DO UPDATE SET
+               title = EXCLUDED.title,
+               description = EXCLUDED.description,
+               requirements = EXCLUDED.requirements,
+               media_drive_link = EXCLUDED.media_drive_link,
+               start_date = EXCLUDED.start_date,
+               end_date = EXCLUDED.end_date`,
+            [
+              id,
+              project.title,
+              project.description,
+              project.description,
+              null,
+              project.start_date,
+              project.end_date,
+            ]
           );
         } catch (showcaseError) {
           console.error('Showcase insert error (non-critical):', showcaseError);

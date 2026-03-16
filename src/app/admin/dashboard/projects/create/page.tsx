@@ -18,6 +18,7 @@ export default function CreateProjectPage() {
   const [members, setMembers] = useState<Member[]>([]);
   const [formData, setFormData] = useState({
     title: '',
+    client_name: '',
     description: '',
     requirements: '',
     media_drive_link: '',
@@ -120,6 +121,13 @@ export default function CreateProjectPage() {
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               placeholder="Enter project title"
               required
+            />
+
+            <Input
+              label="Client Name"
+              value={formData.client_name}
+              onChange={(e) => setFormData({ ...formData, client_name: e.target.value })}
+              placeholder="Enter client name"
             />
 
             <div>

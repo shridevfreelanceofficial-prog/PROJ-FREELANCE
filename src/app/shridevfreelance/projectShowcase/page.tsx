@@ -5,9 +5,11 @@ import Link from 'next/link';
 interface ShowcaseProject {
   id: string;
   title: string;
+  client_name: string | null;
   description: string | null;
   requirements: string | null;
   cover_image_url: string | null;
+  live_website_url: string | null;
   start_date: string | null;
   end_date: string | null;
   team_members: Array<{ name: string; role: string }> | null;
@@ -18,7 +20,7 @@ export default async function ProjectShowcasePage() {
 
   try {
     projects = await query<ShowcaseProject>(
-      `SELECT id, title, description, requirements, cover_image_url, start_date, end_date, team_members
+      `SELECT id, title, client_name, description, requirements, cover_image_url, live_website_url, start_date, end_date, team_members
        FROM project_showcase
        WHERE is_visible = true
        ORDER BY end_date DESC`
@@ -78,11 +80,26 @@ export default async function ProjectShowcasePage() {
                 {/* Cover Image */}
                 <div className="h-48 bg-gradient-to-br from-[#10B981] to-[#0F766E] relative">
                   {project.cover_image_url ? (
-                    <img
-                      src={project.cover_image_url}
-                      alt={project.title}
-                      className="w-full h-full object-cover"
-                    />
+                    project.live_website_url ? (
+                      <a
+                        href={project.live_website_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="block w-full h-full"
+                      >
+                        <img
+                          src={`/api/public/showcase-cover?url=${encodeURIComponent(project.cover_image_url)}`}
+                          alt={project.title}
+                          className="w-full h-full object-cover"
+                        />
+                      </a>
+                    ) : (
+                      <img
+                        src={`/api/public/showcase-cover?url=${encodeURIComponent(project.cover_image_url)}`}
+                        alt={project.title}
+                        className="w-full h-full object-cover"
+                      />
+                    )
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
                       <span className="text-white text-6xl font-bold opacity-20">
@@ -93,6 +110,11 @@ export default async function ProjectShowcasePage() {
                 </div>
                 <CardBody className="p-6">
                   <h3 className="text-xl font-bold text-[#111827] mb-2">{project.title}</h3>
+                  {project.client_name ? (
+                    <p className="text-sm text-[#374151] mb-3">
+                      <span className="text-[#6B7280]">Client:</span> {project.client_name}
+                    </p>
+                  ) : null}
                   <p className="text-[#6B7280] text-sm mb-4 line-clamp-3">
                     {project.description || 'No description available'}
                   </p>
@@ -125,6 +147,26 @@ export default async function ProjectShowcasePage() {
                       </div>
                     </div>
                   )}
+
+                  <div className="mt-7 flex flex-wrap items-center gap-3">
+                    <Link
+                      href={`/shridevfreelance/projectShowcase/${project.id}`}
+                      className="inline-flex items-center justify-center px-4 py-2 rounded-lg border-2 border-[#10B981] text-[#10B981] text-sm font-medium hover:bg-[#D1FAE5] transition-colors"
+                    >
+                      View Details
+                    </Link>
+
+                    {project.live_website_url ? (
+                      <a
+                        href={project.live_website_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-[#10B981] text-white text-sm font-medium hover:bg-[#0F766E] transition-colors"
+                      >
+                        Visit Project
+                      </a>
+                    ) : null}
+                  </div>
                 </CardBody>
               </Card>
             ))}

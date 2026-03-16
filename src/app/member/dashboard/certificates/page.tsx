@@ -81,7 +81,7 @@ export default function MemberCertificatesPage() {
                     View Certificate
                   </Link>
                   <Link
-                    href={`/certificates/verify?code=${cert.certificate_code}`}
+                    href={`/certificate-verification?code=${cert.certificate_code}`}
                     className="text-[#6B7280] hover:underline text-sm"
                   >
                     Verify

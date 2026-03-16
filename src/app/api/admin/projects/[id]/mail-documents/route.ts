@@ -135,14 +135,43 @@ export async function POST(
         ? ((docRow as { code: string | null } | null)?.code ?? undefined)
         : undefined;
 
-    if (!docUrl) {
+    // For confirmation reports, regenerate on-demand so the latest admin signature is always embedded.
+    // For certificates, we attach the stored PDF from blob.
+    const pdfBuffer =
+      docType === 'confirmation'
+        ? await (async () => {
+            const origin = new URL(request.url).origin;
+            const res = await fetch(`${origin}/api/admin/projects/${projectId}/confirmation`, {
+              method: 'POST',
+              headers: {
+                'content-type': 'application/json',
+                cookie: request.headers.get('cookie') || '',
+              },
+              body: JSON.stringify({ member_id: memberId }),
+              cache: 'no-store',
+            });
+
+            if (!res.ok) {
+              const text = await res.text().catch(() => '');
+              throw new Error(`Failed to regenerate confirmation report (${res.status}): ${text || res.statusText}`);
+            }
+
+            const ab = await res.arrayBuffer();
+            return Buffer.from(ab);
+          })()
+        : await (async () => {
+            if (!docUrl) {
+              return null;
+            }
+            return fetchBlobBuffer(docUrl);
+          })();
+
+    if (!pdfBuffer) {
       return NextResponse.json(
-        { error: docType === 'certificate' ? 'Certificate not generated yet' : 'Confirmation report not generated yet' },
+        { error: 'Certificate not generated yet' },
         { status: 404 }
       );
     }
-
-    const pdfBuffer = await fetchBlobBuffer(docUrl);
 
     const prettyType = docType === 'certificate' ? 'Certificate' : 'Confirmation Report';
     const filename = `${prettyType.replace(/\s+/g, '-').toLowerCase()}-${project.title.replace(/\s+/g, '-').toLowerCase()}.pdf`;
@@ -152,8 +181,8 @@ export async function POST(
         ? await sendCertificateEmail(
             member.email,
             String(member.full_name),
-            String(project.title),
-            docUrl,
+            project.title,
+            docUrl || '',
             pdfBuffer,
             certificateCode
           )

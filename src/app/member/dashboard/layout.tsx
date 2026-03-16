@@ -1,9 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
+import { usePathname, useRouter } from 'next/navigation';
+import NotificationsBell from '@/components/NotificationsBell';
 
 interface MemberUser {
   id: string;
@@ -162,6 +163,7 @@ export default function MemberDashboardLayout({
               {navItems.find(item => item.href === pathname)?.label || 'Dashboard'}
             </h1>
             <div className="flex items-center gap-4">
+              <NotificationsBell userType="member" />
               <span className="text-sm text-[#6B7280]">Team Member</span>
             </div>
           </div>

@@ -1,6 +1,8 @@
+
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Button, Input, Card, CardHeader, CardBody } from '@/components/ui';
 
 interface CertificateData {
@@ -13,10 +15,18 @@ interface CertificateData {
 }
 
 export default function CertificateVerificationPage() {
+  const searchParams = useSearchParams();
   const [certificateCode, setCertificateCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<CertificateData | null>(null);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    const code = searchParams.get('code');
+    if (code && !certificateCode) {
+      setCertificateCode(code.toUpperCase());
+    }
+  }, [searchParams, certificateCode]);
 
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();

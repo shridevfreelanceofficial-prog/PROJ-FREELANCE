@@ -35,6 +35,7 @@ CREATE TABLE IF NOT EXISTS members (
 CREATE TABLE IF NOT EXISTS projects (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     title VARCHAR(255) NOT NULL,
+    client_name VARCHAR(255),
     description TEXT,
     requirements TEXT,
     media_drive_link TEXT,
@@ -169,20 +170,39 @@ CREATE TABLE IF NOT EXISTS notifications (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Contact form submissions
+CREATE TABLE IF NOT EXISTS contact_submissions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    phone VARCHAR(50),
+    subject VARCHAR(255),
+    message TEXT NOT NULL,
+    is_read BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Project showcase table
 CREATE TABLE IF NOT EXISTS project_showcase (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     project_id UUID REFERENCES projects(id) ON DELETE SET NULL,
     title VARCHAR(255) NOT NULL,
+    client_name VARCHAR(255),
     description TEXT,
     requirements TEXT,
+    media_drive_link TEXT,
+    live_website_url TEXT,
+    daily_working_hours DECIMAL(4,2),
     cover_image_url TEXT,
     start_date DATE,
     end_date DATE,
     team_members JSONB,
-    is_visible BOOLEAN DEFAULT TRUE,
+    is_visible BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Ensure one showcase entry per project when importing from completed projects
+CREATE UNIQUE INDEX IF NOT EXISTS uq_project_showcase_project_id ON project_showcase(project_id);
 
 -- Create indexes for better performance
 CREATE INDEX idx_project_members_project ON project_members(project_id);
@@ -197,3 +217,5 @@ CREATE INDEX idx_payments_project ON payments(project_id);
 CREATE INDEX idx_payments_member ON payments(member_id);
 CREATE INDEX idx_certificates_code ON certificates(certificate_code);
 CREATE INDEX idx_notifications_user ON notifications(user_type, user_id);
+CREATE INDEX idx_contact_submissions_created_at ON contact_submissions(created_at);
+CREATE INDEX idx_contact_submissions_is_read ON contact_submissions(is_read);

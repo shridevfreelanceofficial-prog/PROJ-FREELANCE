@@ -63,6 +63,7 @@ export default function MailDocumentsPage() {
 
       if (response.ok) {
         alert('Email sent successfully');
+        await fetchData();
       } else {
         const data = await response.json().catch(() => null);
         alert(data?.error || 'Failed to send email');

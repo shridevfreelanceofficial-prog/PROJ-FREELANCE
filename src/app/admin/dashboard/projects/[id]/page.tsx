@@ -9,6 +9,7 @@ import { getSignedUrl } from '@/lib/blob';
 interface Project {
   id: string;
   title: string;
+  client_name: string | null;
   description: string | null;
   requirements: string | null;
   media_drive_link: string | null;
@@ -165,6 +166,11 @@ export default function ProjectDetailsPage() {
             ← Back to Projects
           </Link>
           <h2 className="text-2xl font-bold text-[#111827]">{project.title}</h2>
+          {project.client_name ? (
+            <p className="text-sm text-[#374151] mt-1">
+              <span className="text-[#6B7280]">Client:</span> {project.client_name}
+            </p>
+          ) : null}
           <p className="text-[#6B7280] mt-1">{project.description || 'No description'}</p>
         </div>
         <div className="flex gap-2">

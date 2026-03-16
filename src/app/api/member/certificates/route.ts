@@ -21,12 +21,12 @@ export async function GET(request: NextRequest) {
       issue_date: string;
       certificate_url: string;
     }>(
-      `SELECT c.id, c.certificate_code, p.name as project_name, p.client_name, 
-              c.issue_date, c.certificate_url
+      `SELECT c.id, c.certificate_code, p.title as project_name, p.client_name, 
+              c.issued_at as issue_date, c.certificate_url
        FROM certificates c
        JOIN projects p ON c.project_id = p.id
        WHERE c.member_id = $1
-       ORDER BY c.issue_date DESC`,
+       ORDER BY c.issued_at DESC`,
       [result.user.id]
     );
 

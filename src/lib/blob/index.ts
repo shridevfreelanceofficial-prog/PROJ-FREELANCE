@@ -24,6 +24,26 @@ export async function uploadFile(file: File, folder: string = 'uploads'): Promis
   };
 }
 
+// Upload file to Vercel Blob with public access (for public pages like Project Showcase)
+export async function uploadPublicFile(file: File, folder: string = 'public-uploads'): Promise<UploadResult> {
+  const filename = `${folder}/${Date.now()}-${file.name}`;
+
+  try {
+    const blob = await put(filename, file, { access: 'public' });
+    return {
+      url: blob.url,
+      pathname: blob.pathname,
+    };
+  } catch (error) {
+    // Some blob stores are configured as private-only; fall back to private upload.
+    const blob = await put(filename, file, { access: 'private' });
+    return {
+      url: blob.url,
+      pathname: blob.pathname,
+    };
+  }
+}
+
 // Upload buffer to Vercel Blob
 export async function uploadBuffer(buffer: Buffer, filename: string, folder: string = 'documents'): Promise<UploadResult> {
   const pathname = `${folder}/${Date.now()}-${filename}`;

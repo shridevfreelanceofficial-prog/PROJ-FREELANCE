@@ -14,7 +14,7 @@ export async function GET() {
     }
 
     const projects = await query(
-      `SELECT id, title, description, start_date, end_date, status, created_at 
+      `SELECT id, title, client_name, description, start_date, end_date, status, created_at 
        FROM projects 
        ORDER BY created_at DESC`
     );
@@ -43,6 +43,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     const {
       title,
+      client_name,
       description,
       requirements,
       media_drive_link,
@@ -70,10 +71,10 @@ export async function POST(request: Request) {
     }
 
     const projectResult = await query<ProjectResult>(
-      `INSERT INTO projects (title, description, requirements, media_drive_link, start_date, end_date, created_by)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
+      `INSERT INTO projects (title, client_name, description, requirements, media_drive_link, start_date, end_date, created_by)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
        RETURNING id, title, description, start_date, end_date, status`,
-      [title, description, requirements, media_drive_link, start_date, end_date, result.user.id]
+      [title, client_name || null, description, requirements, media_drive_link, start_date, end_date, result.user.id]
     );
 
     const project = projectResult[0] as ProjectResult;
