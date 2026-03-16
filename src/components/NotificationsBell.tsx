@@ -24,7 +24,6 @@ export default function NotificationsBell({ userType, pollMs = 10000 }: Props) {
   const [items, setItems] = useState<NotificationItem[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [markingAll, setMarkingAll] = useState(false);
   const [paymentStatusById, setPaymentStatusById] = useState<Record<string, { confirmed_by_member: boolean }>>({});
   const containerRef = useRef<HTMLDivElement | null>(null);
 
@@ -76,13 +75,12 @@ export default function NotificationsBell({ userType, pollMs = 10000 }: Props) {
 
   const markAllRead = async () => {
     try {
-      setMarkingAll(true);
       const res = await fetch(`${apiBase}/mark-all-read`, { method: 'PATCH' });
       if (!res.ok) return;
       setUnreadCount(0);
       setItems((prev) => prev.map((n) => ({ ...n, is_read: true })));
     } finally {
-      setMarkingAll(false);
+      // ignore
     }
   };
 
@@ -155,108 +153,116 @@ export default function NotificationsBell({ userType, pollMs = 10000 }: Props) {
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-[360px] max-w-[90vw] bg-white dark:bg-[#111827] border border-[#E5E7EB] dark:border-[#1F2937] rounded-xl shadow-xl z-50 overflow-hidden">
-          <div className="px-4 py-3 border-b border-[#E5E7EB] dark:border-[#1F2937] flex items-center justify-between">
-            <p className="font-semibold text-[#111827] dark:text-[#F9FAFB]">Notifications</p>
-            <button
-              type="button"
-              className="text-xs text-[#6B7280] dark:text-[#9CA3AF] hover:text-[#111827]"
-              onClick={markAllRead}
-              disabled={markingAll}
-            >
-              Mark all read
-            </button>
-          </div>
+        <div className="fixed inset-0 z-50 sm:absolute sm:inset-auto sm:right-0 sm:mt-2">
+          <div className="absolute inset-0 bg-black/40 sm:hidden" onClick={() => setOpen(false)} />
 
-          <div className="max-h-[420px] overflow-y-auto">
-            {loading ? (
-              <div className="p-6 text-sm text-[#6B7280]">Loading...</div>
-            ) : items.length === 0 ? (
-              <div className="p-6 text-sm text-[#6B7280]">No notifications</div>
-            ) : (
-              <div className="divide-y divide-[#F3F4F6] dark:divide-[#1F2937]">
-                {items.map((n) => {
-                  const Wrapper: any = n.action_url ? Link : 'div';
-                  const wrapperProps = n.action_url
-                    ? { href: n.action_url, onClick: () => setOpen(false) }
-                    : {};
+          <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[360px] max-w-[92vw] bg-white dark:bg-[#111827] border border-[#E5E7EB] dark:border-[#1F2937] rounded-xl shadow-xl overflow-hidden sm:static sm:translate-x-0 sm:translate-y-0 sm:left-auto sm:top-auto">
+            <div className="px-4 py-3 border-b border-[#E5E7EB] dark:border-[#1F2937] flex items-center justify-between">
+              <p className="font-semibold text-[#111827] dark:text-[#F9FAFB]">Notifications</p>
+              <button
+                type="button"
+                className="sm:hidden text-sm text-[#6B7280] dark:text-[#9CA3AF]"
+                onClick={() => setOpen(false)}
+                aria-label="Close notifications"
+              >
+                Close
+              </button>
+            </div>
 
-                  const paymentId =
-                    userType === 'member' && n.type === 'payment' && n.action_data?.payment_id
-                      ? String(n.action_data.payment_id)
-                      : null;
-                  const paymentStatus = paymentId ? paymentStatusById[paymentId] : null;
+            <div className="max-h-[70vh] sm:max-h-[420px] overflow-y-auto">
+              {loading ? (
+                <div className="p-6 text-sm text-[#6B7280]">Loading...</div>
+              ) : items.length === 0 ? (
+                <div className="p-6 text-sm text-[#6B7280]">No notifications</div>
+              ) : (
+                <div className="divide-y divide-[#F3F4F6] dark:divide-[#1F2937]">
+                  {items.map((n) => {
+                    const Wrapper: any = n.action_url ? Link : 'div';
+                    const wrapperProps = n.action_url
+                      ? { href: n.action_url, onClick: () => setOpen(false) }
+                      : {};
 
-                  return (
-                    <div key={n.id} className={n.is_read ? '' : 'bg-[#D1FAE5]/20'}>
-                      <Wrapper
-                        {...wrapperProps}
-                        className="block px-4 py-3 hover:bg-[#F8FAFC] dark:hover:bg-[#0B1220]"
-                      >
-                        <div className="flex items-start gap-3">
-                          {!n.is_read && <div className="w-2 h-2 bg-[#10B981] rounded-full mt-2 flex-shrink-0" />}
-                          <div className={n.is_read ? 'ml-5' : ''}>
-                            <p className="text-sm font-medium text-[#111827] dark:text-[#F9FAFB]">{n.title}</p>
-                            {n.message ? (
-                              <p className="text-sm text-[#6B7280] dark:text-[#9CA3AF] mt-1 line-clamp-2">{n.message}</p>
-                            ) : null}
-                            <p className="text-xs text-[#6B7280] dark:text-[#9CA3AF] mt-2">
-                              {new Date(n.created_at).toLocaleString()}
-                            </p>
+                    const paymentId =
+                      userType === 'member' && n.type === 'payment' && n.action_data?.payment_id
+                        ? String(n.action_data.payment_id)
+                        : null;
+                    const paymentStatus = paymentId ? paymentStatusById[paymentId] : null;
+
+                    return (
+                      <div key={n.id} className={n.is_read ? '' : 'bg-[#D1FAE5]/20'}>
+                        <Wrapper
+                          {...wrapperProps}
+                          className="block px-4 py-3 hover:bg-[#F8FAFC] dark:hover:bg-[#0B1220]"
+                        >
+                          <div className="flex items-start gap-3">
+                            {!n.is_read && (
+                              <div className="w-2 h-2 bg-[#10B981] rounded-full mt-2 flex-shrink-0" />
+                            )}
+                            <div className={n.is_read ? 'ml-5' : ''}>
+                              <p className="text-sm font-medium text-[#111827] dark:text-[#F9FAFB]">{n.title}</p>
+                              {n.message ? (
+                                <p className="text-sm text-[#6B7280] dark:text-[#9CA3AF] mt-1 line-clamp-2">
+                                  {n.message}
+                                </p>
+                              ) : null}
+                              <p className="text-xs text-[#6B7280] dark:text-[#9CA3AF] mt-2">
+                                {new Date(n.created_at).toLocaleString()}
+                              </p>
+                            </div>
                           </div>
-                        </div>
-                      </Wrapper>
+                        </Wrapper>
 
-                      <div className="px-4 pb-3 flex items-center justify-between">
-                        {userType === 'member' && !n.is_read ? (
-                          <button
-                            type="button"
-                            className="text-xs text-[#10B981] hover:underline"
-                            onClick={() => markOneRead(n.id)}
-                          >
-                            Mark as read
-                          </button>
-                        ) : (
-                          <span />
-                        )}
-
-                        {paymentId ? (
-                          paymentStatus?.confirmed_by_member ? (
-                            <span className="text-xs text-[#6B7280] dark:text-[#9CA3AF]">Already confirmed</span>
-                          ) : (
+                        <div className="px-4 pb-3 flex items-center justify-between">
+                          {userType === 'member' && !n.is_read ? (
                             <button
                               type="button"
-                              className="text-xs bg-[#10B981] text-white px-2 py-1 rounded-md"
-                              onClick={async () => {
-                                try {
-                                  const ok = window.confirm('Confirm payment receipt?');
-                                  if (!ok) return;
-                                  const res = await fetch(`/api/member/payments/${paymentId}/confirm`, {
-                                    method: 'POST',
-                                  });
-                                  if (res.ok) {
-                                    setPaymentStatusById((prev) => ({
-                                      ...prev,
-                                      [paymentId]: { confirmed_by_member: true },
-                                    }));
-                                    await markOneRead(n.id);
-                                    await fetchNotifications();
-                                  }
-                                } catch {
-                                  // ignore
-                                }
-                              }}
+                              className="text-xs text-[#10B981] hover:underline"
+                              onClick={() => markOneRead(n.id)}
                             >
-                              Confirm
+                              Mark as read
                             </button>
-                          )
-                        ) : null}
+                          ) : (
+                            <span />
+                          )}
+
+                          {paymentId ? (
+                            paymentStatus?.confirmed_by_member ? (
+                              <span className="text-xs text-[#6B7280] dark:text-[#9CA3AF]">Already confirmed</span>
+                            ) : (
+                              <button
+                                type="button"
+                                className="text-xs bg-[#10B981] text-white px-2 py-1 rounded-md"
+                                onClick={async () => {
+                                  try {
+                                    const ok = window.confirm('Confirm payment receipt?');
+                                    if (!ok) return;
+                                    const res = await fetch(`/api/member/payments/${paymentId}/confirm`, {
+                                      method: 'POST',
+                                    });
+                                    if (res.ok) {
+                                      setPaymentStatusById((prev) => ({
+                                        ...prev,
+                                        [paymentId]: { confirmed_by_member: true },
+                                      }));
+                                      await markOneRead(n.id);
+                                      await fetchNotifications();
+                                    }
+                                  } catch {
+                                    // ignore
+                                  }
+                                }}
+                              >
+                                Confirm
+                              </button>
+                            )
+                          ) : null}
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}

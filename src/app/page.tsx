@@ -1,44 +1,11 @@
 import Link from 'next/link';
-import Image from 'next/image';
+import HomeHeader from '@/components/HomeHeader';
 
 export default function Home() {
   return (
     <div className="min-h-screen bg-[#F8FAFC] flex flex-col">
       {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <Image
-              src="/images/logo/ShriDev_Freelance_logo.png"
-              alt="ShriDev Freelance"
-              width={40}
-              height={40}
-              className="w-10 h-10 rounded-lg"
-            />
-            <span className="text-xl font-bold text-[#111827]">ShriDev Freelance</span>
-          </div>
-          <div className="flex gap-4">
-            <Link
-              href="/contact"
-              className="px-4 py-2 text-[#10B981] hover:text-[#0F766E] font-medium transition-colors"
-            >
-              Contact Us
-            </Link>
-            <Link
-              href="/admin/login"
-              className="px-4 py-2 text-[#10B981] hover:text-[#0F766E] font-medium transition-colors"
-            >
-              Admin Login
-            </Link>
-            <Link
-              href="/member/login"
-              className="px-4 py-2 bg-[#10B981] text-white rounded-lg hover:bg-[#0F766E] font-medium transition-colors shadow-md"
-            >
-              Member Login
-            </Link>
-          </div>
-        </div>
-      </header>
+      <HomeHeader />
 
       {/* Hero Section */}
       <main className="flex-1 px-4">
@@ -89,7 +56,7 @@ export default function Home() {
                   </svg>
                 </div>
                 <h3 className="text-xl font-semibold text-[#111827] mb-2">Web Development</h3>
-                <p className="text-[#6B7280]">Landing pages, business websites, and web apps with a modern UI and clean UX.</p>
+                <p className="text-[#6B7280]">Websites and web apps with a modern UI, clean UX, and performance-first approach.</p>
               </div>
               <div className="bg-[#F8FAFC] rounded-xl p-6 border border-[#D1FAE5]">
                 <div className="w-12 h-12 bg-[#D1FAE5] rounded-lg flex items-center justify-center mb-4">
@@ -97,8 +64,8 @@ export default function Home() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                   </svg>
                 </div>
-                <h3 className="text-xl font-semibold text-[#111827] mb-2">Dashboards & Admin Panels</h3>
-                <p className="text-[#6B7280]">Role-based dashboards, project management, reporting, and automation.</p>
+                <h3 className="text-xl font-semibold text-[#111827] mb-2">Mobile App Development</h3>
+                <p className="text-[#6B7280]">Mobile apps with clean UI, stable performance, and scalable architecture.</p>
               </div>
               <div className="bg-[#F8FAFC] rounded-xl p-6 border border-[#D1FAE5]">
                 <div className="w-12 h-12 bg-[#D1FAE5] rounded-lg flex items-center justify-center mb-4">
@@ -180,7 +147,7 @@ export default function Home() {
                     Contact Us
                   </Link>
                   <a
-                    href="mailto:shrikeshshetty1234@gmail.com"
+                    href="mailto:shridevfreelanceofficial@gmail.com"
                     className="px-6 py-3 border-2 border-[#10B981] text-[#10B981] rounded-lg hover:bg-[#D1FAE5] font-medium transition-colors text-center"
                   >
                     Email Directly
@@ -191,30 +158,12 @@ export default function Home() {
           </div>
         </section>
 
-        {/* CTA */}
-        <section className="py-16 bg-[#F8FAFC]">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-3xl font-bold text-[#111827]">Ready to get started?</h2>
-            <p className="text-[#6B7280] mt-3">
-              Let’s build something amazing together.
-            </p>
-            <div className="mt-6">
-              <Link
-                href="/contact"
-                className="px-6 py-3 bg-[#10B981] text-white rounded-lg hover:bg-[#0F766E] font-medium transition-colors"
-              >
-                Contact Us
-              </Link>
-            </div>
-          </div>
-        </section>
-
       </main>
 
       {/* Footer */}
       <footer className="bg-[#0F766E] text-white py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p className="text-sm opacity-80">© 2024 ShriDev Freelance. All rights reserved.</p>
+          <p className="text-sm opacity-80">© 2026 ShriDev Freelance. All rights reserved.</p>
         </div>
       </footer>
     </div>

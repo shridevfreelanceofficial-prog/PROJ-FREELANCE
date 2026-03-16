@@ -1,6 +1,7 @@
 import { query } from '@/lib/db';
 import { Card, CardBody } from '@/components/ui';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface ShowcaseProject {
   id: string;
@@ -18,6 +19,13 @@ interface ShowcaseProject {
 export default async function ProjectShowcasePage() {
   let projects: ShowcaseProject[] = [];
 
+  const formatDate = (date: string | null) => {
+    if (!date) return '';
+    const d = new Date(date);
+    if (Number.isNaN(d.getTime())) return '';
+    return d.toLocaleDateString('en-GB');
+  };
+
   try {
     projects = await query<ShowcaseProject>(
       `SELECT id, title, client_name, description, requirements, cover_image_url, live_website_url, start_date, end_date, team_members
@@ -33,11 +41,15 @@ export default async function ProjectShowcasePage() {
     <div className="min-h-screen bg-[#F8FAFC]">
       {/* Header */}
       <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
           <Link href="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-[#10B981] to-[#0F766E] rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-xl">S</span>
-            </div>
+            <Image
+              src="/images/logo/ShriDev_Freelance_logo.png"
+              alt="ShriDev Freelance"
+              width={40}
+              height={40}
+              className="w-10 h-10 rounded-lg"
+            />
             <span className="text-xl font-bold text-[#111827]">ShriDev Freelance</span>
           </Link>
           <div className="flex gap-4">
@@ -121,13 +133,13 @@ export default async function ProjectShowcasePage() {
 
                   {/* Timeline */}
                   {(project.start_date || project.end_date) && (
-                    <div className="flex items-center gap-2 text-sm text-[#6B7280] mb-4">
+                    <div className="flex flex-wrap items-center gap-2 text-sm text-[#6B7280] mb-4">
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                       </svg>
-                      {project.start_date && new Date(project.start_date).toLocaleDateString()}
+                      {project.start_date && formatDate(project.start_date)}
                       {project.start_date && project.end_date && ' - '}
-                      {project.end_date && new Date(project.end_date).toLocaleDateString()}
+                      {project.end_date && formatDate(project.end_date)}
                     </div>
                   )}
 
@@ -178,7 +190,7 @@ export default async function ProjectShowcasePage() {
       <footer className="bg-[#0F766E] text-white py-8 mt-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <p className="text-sm opacity-80">
-            © 2024 ShriDev Freelance. All rights reserved.
+            © 2026 ShriDev Freelance. All rights reserved.
           </p>
         </div>
       </footer>

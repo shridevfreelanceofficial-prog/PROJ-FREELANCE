@@ -20,7 +20,7 @@ function formatDate(date: string | null) {
   if (!date) return 'N/A';
   const d = new Date(date);
   if (Number.isNaN(d.getTime())) return 'N/A';
-  return d.toLocaleDateString();
+  return d.toLocaleDateString('en-GB');
 }
 
 export default async function ShowcaseProjectDetailsPage({

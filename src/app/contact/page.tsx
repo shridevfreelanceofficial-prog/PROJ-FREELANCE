@@ -52,7 +52,7 @@ export default function ContactPage() {
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
       <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
           <Link href="/" className="flex items-center gap-3">
             <Image
               src="/images/logo/ShriDev_Freelance_logo.png"
@@ -63,7 +63,7 @@ export default function ContactPage() {
             />
             <span className="text-xl font-bold text-[#111827]">ShriDev Freelance</span>
           </Link>
-          <div className="flex gap-4">
+          <div className="flex flex-wrap gap-4">
             <Link
               href="/"
               className="px-4 py-2 text-[#10B981] hover:text-[#0F766E] font-medium transition-colors"
@@ -104,8 +104,8 @@ export default function ContactPage() {
                 </div>
 
                 <div className="space-y-2 text-sm">
-                  <a className="text-[#10B981] hover:text-[#0F766E]" href="mailto:shrikeshshetty1234@gmail.com">
-                    shrikeshshetty1234@gmail.com
+                  <a className="text-[#10B981] hover:text-[#0F766E]" href="mailto:shridevfreelanceofficial@gmail.com">
+                    shridevfreelanceofficial@gmail.com
                   </a>
                   <div className="flex flex-col gap-1">
                     <a
@@ -138,7 +138,7 @@ export default function ContactPage() {
                 <div className="rounded-xl bg-[#D1FAE5]/40 border border-[#D1FAE5] p-4">
                   <p className="text-sm text-[#111827] font-medium">What we can help with</p>
                   <p className="text-sm text-[#6B7280] mt-1">
-                    Web development, dashboards, admin panels, automation, performance improvements, and modern UI.
+                    Web & mobile app development, dashboards, admin panels, automation, performance improvements, and modern UI.
                   </p>
                 </div>
               </CardBody>
@@ -177,19 +177,21 @@ export default function ContactPage() {
 
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-[#111827] mb-1">Phone</label>
+                      <label className="block text-sm font-medium text-[#111827] mb-1">Phone *</label>
                       <input
                         className="w-full px-4 py-2 border border-[#D1FAE5] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#10B981]"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
+                        required
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-[#111827] mb-1">Subject</label>
+                      <label className="block text-sm font-medium text-[#111827] mb-1">Subject *</label>
                       <input
                         className="w-full px-4 py-2 border border-[#D1FAE5] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#10B981]"
                         value={subject}
                         onChange={(e) => setSubject(e.target.value)}
+                        required
                       />
                     </div>
                   </div>
