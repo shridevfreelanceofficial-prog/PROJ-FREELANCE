@@ -5,12 +5,14 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import NotificationsBell from '@/components/NotificationsBell';
+import { getSignedUrl } from '@/lib/blob';
 
 interface MemberUser {
   id: string;
   full_name: string;
   email: string;
   role: string | null;
+  profile_image_url?: string | null;
 }
 
 export default function MemberDashboardLayout({
@@ -122,10 +124,18 @@ export default function MemberDashboardLayout({
           {/* User info & logout */}
           <div className="px-4 py-4 border-t border-[#D1FAE5]">
             <div className="flex items-center gap-3 px-4 py-2 mb-2">
-              <div className="w-10 h-10 bg-[#D1FAE5] rounded-full flex items-center justify-center">
-                <span className="text-[#10B981] font-medium">
-                  {user?.full_name?.[0] || 'M'}
-                </span>
+              <div className="w-10 h-10 bg-[#D1FAE5] rounded-full flex items-center justify-center overflow-hidden">
+                {user?.profile_image_url ? (
+                  <img
+                    src={getSignedUrl(user.profile_image_url)}
+                    alt="Profile"
+                    className="w-10 h-10 object-cover"
+                  />
+                ) : (
+                  <span className="text-[#10B981] font-medium">
+                    {user?.full_name?.[0] || 'M'}
+                  </span>
+                )}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-[#111827] truncate">

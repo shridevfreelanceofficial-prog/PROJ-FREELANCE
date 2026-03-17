@@ -20,9 +20,11 @@ const ROLES = [
 export default function CreateMemberPage() {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const profileInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [signaturePreview, setSignaturePreview] = useState<string | null>(null);
+  const [profilePreview, setProfilePreview] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     full_name: '',
     email: '',
@@ -32,6 +34,7 @@ export default function CreateMemberPage() {
     residential_location: '',
     role: '',
     signature: null as File | null,
+    profile_image: null as File | null,
   });
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -45,6 +48,22 @@ export default function CreateMemberPage() {
       const reader = new FileReader();
       reader.onloadend = () => {
         setSignaturePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleProfileImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        setError('File size must be less than 5MB');
+        return;
+      }
+      setFormData({ ...formData, profile_image: file });
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfilePreview(reader.result as string);
       };
       reader.readAsDataURL(file);
     }
@@ -64,6 +83,9 @@ export default function CreateMemberPage() {
       submitData.append('password', formData.password);
       submitData.append('residential_location', formData.residential_location);
       submitData.append('role', formData.role);
+      if (formData.profile_image) {
+        submitData.append('profile_image', formData.profile_image);
+      }
       if (formData.signature) {
         submitData.append('signature', formData.signature);
       }
@@ -173,6 +195,47 @@ export default function CreateMemberPage() {
                   </option>
                 ))}
               </select>
+            </div>
+
+            {/* Profile Picture Upload */}
+            <div>
+              <label className="block text-sm font-medium text-[#111827] mb-1.5">
+                Profile Picture (Optional)
+              </label>
+              <div className="mt-2">
+                <div
+                  onClick={() => profileInputRef.current?.click()}
+                  className="border-2 border-dashed border-[#D1FAE5] rounded-lg p-6 text-center cursor-pointer hover:border-[#10B981] transition-colors"
+                >
+                  {profilePreview ? (
+                    <div className="space-y-2">
+                      <img
+                        src={profilePreview}
+                        alt="Profile preview"
+                        className="w-20 h-20 mx-auto rounded-full object-cover"
+                      />
+                      <p className="text-sm text-[#6B7280]">Click to change</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <div className="w-20 h-20 mx-auto rounded-full bg-[#D1FAE5] flex items-center justify-center">
+                        <span className="text-[#10B981] font-semibold text-2xl">
+                          {formData.full_name?.[0] || 'M'}
+                        </span>
+                      </div>
+                      <p className="text-sm text-[#6B7280]">Click to upload profile picture</p>
+                      <p className="text-xs text-[#6B7280]">PNG, JPG up to 5MB</p>
+                    </div>
+                  )}
+                </div>
+                <input
+                  ref={profileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleProfileImageChange}
+                  className="hidden"
+                />
+              </div>
             </div>
 
             {/* Signature Upload */}

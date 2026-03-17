@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button, Input, Card, CardHeader, CardBody } from '@/components/ui';
+import { getSignedUrl } from '@/lib/blob';
 
 interface Member {
   id: string;
@@ -14,6 +15,7 @@ interface Member {
   residential_location: string | null;
   role: string | null;
   signature_url: string | null;
+  profile_image_url: string | null;
   is_active: boolean;
 }
 
@@ -31,6 +33,8 @@ export default function EditMemberPage() {
   const [location, setLocation] = useState('');
   const [role, setRole] = useState('');
   const [signatureFile, setSignatureFile] = useState<File | null>(null);
+  const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
+  const [profilePreview, setProfilePreview] = useState<string | null>(null);
 
   useEffect(() => {
     fetchMember();
@@ -68,6 +72,9 @@ export default function EditMemberPage() {
       formData.append('github_username', githubUsername);
       formData.append('residential_location', location);
       formData.append('role', role);
+      if (profileImageFile) {
+        formData.append('profile_image', profileImageFile);
+      }
       if (signatureFile) {
         formData.append('signature', signatureFile);
       }
@@ -177,10 +184,61 @@ export default function EditMemberPage() {
             <h3 className="text-lg font-semibold text-[#111827]">Signature</h3>
           </CardHeader>
           <CardBody className="space-y-4">
+            {member.profile_image_url && !profilePreview && (
+              <div>
+                <p className="text-sm text-[#6B7280] mb-2">Current Profile Picture:</p>
+                <img
+                  src={getSignedUrl(member.profile_image_url)}
+                  alt="Profile"
+                  className="w-20 h-20 rounded-full border object-cover"
+                />
+              </div>
+            )}
+
+            {profilePreview && (
+              <div>
+                <p className="text-sm text-[#6B7280] mb-2">Profile Picture Preview:</p>
+                <img
+                  src={profilePreview}
+                  alt="Profile preview"
+                  className="w-20 h-20 rounded-full border object-cover"
+                />
+              </div>
+            )}
+
+            <div>
+              <label className="block text-sm font-medium text-[#111827] mb-1.5">
+                Upload Profile Picture
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0] || null;
+                  setProfileImageFile(file);
+                  if (!file) {
+                    setProfilePreview(null);
+                    return;
+                  }
+                  const reader = new FileReader();
+                  reader.onloadend = () => {
+                    setProfilePreview(reader.result as string);
+                  };
+                  reader.readAsDataURL(file);
+                }}
+                className="block w-full text-sm text-[#6B7280]
+                  file:mr-4 file:py-2 file:px-4
+                  file:rounded-lg file:border-0
+                  file:text-sm file:font-medium
+                  file:bg-[#D1FAE5] file:text-[#10B981]
+                  hover:file:bg-[#A7F3D0]"
+              />
+            </div>
+
             {member.signature_url && (
               <div>
                 <p className="text-sm text-[#6B7280] mb-2">Current Signature:</p>
-                <img src={member.signature_url} alt="Signature" className="max-w-xs border rounded" />
+                <img src={getSignedUrl(member.signature_url)} alt="Signature" className="max-w-xs border rounded" />
               </div>
             )}
             <div>

@@ -11,10 +11,14 @@ CREATE TABLE IF NOT EXISTS administrators (
     username VARCHAR(255) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
     signature_url TEXT,
+    profile_image_url TEXT,
     is_profile_complete BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+
+ALTER TABLE administrators
+  ADD COLUMN IF NOT EXISTS profile_image_url TEXT;
 
 -- Members table
 CREATE TABLE IF NOT EXISTS members (
@@ -27,6 +31,7 @@ CREATE TABLE IF NOT EXISTS members (
     role VARCHAR(100),
     github_username VARCHAR(255),
     signature_url TEXT,
+    profile_image_url TEXT,
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
@@ -34,6 +39,9 @@ CREATE TABLE IF NOT EXISTS members (
 
 ALTER TABLE members
   ADD COLUMN IF NOT EXISTS github_username VARCHAR(255);
+
+ALTER TABLE members
+  ADD COLUMN IF NOT EXISTS profile_image_url TEXT;
 
 -- Projects table
 CREATE TABLE IF NOT EXISTS projects (

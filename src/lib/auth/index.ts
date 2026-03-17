@@ -11,6 +11,7 @@ export interface AdminUser {
   email: string | null;
   username: string;
   signature_url: string | null;
+  profile_image_url?: string | null;
   is_profile_complete: boolean;
 }
 
@@ -22,6 +23,7 @@ export interface MemberUser {
   residential_location: string | null;
   role: string | null;
   signature_url: string | null;
+  profile_image_url?: string | null;
   is_active: boolean;
 }
 
@@ -94,13 +96,13 @@ export async function getCurrentUser(): Promise<{ user: AdminUser | MemberUser; 
 
   if (userType === 'admin') {
     const admin = await queryOne<AdminUser>(
-      'SELECT id, name, email, username, signature_url, is_profile_complete FROM administrators WHERE id = $1',
+      'SELECT id, name, email, username, signature_url, profile_image_url, is_profile_complete FROM administrators WHERE id = $1',
       [payload.userId]
     );
     if (admin) return { user: admin, userType: 'admin' };
   } else {
     const member = await queryOne<MemberUser>(
-      'SELECT id, full_name, email, phone, residential_location, role, signature_url, is_active FROM members WHERE id = $1',
+      'SELECT id, full_name, email, phone, residential_location, role, signature_url, profile_image_url, is_active FROM members WHERE id = $1',
       [payload.userId]
     );
     if (member) return { user: member, userType: 'member' };

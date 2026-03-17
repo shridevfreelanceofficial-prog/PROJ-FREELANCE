@@ -74,6 +74,15 @@ export async function uploadSignature(file: File, userId: string): Promise<Uploa
   return uploadFile(file, `signatures/${userId}`);
 }
 
+// Upload profile image
+export async function uploadProfileImage(
+  file: File,
+  userType: 'admin' | 'member',
+  userId: string
+): Promise<UploadResult> {
+  return uploadFile(file, `profile-images/${userType}/${userId}`);
+}
+
 // Upload daily report
 export async function uploadDailyReport(file: File, projectId: string, memberId: string): Promise<UploadResult> {
   return uploadFile(file, `reports/${projectId}/${memberId}`);

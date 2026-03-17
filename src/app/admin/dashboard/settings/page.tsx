@@ -10,6 +10,7 @@ interface AdminProfile {
   name: string | null;
   email: string | null;
   signature_url: string | null;
+  profile_image_url: string | null;
 }
 
 export default function SettingsPage() {
@@ -19,6 +20,7 @@ export default function SettingsPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [signatureFile, setSignatureFile] = useState<File | null>(null);
+  const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
   
   // Password change
   const [currentPassword, setCurrentPassword] = useState('');
@@ -62,6 +64,9 @@ export default function SettingsPage() {
       const formData = new FormData();
       formData.append('name', name);
       formData.append('email', email);
+      if (profileImageFile) {
+        formData.append('profile_image', profileImageFile);
+      }
       if (signatureFile) {
         formData.append('signature', signatureFile);
       }
@@ -184,6 +189,32 @@ export default function SettingsPage() {
             <h3 className="text-lg font-semibold text-[#111827]">Signature</h3>
           </CardHeader>
           <CardBody className="space-y-4">
+            {profile?.profile_image_url && (
+              <div>
+                <p className="text-sm text-[#6B7280] mb-2">Profile Picture:</p>
+                <img
+                  src={getSignedUrl(profile.profile_image_url)}
+                  alt="Profile"
+                  className="w-20 h-20 rounded-full border object-cover"
+                />
+              </div>
+            )}
+            <div>
+              <label className="block text-sm font-medium text-[#111827] mb-1.5">
+                Upload Profile Picture
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setProfileImageFile(e.target.files?.[0] || null)}
+                className="block w-full text-sm text-[#6B7280]
+                  file:mr-4 file:py-2 file:px-4
+                  file:rounded-lg file:border-0
+                  file:text-sm file:font-medium
+                  file:bg-[#D1FAE5] file:text-[#10B981]
+                  hover:file:bg-[#A7F3D0]"
+              />
+            </div>
             {profile?.signature_url && (
               <div>
                 <p className="text-sm text-[#6B7280] mb-2">Current Signature:</p>

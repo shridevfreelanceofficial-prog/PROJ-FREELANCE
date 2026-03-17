@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
 import { query } from '@/lib/db';
-import { uploadSignature } from '@/lib/blob';
+import { uploadProfileImage, uploadSignature } from '@/lib/blob';
 
 export async function GET() {
   try {
@@ -39,6 +39,7 @@ export async function PUT(request: NextRequest) {
     const name = formData.get('name') as string;
     const email = formData.get('email') as string;
     const signatureFile = formData.get('signature') as File | null;
+    const profileImageFile = formData.get('profile_image') as File | null;
 
     // Validate required fields (username is not required since it cannot be changed)
     if (!name || !email) {
@@ -62,18 +63,24 @@ export async function PUT(request: NextRequest) {
     }
 
     let signatureUrl = (result.user as any).signature_url;
+    let profileImageUrl = (result.user as any).profile_image_url;
 
     // Upload new signature if provided
     if (signatureFile && signatureFile.size > 0) {
       signatureUrl = (await uploadSignature(signatureFile, result.user.id)).url;
     }
 
+    // Upload new profile image if provided
+    if (profileImageFile && profileImageFile.size > 0) {
+      profileImageUrl = (await uploadProfileImage(profileImageFile, 'admin', result.user.id)).url;
+    }
+
     // Update admin profile
     await query(
       `UPDATE administrators 
-       SET name = $1, email = $2, signature_url = $3, is_profile_complete = true, updated_at = CURRENT_TIMESTAMP
-       WHERE id = $4`,
-      [name, email, signatureUrl, result.user.id]
+       SET name = $1, email = $2, signature_url = $3, profile_image_url = $4, is_profile_complete = true, updated_at = CURRENT_TIMESTAMP
+       WHERE id = $5`,
+      [name, email, signatureUrl, profileImageUrl, result.user.id]
     );
 
     return NextResponse.json({

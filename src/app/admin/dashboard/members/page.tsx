@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Button, Card, CardHeader, CardBody } from '@/components/ui';
+import { getSignedUrl } from '@/lib/blob';
 
 interface Member {
   id: string;
@@ -10,6 +11,7 @@ interface Member {
   email: string;
   phone: string | null;
   role: string | null;
+  profile_image_url?: string | null;
   is_active: boolean;
   created_at: string;
 }
@@ -111,10 +113,18 @@ export default function MembersPage() {
                     <tr key={member.id} className="hover:bg-[#F8FAFC]">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
-                          <div className="w-10 h-10 bg-[#D1FAE5] rounded-full flex items-center justify-center mr-3">
-                            <span className="text-[#10B981] font-medium">
-                              {member.full_name[0].toUpperCase()}
-                            </span>
+                          <div className="w-10 h-10 bg-[#D1FAE5] rounded-full flex items-center justify-center mr-3 overflow-hidden">
+                            {member.profile_image_url ? (
+                              <img
+                                src={getSignedUrl(member.profile_image_url)}
+                                alt={member.full_name}
+                                className="w-10 h-10 object-cover"
+                              />
+                            ) : (
+                              <span className="text-[#10B981] font-medium">
+                                {member.full_name[0].toUpperCase()}
+                              </span>
+                            )}
                           </div>
                           <div>
                             <div className="text-sm font-medium text-[#111827]">
