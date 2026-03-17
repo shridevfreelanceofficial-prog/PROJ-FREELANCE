@@ -10,10 +10,12 @@ export default function Home() {
       {/* Hero Section */}
       <main className="flex-1 px-4">
         <section
-          className="max-w-7xl mx-auto pt-16 pb-10 relative bg-contain md:bg-cover bg-top md:bg-center bg-no-repeat rounded-3xl overflow-hidden"
-          style={{ backgroundImage: "url('/images/hero-bg/hero-bg.png')" }}
+          className="max-w-7xl mx-auto pt-16 pb-10 min-h-[560px] sm:min-h-[520px] md:min-h-0 relative bg-contain md:bg-cover bg-top md:bg-center bg-no-repeat rounded-3xl overflow-hidden"
+          style={{
+            backgroundImage:
+              "linear-gradient(180deg, rgba(15, 118, 110, 0.70) 0%, rgba(17, 24, 39, 0.78) 55%, rgba(15, 118, 110, 0.72) 100%), url('/images/hero-bg/hero-bg.png')",
+          }}
         >
-          <div className="absolute inset-0 bg-black/50" />
           <div className="max-w-4xl mx-auto text-center relative z-10 px-4 py-10">
             <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
               Build. Launch. Scale.
