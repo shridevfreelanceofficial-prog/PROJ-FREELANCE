@@ -115,10 +115,23 @@ export async function sendCertificateEmail(
   certificateBuffer: Buffer,
   certificateCode?: string
 ): Promise<boolean> {
-  const baseUrl =
+  const normalizeBaseUrl = (url: string): string => {
+    const trimmed = url.trim().replace(/\/+$/, '');
+    if (!trimmed) return 'https://www.shridevfreelance.online';
+    if (/^https?:\/\//i.test(trimmed)) return trimmed;
+    return `https://${trimmed}`;
+  };
+
+  const configured =
     process.env.NEXT_PUBLIC_APP_URL ||
     process.env.APP_URL ||
     'https://www.shridevfreelance.online';
+
+  const normalized = normalizeBaseUrl(configured);
+  // Always use production domain if localhost is detected (for certificate emails)
+  const baseUrl = /localhost/i.test(normalized)
+    ? 'https://www.shridevfreelance.online'
+    : normalized;
 
   const verifyUrl = certificateCode
     ? `${baseUrl}/certificate-verification?code=${encodeURIComponent(certificateCode)}`

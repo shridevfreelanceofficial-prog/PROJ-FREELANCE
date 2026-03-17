@@ -3,12 +3,27 @@ import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 import path from 'path';
 import fs from 'fs/promises';
 
+function normalizeBaseUrl(url: string): string {
+  const trimmed = url.trim().replace(/\/+$/, '');
+  if (!trimmed) return 'https://www.shridevfreelance.online';
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  return `https://${trimmed}`;
+}
+
 function getAppBaseUrl(): string {
-  return (
+  const configured =
     process.env.NEXT_PUBLIC_APP_URL ||
     process.env.APP_URL ||
-    'https://www.shridevfreelance.online'
-  );
+    'https://www.shridevfreelance.online';
+
+  const normalized = normalizeBaseUrl(configured);
+
+  // Always use production domain if localhost is detected (for certificates/emails)
+  if (/localhost/i.test(normalized)) {
+    return 'https://www.shridevfreelance.online';
+  }
+
+  return normalized;
 }
 
 interface CertificateData {
@@ -343,13 +358,21 @@ export async function createCertificatePDF(data: CertificateData): Promise<Uint8
 
   // Bottom layout
 
-  // Certificate ID + Verify URL (bottom-left) - keep inside inner border
-  const certIdLabelY = innerMargin + 44;
-  const certIdValueY = innerMargin + 32;
-  const verifyY = innerMargin + 20;
+  // Admin signature (bottom center, no label) - define first for reference
+  const sigY = innerMargin + 82;
+  const sigWidth = 220;
+  const sigHeight = 70;
+  const sigX = (width - sigWidth) / 2;
+
+  // Certificate ID + Verify URL (bottom-left)
+  // Anchor this block just above the bottom inner border of the light green box.
+  const verifyY = innerMargin + 12;
+  const certIdValueY = verifyY + 12;
+  const certIdLabelY = certIdValueY + 12;
+  const certBlockX = innerMargin + 10;
 
   page.drawText('Certificate ID', {
-    x: marginX,
+    x: certBlockX,
     y: certIdLabelY,
     size: 9,
     font: fontBold,
@@ -357,27 +380,22 @@ export async function createCertificatePDF(data: CertificateData): Promise<Uint8
   });
 
   page.drawText(data.certificateCode, {
-    x: marginX,
+    x: certBlockX,
     y: certIdValueY,
     size: 9,
     font: fontBold,
     color: primary,
   });
 
+  // Verify URL - positioned just above the green signature line
   const verifyUrl = `${getAppBaseUrl()}/certificate-verification?code=${encodeURIComponent(data.certificateCode)}`;
   page.drawText('Verify at: ' + verifyUrl, {
-    x: marginX,
+    x: certBlockX,
     y: verifyY,
     size: 8,
     font: font,
     color: muted,
   });
-
-  // Admin signature (bottom center, no label)
-  const sigY = innerMargin + 54;
-  const sigWidth = 220;
-  const sigHeight = 70;
-  const sigX = (width - sigWidth) / 2;
 
   page.drawLine({
     start: { x: sigX, y: sigY - 6 },
@@ -828,7 +846,7 @@ export function createCertificateHTML(data: CertificateData): string {
         Issued by ShriDev Freelance Project Management System
       </p>
       <p class="verify-text">
-        Verify at: <span class="verify-url">${getAppBaseUrl().replace(/^https?:\/\//, '')}/certificate-verification?code=${data.certificateCode}</span>
+        Verify at: <span class="verify-url">${getAppBaseUrl()}/certificate-verification?code=${data.certificateCode}</span>
       </p>
     </div>
   </div>

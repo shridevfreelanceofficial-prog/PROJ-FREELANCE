@@ -9,18 +9,31 @@ type NotificationInput = {
   action_data?: any;
 };
 
+function normalizeBaseUrl(url: string): string {
+  const trimmed = url.trim().replace(/\/+$/, '');
+  if (!trimmed) return 'https://www.shridevfreelance.online';
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  return `https://${trimmed}`;
+}
+
 function toAbsoluteUrl(actionUrl?: string | null): string | undefined {
   if (!actionUrl) return undefined;
   const trimmed = actionUrl.trim();
   if (!trimmed) return undefined;
   if (/^https?:\/\//i.test(trimmed)) return trimmed;
 
-  const base =
+  const configured =
     process.env.NEXT_PUBLIC_APP_URL ||
     process.env.APP_URL ||
-    'http://localhost:3000';
+    'https://www.shridevfreelance.online';
 
-  return `${base}${trimmed.startsWith('/') ? '' : '/'}${trimmed}`;
+  const base = normalizeBaseUrl(configured);
+  // Always use production domain if localhost is detected (for notification emails)
+  const safeBase = /localhost/i.test(base)
+    ? 'https://www.shridevfreelance.online'
+    : base;
+
+  return `${safeBase}${trimmed.startsWith('/') ? '' : '/'}${trimmed}`;
 }
 
 export async function notifyAdmins(input: NotificationInput): Promise<void> {

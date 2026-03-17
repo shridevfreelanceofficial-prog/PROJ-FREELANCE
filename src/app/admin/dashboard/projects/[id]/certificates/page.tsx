@@ -386,20 +386,7 @@ export default function CertificatesPage() {
       )}
 
       {/* Certificate Preview */}
-      <Card>
-        <CardHeader>
-          <h3 className="text-lg font-semibold text-[#111827]">Certificate Preview</h3>
-        </CardHeader>
-        <CardBody>
-          <p className="text-[#6B7280] text-sm mb-4">
-            Each certificate will include the member's name, project details, unique certificate code, 
-            and your signature. Certificates can be verified online.
-          </p>
-          <Link href="/certificate-template.html" target="_blank">
-            <Button variant="outline" size="sm">Preview Certificate Template</Button>
-          </Link>
-        </CardBody>
-      </Card>
+      {null}
     </div>
   );
 }
