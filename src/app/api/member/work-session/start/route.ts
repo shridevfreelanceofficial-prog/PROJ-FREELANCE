@@ -67,7 +67,11 @@ export async function POST(request: NextRequest) {
 
     // Create notification for admin with project details
     const projectName = project[0]?.title || 'Unknown Project';
-    const startTime = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    const startTime = new Date().toLocaleTimeString('en-IN', {
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: 'Asia/Kolkata',
+    });
     const member = result.user as MemberUser;
     
     await notifyAdmins({

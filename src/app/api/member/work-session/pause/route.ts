@@ -59,7 +59,11 @@ export async function POST(request: NextRequest) {
       [session_id]
     );
     const projectName = projectInfo[0]?.project_name || 'Unknown Project';
-    const pauseTime = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    const pauseTime = new Date().toLocaleTimeString('en-IN', {
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: 'Asia/Kolkata',
+    });
     const durationMinutes = Math.floor(totalSeconds / 60);
     
     await notifyAdmins({

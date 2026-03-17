@@ -55,7 +55,11 @@ export async function POST(request: NextRequest) {
       [session_id]
     );
     const projectName = projectInfo[0]?.project_name || 'Unknown Project';
-    const stopTime = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    const stopTime = new Date().toLocaleTimeString('en-IN', {
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: 'Asia/Kolkata',
+    });
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
     

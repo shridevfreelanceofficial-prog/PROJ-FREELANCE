@@ -53,9 +53,14 @@ export async function POST(request: NextRequest) {
     );
 
     const projectTitle = projectInfo?.project_title || 'Unknown Project';
+    const resumeTime = new Date().toLocaleTimeString('en-IN', {
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: 'Asia/Kolkata',
+    });
     await notifyAdmins({
       title: 'Work Session Resumed',
-      message: `${(result.user as any).full_name} resumed working on "${projectTitle}"`,
+      message: `${(result.user as any).full_name} resumed working on "${projectTitle}" at ${resumeTime}`,
       type: 'work_session',
       action_url: projectInfo?.project_id ? `/admin/dashboard/projects/${projectInfo.project_id}` : undefined,
     });
