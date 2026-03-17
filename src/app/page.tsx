@@ -9,13 +9,17 @@ export default function Home() {
 
       {/* Hero Section */}
       <main className="flex-1 px-4">
-        <section className="max-w-7xl mx-auto pt-16 pb-10">
-          <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-5xl md:text-6xl font-bold text-[#111827] mb-6">
+        <section
+          className="max-w-7xl mx-auto pt-16 pb-10 relative bg-contain md:bg-cover bg-top md:bg-center bg-no-repeat rounded-3xl overflow-hidden"
+          style={{ backgroundImage: "url('/images/hero-bg/hero-bg.png')" }}
+        >
+          <div className="absolute inset-0 bg-black/50" />
+          <div className="max-w-4xl mx-auto text-center relative z-10 px-4 py-10">
+            <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
               Build. Launch. Scale.
-              <span className="block text-[#10B981]">Modern Web Solutions for Your Business</span>
+              <span className="block text-[#34D399]">Modern Web Solutions for Your Business</span>
             </h1>
-            <p className="text-xl text-[#6B7280] mb-8 max-w-2xl mx-auto">
+            <p className="text-xl text-white/85 mb-8 max-w-2xl mx-auto">
               We build clean, fast, and reliable web experiences from landing pages to full dashboards.
               Manage projects, collaborate with your team, and showcase your work professionally.
             </p>
@@ -28,13 +32,13 @@ export default function Home() {
               </Link>
               <Link
                 href="/certificate-verification"
-                className="px-8 py-3 border-2 border-[#10B981] text-[#10B981] rounded-lg hover:bg-[#D1FAE5] font-medium transition-colors"
+                className="px-8 py-3 border-2 border-white/80 text-white rounded-lg hover:bg-white/10 font-medium transition-colors"
               >
                 Verify Certificate
               </Link>
               <Link
                 href="/contact"
-                className="px-8 py-3 bg-white border-2 border-[#D1FAE5] text-[#111827] rounded-lg hover:bg-[#F8FAFC] font-medium transition-colors"
+                className="px-8 py-3 bg-white border-2 border-white text-[#111827] rounded-lg hover:bg-[#F8FAFC] font-medium transition-colors"
               >
                 Get a Quote
               </Link>
