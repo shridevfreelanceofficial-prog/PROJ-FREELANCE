@@ -10,8 +10,35 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "ShriDev Freelance - Project Management System",
   description: "Professional freelancing project management and showcase platform",
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL ||
+      process.env.APP_URL ||
+      "https://www.shridevfreelance.online"
+  ),
   icons: {
-    icon: "/favicon.ico",
+    icon: [
+      { url: "/images/logo/ShriDev_Freelance_logo.png", type: "image/png" },
+      { url: "/favicon.ico" },
+    ],
+    apple: [{ url: "/images/logo/ShriDev_Freelance_logo.png" }],
+  },
+  openGraph: {
+    title: "ShriDev Freelance - Project Management System",
+    description: "Professional freelancing project management and showcase platform",
+    images: [
+      {
+        url: "/images/logo/ShriDev_Freelance_logo.png",
+        width: 1200,
+        height: 630,
+        alt: "ShriDev Freelance",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "ShriDev Freelance - Project Management System",
+    description: "Professional freelancing project management and showcase platform",
+    images: ["/images/logo/ShriDev_Freelance_logo.png"],
   },
 };
 

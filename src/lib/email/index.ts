@@ -115,9 +115,14 @@ export async function sendCertificateEmail(
   certificateBuffer: Buffer,
   certificateCode?: string
 ): Promise<boolean> {
+  const baseUrl =
+    process.env.NEXT_PUBLIC_APP_URL ||
+    process.env.APP_URL ||
+    'https://www.shridevfreelance.online';
+
   const verifyUrl = certificateCode
-    ? `https://shridevfreelance.com/certificate-verification?code=${encodeURIComponent(certificateCode)}`
-    : 'https://shridevfreelance.com/certificate-verification';
+    ? `${baseUrl}/certificate-verification?code=${encodeURIComponent(certificateCode)}`
+    : `${baseUrl}/certificate-verification`;
   
   const html = `
     <!DOCTYPE html>

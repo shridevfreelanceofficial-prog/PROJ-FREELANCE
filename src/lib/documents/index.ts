@@ -3,6 +3,14 @@ import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 import path from 'path';
 import fs from 'fs/promises';
 
+function getAppBaseUrl(): string {
+  return (
+    process.env.NEXT_PUBLIC_APP_URL ||
+    process.env.APP_URL ||
+    'https://www.shridevfreelance.online'
+  );
+}
+
 interface CertificateData {
   memberName: string;
   projectName: string;
@@ -356,7 +364,8 @@ export async function createCertificatePDF(data: CertificateData): Promise<Uint8
     color: primary,
   });
 
-  page.drawText('Verify at: shridevfreelance.com/verify?code=' + data.certificateCode, {
+  const verifyUrl = `${getAppBaseUrl()}/certificate-verification?code=${encodeURIComponent(data.certificateCode)}`;
+  page.drawText('Verify at: ' + verifyUrl, {
     x: marginX,
     y: verifyY,
     size: 8,
@@ -819,7 +828,7 @@ export function createCertificateHTML(data: CertificateData): string {
         Issued by ShriDev Freelance Project Management System
       </p>
       <p class="verify-text">
-        Verify at: <span class="verify-url">shridevfreelance.com/verify?code=${data.certificateCode}</span>
+        Verify at: <span class="verify-url">${getAppBaseUrl().replace(/^https?:\/\//, '')}/certificate-verification?code=${data.certificateCode}</span>
       </p>
     </div>
   </div>
