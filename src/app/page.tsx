@@ -3,20 +3,24 @@ import HomeHeader from '@/components/HomeHeader';
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex flex-col">
+    <div className="min-h-screen flex flex-col relative overflow-hidden">
+      {/* Page Background Gradient */}
+      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-[#F8FAFC] via-[#D1FAE5]/30 to-[#10B981]/10" />
+      <div className="fixed top-0 right-0 -z-10 w-96 h-96 bg-[#10B981]/5 rounded-full blur-3xl" />
+      <div className="fixed bottom-0 left-0 -z-10 w-96 h-96 bg-[#0F766E]/5 rounded-full blur-3xl" />
       {/* Header */}
       <HomeHeader />
 
       {/* Hero Section */}
       <main className="flex-1 px-4">
         <section
-          className="max-w-7xl mx-auto pt-16 pb-10 min-h-[560px] sm:min-h-[520px] md:min-h-0 relative bg-contain md:bg-cover bg-top md:bg-center bg-no-repeat rounded-3xl overflow-hidden"
+          className="max-w-7xl mx-auto mt-8 pt-24 pb-10 min-h-[560px] sm:min-h-[520px] md:min-h-0 relative bg-contain md:bg-cover bg-top md:bg-center bg-no-repeat rounded-3xl overflow-hidden"
           style={{
             backgroundImage:
               "linear-gradient(180deg, rgba(15, 118, 110, 0.70) 0%, rgba(17, 24, 39, 0.78) 55%, rgba(15, 118, 110, 0.72) 100%), url('/images/hero-bg/hero-bg.png')",
           }}
         >
-          <div className="max-w-4xl mx-auto text-center relative z-10 px-4 py-10">
+          <div className="max-w-4xl mx-auto text-center relative z-10 px-4 py-6">
             <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
               Build. Launch. Scale.
               <span className="block text-[#34D399]">Modern Web Solutions for Your Business</span>
@@ -49,13 +53,13 @@ export default function Home() {
         </section>
 
         {/* What We Do */}
-        <section className="py-16 bg-white">
+        <section className="py-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 className="text-3xl font-bold text-center text-[#111827] mb-12">
               What We Do
             </h2>
             <div className="grid md:grid-cols-3 gap-8">
-              <div className="bg-[#F8FAFC] rounded-xl p-6 border border-[#D1FAE5]">
+              <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-[#D1FAE5] hover:border-[#10B981] hover:shadow-lg hover:shadow-[#10B981]/10 hover:bg-gradient-to-br hover:from-white hover:to-[#D1FAE5]/30 transition-all duration-300 cursor-default">
                 <div className="w-12 h-12 bg-[#D1FAE5] rounded-lg flex items-center justify-center mb-4">
                   <svg className="w-6 h-6 text-[#10B981]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -64,8 +68,8 @@ export default function Home() {
                 <h3 className="text-xl font-semibold text-[#111827] mb-2">Web Development</h3>
                 <p className="text-[#6B7280]">Websites and web apps with a modern UI, clean UX, and performance-first approach.</p>
               </div>
-              <div className="bg-[#F8FAFC] rounded-xl p-6 border border-[#D1FAE5]">
-                <div className="w-12 h-12 bg-[#D1FAE5] rounded-lg flex items-center justify-center mb-4">
+              <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-[#D1FAE5] hover:border-[#10B981] hover:shadow-lg hover:shadow-[#10B981]/10 hover:bg-gradient-to-br hover:from-white hover:to-[#D1FAE5]/30 transition-all duration-300 cursor-default">
+                <div className="w-12 h-12 bg-[#D1FAE5] rounded-lg flex items-center justify-center mb-4 group-hover:bg-[#10B981]/20">
                   <svg className="w-6 h-6 text-[#10B981]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                   </svg>
@@ -73,7 +77,7 @@ export default function Home() {
                 <h3 className="text-xl font-semibold text-[#111827] mb-2">Mobile App Development</h3>
                 <p className="text-[#6B7280]">Mobile apps with clean UI, stable performance, and scalable architecture.</p>
               </div>
-              <div className="bg-[#F8FAFC] rounded-xl p-6 border border-[#D1FAE5]">
+              <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-[#D1FAE5] hover:border-[#10B981] hover:shadow-lg hover:shadow-[#10B981]/10 hover:bg-gradient-to-br hover:from-white hover:to-[#D1FAE5]/30 transition-all duration-300 cursor-default">
                 <div className="w-12 h-12 bg-[#D1FAE5] rounded-lg flex items-center justify-center mb-4">
                   <svg className="w-6 h-6 text-[#10B981]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -87,7 +91,7 @@ export default function Home() {
         </section>
 
         {/* Process */}
-        <section className="py-16 bg-[#F8FAFC]">
+        <section className="py-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 className="text-3xl font-bold text-center text-[#111827] mb-4">How We Work</h2>
             <p className="text-center text-[#6B7280] max-w-2xl mx-auto mb-12">
@@ -100,7 +104,7 @@ export default function Home() {
               { title: 'Develop', desc: 'Build fast, secure, and maintainable features.' },
               { title: 'Launch', desc: 'Deploy, monitor, and support improvements.' },
               ].map((s, idx) => (
-                <div key={s.title} className="bg-white rounded-xl p-6 border border-[#D1FAE5]">
+                <div key={s.title} className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-[#D1FAE5] hover:border-[#10B981] hover:shadow-lg hover:shadow-[#10B981]/10 hover:bg-gradient-to-br hover:from-white hover:to-[#D1FAE5]/30 transition-all duration-300 cursor-default">
                   <p className="text-sm font-bold text-[#10B981]">Step {idx + 1}</p>
                   <h3 className="text-lg font-semibold text-[#111827] mt-2">{s.title}</h3>
                   <p className="text-sm text-[#6B7280] mt-2">{s.desc}</p>
@@ -111,7 +115,7 @@ export default function Home() {
         </section>
 
         {/* Why us */}
-        <section className="py-16 bg-white">
+        <section className="py-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid lg:grid-cols-2 gap-10 items-center">
               <div>
@@ -140,7 +144,7 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="bg-[#F8FAFC] border border-[#D1FAE5] rounded-2xl p-8">
+              <div className="bg-white/80 backdrop-blur-sm border border-[#D1FAE5] rounded-2xl p-8 hover:border-[#10B981] hover:shadow-lg hover:shadow-[#10B981]/10 hover:bg-gradient-to-br hover:from-white hover:to-[#D1FAE5]/30 transition-all duration-300">
                 <h3 className="text-xl font-bold text-[#111827]">Start with a quick message</h3>
                 <p className="text-[#6B7280] mt-2">
                   Tell us what you’re building, and we’ll reply with a plan and estimate.
