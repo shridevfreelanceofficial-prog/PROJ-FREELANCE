@@ -17,10 +17,10 @@ export const metadata: Metadata = {
   ),
   icons: {
     icon: [
-      { url: "/images/logo/ShriDev_Freelance_logo.png", type: "image/png" },
-      { url: "/favicon.ico" },
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/images/logo/ShriDev_Freelance_logo.png", type: "image/png", sizes: "any" },
     ],
-    apple: [{ url: "/images/logo/ShriDev_Freelance_logo.png" }],
+    apple: [{ url: "/images/logo/ShriDev_Freelance_logo.png", sizes: "180x180" }],
   },
   openGraph: {
     title: "ShriDev Freelance - Project Management System",
