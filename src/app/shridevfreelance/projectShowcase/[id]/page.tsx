@@ -8,7 +8,6 @@ interface ShowcaseProject {
   description: string | null;
   requirements: string | null;
   cover_image_url: string | null;
-  media_drive_link: string | null;
   live_website_url: string | null;
   daily_working_hours: string | null;
   start_date: string | null;
@@ -31,7 +30,7 @@ export default async function ShowcaseProjectDetailsPage({
   const { id } = await params;
 
   const project = await queryOne<ShowcaseProject>(
-    `SELECT id, title, client_name, description, requirements, cover_image_url, media_drive_link, live_website_url,
+    `SELECT id, title, client_name, description, requirements, cover_image_url, live_website_url,
             daily_working_hours, start_date, end_date, team_members
      FROM project_showcase
      WHERE id = $1 AND is_visible = true`,
@@ -137,22 +136,6 @@ export default async function ShowcaseProjectDetailsPage({
               <div className="rounded-xl border bg-[#F8FAFC] p-5">
                 <p className="text-xs uppercase tracking-wide text-[#6B7280]">Daily Working Hours</p>
                 <p className="mt-1 text-sm font-medium text-[#111827]">{project.daily_working_hours || 'N/A'}</p>
-              </div>
-
-              <div className="rounded-xl border bg-[#F8FAFC] p-5">
-                <p className="text-xs uppercase tracking-wide text-[#6B7280]">Media Drive Link</p>
-                {project.media_drive_link ? (
-                  <a
-                    href={project.media_drive_link}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="mt-1 block text-sm font-medium text-[#10B981] hover:underline break-all"
-                  >
-                    {project.media_drive_link}
-                  </a>
-                ) : (
-                  <p className="mt-1 text-sm font-medium text-[#111827]">N/A</p>
-                )}
               </div>
 
               <div className="rounded-xl border bg-[#F8FAFC] p-5">
