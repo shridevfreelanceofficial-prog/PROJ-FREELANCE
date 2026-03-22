@@ -1,6 +1,9 @@
 import { queryOne } from '@/lib/db';
 import Link from 'next/link';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 interface ShowcaseProject {
   id: string;
   title: string;

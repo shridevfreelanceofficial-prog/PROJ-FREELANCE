@@ -3,6 +3,9 @@ import { Card, CardBody } from '@/components/ui';
 import Link from 'next/link';
 import Image from 'next/image';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 interface ShowcaseProject {
   id: string;
   title: string;
