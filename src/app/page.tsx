@@ -1,5 +1,8 @@
 import Link from 'next/link';
 import HomeHeader from '@/components/HomeHeader';
+import ParticlesHeroBackground from '@/components/ParticlesHeroBackground';
+import Reveal from '@/components/animations/Reveal';
+import TiltCard from '@/components/animations/TiltCard';
 
 export default function Home() {
   return (
@@ -12,42 +15,48 @@ export default function Home() {
       <HomeHeader />
 
       {/* Hero Section */}
-      <main className="flex-1 px-4">
+      <main className="flex-1">
         <section
-          className="max-w-7xl mx-auto mt-8 pt-24 pb-10 min-h-[560px] sm:min-h-[520px] md:min-h-0 relative bg-contain md:bg-cover bg-top md:bg-center bg-no-repeat rounded-3xl overflow-hidden"
-          style={{
-            backgroundImage:
-              "linear-gradient(180deg, rgba(15, 118, 110, 0.70) 0%, rgba(17, 24, 39, 0.78) 55%, rgba(15, 118, 110, 0.72) 100%), url('/images/hero-bg/hero-bg.png')",
-          }}
+          className="w-full pt-16 pb-10 min-h-[560px] sm:min-h-[520px] md:min-h-0 relative overflow-hidden"
         >
-          <div className="max-w-4xl mx-auto text-center relative z-10 px-4 py-6">
-            <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
-              Build. Launch. Scale.
-              <span className="block text-[#34D399]">Modern Web Solutions for Your Business</span>
-            </h1>
-            <p className="text-xl text-white/85 mb-8 max-w-2xl mx-auto">
-              We build clean, fast, and reliable web experiences from landing pages to full dashboards.
-              Manage projects, collaborate with your team, and showcase your work professionally.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                href="/shridevfreelance/projectShowcase"
-                className="px-8 py-3 bg-[#10B981] text-white rounded-lg hover:bg-[#0F766E] font-medium transition-colors shadow-lg"
-              >
-                View Project Showcase
-              </Link>
-              <Link
-                href="/certificate-verification"
-                className="px-8 py-3 border-2 border-white/80 text-white rounded-lg hover:bg-white/10 font-medium transition-colors"
-              >
-                Verify Certificate
-              </Link>
-              <Link
-                href="/contact"
-                className="px-8 py-3 bg-white border-2 border-white text-[#111827] rounded-lg hover:bg-[#F8FAFC] font-medium transition-colors"
-              >
-                Get a Quote
-              </Link>
+          <ParticlesHeroBackground />
+
+          <div className="max-w-7xl mx-auto">
+            <div className="max-w-4xl mx-auto text-center relative z-10 px-4 py-10">
+            <Reveal delay={0.05} y={22} once={false}>
+              <h1 className="text-5xl md:text-6xl font-bold text-[#0B1220] mb-6">
+                Build. Launch. Scale.
+                <span className="block text-[#059669]">Modern Web Solutions for Your Business</span>
+              </h1>
+            </Reveal>
+            <Reveal delay={0.12} y={18} once={false}>
+              <p className="text-xl text-[#0B1220]/80 mb-8 max-w-2xl mx-auto">
+                We build clean, fast, and reliable web experiences from landing pages to full dashboards.
+                Manage projects, collaborate with your team, and showcase your work professionally.
+              </p>
+            </Reveal>
+            <Reveal delay={0.18} y={14} once={false}>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Link
+                  href="/projects"
+                  className="px-8 py-3 bg-[#10B981] text-white rounded-lg hover:bg-[#0F766E] font-medium transition-colors shadow-lg"
+                >
+                  View Projects
+                </Link>
+                <Link
+                  href="/certificate-verification"
+                  className="px-8 py-3 border-2 border-[#0F766E]/40 text-[#0B1220] rounded-lg hover:bg-[#D1FAE5]/35 font-medium transition-colors"
+                >
+                  Verify Certificate
+                </Link>
+                <Link
+                  href="/contact"
+                  className="px-8 py-3 bg-white/80 backdrop-blur border-2 border-white text-[#111827] rounded-lg hover:bg-[#F8FAFC] font-medium transition-colors"
+                >
+                  Get a Quote
+                </Link>
+              </div>
+            </Reveal>
             </div>
           </div>
         </section>
@@ -55,37 +64,45 @@ export default function Home() {
         {/* What We Do */}
         <section className="py-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="text-3xl font-bold text-center text-[#111827] mb-12">
-              What We Do
-            </h2>
+            <Reveal className="mb-12">
+              <h2 className="text-3xl font-bold text-center text-[#111827]">
+                What We Do
+              </h2>
+            </Reveal>
             <div className="grid md:grid-cols-3 gap-8">
-              <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-[#D1FAE5] hover:border-[#10B981] hover:shadow-lg hover:shadow-[#10B981]/10 hover:bg-gradient-to-br hover:from-white hover:to-[#D1FAE5]/30 transition-all duration-300 cursor-default">
-                <div className="w-12 h-12 bg-[#D1FAE5] rounded-lg flex items-center justify-center mb-4">
-                  <svg className="w-6 h-6 text-[#10B981]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-semibold text-[#111827] mb-2">Web Development</h3>
-                <p className="text-[#6B7280]">Websites and web apps with a modern UI, clean UX, and performance-first approach.</p>
-              </div>
-              <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-[#D1FAE5] hover:border-[#10B981] hover:shadow-lg hover:shadow-[#10B981]/10 hover:bg-gradient-to-br hover:from-white hover:to-[#D1FAE5]/30 transition-all duration-300 cursor-default">
-                <div className="w-12 h-12 bg-[#D1FAE5] rounded-lg flex items-center justify-center mb-4 group-hover:bg-[#10B981]/20">
-                  <svg className="w-6 h-6 text-[#10B981]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-semibold text-[#111827] mb-2">Mobile App Development</h3>
-                <p className="text-[#6B7280]">Mobile apps with clean UI, stable performance, and scalable architecture.</p>
-              </div>
-              <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-[#D1FAE5] hover:border-[#10B981] hover:shadow-lg hover:shadow-[#10B981]/10 hover:bg-gradient-to-br hover:from-white hover:to-[#D1FAE5]/30 transition-all duration-300 cursor-default">
-                <div className="w-12 h-12 bg-[#D1FAE5] rounded-lg flex items-center justify-center mb-4">
-                  <svg className="w-6 h-6 text-[#10B981]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-semibold text-[#111827] mb-2">Certificates & Automation</h3>
-                <p className="text-[#6B7280]">Generate documents, send emails, and streamline internal workflows.</p>
-              </div>
+              <Reveal delay={0.04}>
+                <TiltCard className="group bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-[#D1FAE5] hover:border-[#10B981] transition-all duration-300 cursor-default">
+                  <div className="w-12 h-12 bg-[#D1FAE5] rounded-lg flex items-center justify-center mb-4">
+                    <svg className="w-6 h-6 text-[#10B981]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-xl font-semibold text-[#111827] mb-2">Web Development</h3>
+                  <p className="text-[#6B7280]">Websites and web apps with a modern UI, clean UX, and performance-first approach.</p>
+                </TiltCard>
+              </Reveal>
+              <Reveal delay={0.08}>
+                <TiltCard className="group bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-[#D1FAE5] hover:border-[#10B981] transition-all duration-300 cursor-default">
+                  <div className="w-12 h-12 bg-[#D1FAE5] rounded-lg flex items-center justify-center mb-4">
+                    <svg className="w-6 h-6 text-[#10B981]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-xl font-semibold text-[#111827] mb-2">Mobile App Development</h3>
+                  <p className="text-[#6B7280]">Mobile apps with clean UI, stable performance, and scalable architecture.</p>
+                </TiltCard>
+              </Reveal>
+              <Reveal delay={0.12}>
+                <TiltCard className="group bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-[#D1FAE5] hover:border-[#10B981] transition-all duration-300 cursor-default">
+                  <div className="w-12 h-12 bg-[#D1FAE5] rounded-lg flex items-center justify-center mb-4">
+                    <svg className="w-6 h-6 text-[#10B981]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-xl font-semibold text-[#111827] mb-2">Certificates & Automation</h3>
+                  <p className="text-[#6B7280]">Generate documents, send emails, and streamline internal workflows.</p>
+                </TiltCard>
+              </Reveal>
             </div>
           </div>
         </section>
@@ -93,10 +110,14 @@ export default function Home() {
         {/* Process */}
         <section className="py-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="text-3xl font-bold text-center text-[#111827] mb-4">How We Work</h2>
-            <p className="text-center text-[#6B7280] max-w-2xl mx-auto mb-12">
-              A transparent process that keeps you updated from idea to launch.
-            </p>
+            <Reveal>
+              <h2 className="text-3xl font-bold text-center text-[#111827] mb-4">How We Work</h2>
+            </Reveal>
+            <Reveal delay={0.06}>
+              <p className="text-center text-[#6B7280] max-w-2xl mx-auto mb-12">
+                A transparent process that keeps you updated from idea to launch.
+              </p>
+            </Reveal>
 
             <div className="grid md:grid-cols-4 gap-6">
               {[{ title: 'Discover', desc: 'Understand goals, users, scope, and timeline.' },
@@ -104,11 +125,21 @@ export default function Home() {
               { title: 'Develop', desc: 'Build fast, secure, and maintainable features.' },
               { title: 'Launch', desc: 'Deploy, monitor, and support improvements.' },
               ].map((s, idx) => (
-                <div key={s.title} className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-[#D1FAE5] hover:border-[#10B981] hover:shadow-lg hover:shadow-[#10B981]/10 hover:bg-gradient-to-br hover:from-white hover:to-[#D1FAE5]/30 transition-all duration-300 cursor-default">
-                  <p className="text-sm font-bold text-[#10B981]">Step {idx + 1}</p>
-                  <h3 className="text-lg font-semibold text-[#111827] mt-2">{s.title}</h3>
-                  <p className="text-sm text-[#6B7280] mt-2">{s.desc}</p>
-                </div>
+                <Reveal key={s.title} delay={0.04 * idx}>
+                  <div
+                    className={`md:transform-none ${
+                      idx % 2 === 0
+                        ? '-rotate-[2deg] -translate-x-1'
+                        : 'rotate-[2deg] translate-x-1'
+                    }`}
+                  >
+                    <TiltCard className="group bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-[#D1FAE5] hover:border-[#10B981] transition-all duration-300 cursor-default">
+                      <p className="text-sm font-bold text-[#10B981]">Step {idx + 1}</p>
+                      <h3 className="text-lg font-semibold text-[#111827] mt-2">{s.title}</h3>
+                      <p className="text-sm text-[#6B7280] mt-2">{s.desc}</p>
+                    </TiltCard>
+                  </div>
+                </Reveal>
               ))}
             </div>
           </div>

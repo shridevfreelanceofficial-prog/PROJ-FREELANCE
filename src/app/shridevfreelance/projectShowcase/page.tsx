@@ -1,7 +1,7 @@
 import { query } from '@/lib/db';
 import { Card, CardBody } from '@/components/ui';
+import HomeHeader from '@/components/HomeHeader';
 import Link from 'next/link';
-import Image from 'next/image';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -42,29 +42,7 @@ export default async function ProjectShowcasePage() {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
-      {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
-          <Link href="/" className="flex items-center gap-3">
-            <Image
-              src="/images/logo/ShriDev_Freelance_logo.png"
-              alt="ShriDev Freelance"
-              width={40}
-              height={40}
-              className="w-10 h-10 rounded-lg"
-            />
-            <span className="text-xl font-bold text-[#111827]">ShriDev Freelance</span>
-          </Link>
-          <div className="flex gap-4">
-            <Link
-              href="/certificate-verification"
-              className="px-4 py-2 text-[#10B981] hover:text-[#0F766E] font-medium transition-colors"
-            >
-              Verify Certificate
-            </Link>
-          </div>
-        </div>
-      </header>
+      <HomeHeader />
 
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-[#10B981] to-[#0F766E] py-16">

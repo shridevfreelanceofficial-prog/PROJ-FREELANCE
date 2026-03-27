@@ -1,4 +1,5 @@
 import { queryOne } from '@/lib/db';
+import HomeHeader from '@/components/HomeHeader';
 import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
@@ -43,15 +44,12 @@ export default async function ShowcaseProjectDetailsPage({
   if (!project) {
     return (
       <div className="min-h-screen bg-[#F8FAFC]">
-        <header className="bg-white shadow-sm">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <Link href="/shridevfreelance/projectShowcase" className="text-sm font-medium text-[#10B981] hover:underline">
-              ← Back to Showcase
-            </Link>
-          </div>
-        </header>
+        <HomeHeader />
 
         <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <Link href="/shridevfreelance/projectShowcase" className="text-sm font-medium text-[#10B981] hover:underline">
+            ← Back to Showcase
+          </Link>
           <div className="rounded-xl bg-white shadow-sm border p-8 text-center">
             <h1 className="text-2xl font-bold text-[#111827]">Project not found</h1>
             <p className="mt-2 text-[#6B7280]">This project is not available or not published.</p>
@@ -63,8 +61,10 @@ export default async function ShowcaseProjectDetailsPage({
 
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
-      <header className="bg-white shadow-sm">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+      <HomeHeader />
+
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div className="flex items-center justify-between gap-4 mb-6">
           <Link href="/shridevfreelance/projectShowcase" className="text-sm font-medium text-[#10B981] hover:underline">
             ← Back to Showcase
           </Link>
@@ -79,9 +79,6 @@ export default async function ShowcaseProjectDetailsPage({
             </a>
           ) : null}
         </div>
-      </header>
-
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="rounded-2xl overflow-hidden bg-white shadow-sm border">
           <div className="h-72 bg-gradient-to-br from-[#10B981] to-[#0F766E] relative">
             {project.cover_image_url ? (

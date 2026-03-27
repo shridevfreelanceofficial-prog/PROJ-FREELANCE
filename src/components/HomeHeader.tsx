@@ -22,7 +22,7 @@ export default function HomeHeader() {
   return (
     <header className="bg-white shadow-sm">
       <div ref={ref} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
+        <Link href="/" className="flex items-center gap-3">
           <Image
             src="/images/logo/ShriDev_Freelance_logo.png"
             alt="ShriDev Freelance"
@@ -30,27 +30,36 @@ export default function HomeHeader() {
             height={40}
             className="w-10 h-10 rounded-lg"
           />
-          <span className="text-xl font-bold text-[#111827]">ShriDev Freelance</span>
-        </div>
+          <span className="text-xl font-bold tracking-tight">
+            <span className="text-[#10B981]">ShriDev</span>{' '}
+            <span className="text-[#0F766E]">Freelance</span>
+          </span>
+        </Link>
 
         <nav className="hidden sm:flex flex-wrap gap-4">
           <Link
+            href="/"
+            className="px-4 py-2 text-[#0F766E] hover:text-[#10B981] font-semibold transition-colors"
+          >
+            Home
+          </Link>
+          <Link
+            href="/projects"
+            className="px-4 py-2 text-[#0F766E] hover:text-[#10B981] font-semibold transition-colors"
+          >
+            Projects
+          </Link>
+          <Link
             href="/contact"
-            className="px-4 py-2 text-[#10B981] hover:text-[#0F766E] font-medium transition-colors"
+            className="px-4 py-2 text-[#0F766E] hover:text-[#10B981] font-semibold transition-colors"
           >
             Contact Us
           </Link>
           <Link
-            href="/admin/login"
-            className="px-4 py-2 text-[#10B981] hover:text-[#0F766E] font-medium transition-colors"
+            href="/plans"
+            className="px-4 py-2 text-[#0F766E] hover:text-[#10B981] font-semibold transition-colors"
           >
-            Admin Login
-          </Link>
-          <Link
-            href="/member/login"
-            className="px-4 py-2 bg-[#10B981] text-white rounded-lg hover:bg-[#0F766E] font-medium transition-colors shadow-md"
-          >
-            Member Login
+            Plans
           </Link>
         </nav>
 
@@ -70,25 +79,32 @@ export default function HomeHeader() {
             <div className="mx-4 rounded-xl border border-[#E5E7EB] bg-white shadow-lg overflow-hidden">
               <div className="p-2">
                 <Link
+                  href="/"
+                  className="block px-4 py-3 rounded-lg text-[#0F766E] font-semibold hover:bg-[#D1FAE5]/40"
+                  onClick={() => setOpen(false)}
+                >
+                  Home
+                </Link>
+                <Link
+                  href="/projects"
+                  className="block px-4 py-3 rounded-lg text-[#0F766E] font-semibold hover:bg-[#D1FAE5]/40"
+                  onClick={() => setOpen(false)}
+                >
+                  Projects
+                </Link>
+                <Link
                   href="/contact"
-                  className="block px-4 py-3 rounded-lg text-[#111827] hover:bg-[#F8FAFC]"
+                  className="block px-4 py-3 rounded-lg text-[#0F766E] font-semibold hover:bg-[#D1FAE5]/40"
                   onClick={() => setOpen(false)}
                 >
                   Contact Us
                 </Link>
                 <Link
-                  href="/admin/login"
-                  className="block px-4 py-3 rounded-lg text-[#111827] hover:bg-[#F8FAFC]"
+                  href="/plans"
+                  className="block px-4 py-3 rounded-lg text-[#0F766E] font-semibold hover:bg-[#D1FAE5]/40"
                   onClick={() => setOpen(false)}
                 >
-                  Admin Login
-                </Link>
-                <Link
-                  href="/member/login"
-                  className="block px-4 py-3 rounded-lg bg-[#10B981] text-white hover:bg-[#0F766E]"
-                  onClick={() => setOpen(false)}
-                >
-                  Member Login
+                  Plans
                 </Link>
               </div>
             </div>
