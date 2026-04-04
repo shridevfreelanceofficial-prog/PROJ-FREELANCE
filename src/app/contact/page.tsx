@@ -45,7 +45,7 @@ export default function ContactPage() {
                         alt="Shrikesh Shetty"
                         width={80}
                         height={80}
-                        className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500"
+                        className="w-full h-full object-cover transition-all duration-500"
                       />
                     </div>
                     <div>
@@ -61,9 +61,9 @@ export default function ContactPage() {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                         </svg>
                       </div>
-                      <div>
+                      <div className="flex-1 min-w-0">
                         <p className="text-sm text-[#475569] font-medium">Email Directly</p>
-                        <p className="text-[#0F172A] font-bold">shridevfreelanceofficial@gmail...</p>
+                        <p className="text-[#0F172A] font-bold truncate">shridevfreelanceofficial@gmail.com</p>
                       </div>
                     </a>
                   </div>

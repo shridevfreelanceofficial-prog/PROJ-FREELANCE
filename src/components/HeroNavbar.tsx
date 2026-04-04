@@ -119,14 +119,14 @@ export default function HeroNavbar() {
             animate={{ y: 0 }}
             exit={{ y: '-100%' }}
             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-            className="fixed inset-0 z-40 bg-[#0F172A] pt-32 pb-8 px-6 flex flex-col justify-between overflow-y-auto lg:hidden"
+            className="fixed inset-0 z-40 bg-[#0F172A] pt-24 pb-8 px-6 flex flex-col justify-between items-center text-center overflow-y-auto lg:hidden"
           >
             {/* Background glowing orbs */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-[#00E6A8]/10 rounded-full blur-[100px] pointer-events-none" />
             <div className="absolute bottom-20 left-0 w-64 h-64 bg-[#00C896]/10 rounded-full blur-[100px] pointer-events-none" />
 
             <motion.div 
-              className="space-y-6 flex flex-col mt-4 relative z-10"
+              className="space-y-4 flex flex-col mt-4 w-full relative z-10"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -143,7 +143,7 @@ export default function HeroNavbar() {
                   <Link
                     href={link.path}
                     onClick={() => setIsOpen(false)}
-                    className={`block text-4xl sm:text-5xl font-black uppercase tracking-widest pb-4 border-b border-white/10 hover:ml-4 transition-all duration-300 ${
+                    className={`block text-base sm:text-lg font-bold uppercase tracking-wider py-2 hover:scale-105 transition-all duration-300 ${
                       link.highlight ? 'text-[#00C896]' : 'text-white/80 hover:text-white'
                     }`}
                   >
@@ -154,7 +154,7 @@ export default function HeroNavbar() {
             </motion.div>
 
             <motion.div 
-              className="mt-12 relative z-10"
+              className="mt-8 relative w-full max-w-sm z-10"
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.4 }}

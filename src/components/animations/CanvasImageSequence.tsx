@@ -16,7 +16,6 @@ export default function CanvasImageSequence({ progress, frameCount, onBgColorExt
 
   useEffect(() => {
     // Preload images
-    let loadedCount = 0;
     const images: HTMLImageElement[] = [];
 
     for (let i = 1; i <= frameCount; i++) {
@@ -26,9 +25,9 @@ export default function CanvasImageSequence({ progress, frameCount, onBgColorExt
       img.src = `/bulb-animation/ezgif-frame-${frameIndex}.jpg`;
 
       img.onload = () => {
-        loadedCount++;
-        // Extract exact edge pixel color from the first frame to seamlessly match the page wrapper
-        if (i === 1 && onBgColorExtracted) {
+        // Unlock exactly when the first critical frame arrives
+        if (i === 1) {
+          if (onBgColorExtracted) {
             const tempCanvas = document.createElement('canvas');
             const tCtx = tempCanvas.getContext('2d', { willReadFrequently: true });
             if (tCtx) {
@@ -36,9 +35,7 @@ export default function CanvasImageSequence({ progress, frameCount, onBgColorExt
               const p = tCtx.getImageData(0, 0, 1, 1).data;
               onBgColorExtracted(`rgb(${p[0]}, ${p[1]}, ${p[2]})`);
             }
-        }
-
-        if (loadedCount === frameCount) {
+          }
           setLoaded(true);
         }
       };
@@ -93,6 +90,9 @@ export default function CanvasImageSequence({ progress, frameCount, onBgColorExt
     if (!ctx) return;
 
     const img = imagesRef.current[index];
+
+    // Guarantee image is fully loaded by network before clearing the previous frame!
+    if (!img.complete || img.naturalWidth === 0) return;
 
     // Responsive drawing logic (maintain aspect ratio / cover)
     const rect = canvas.getBoundingClientRect();
