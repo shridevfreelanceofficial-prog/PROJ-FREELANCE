@@ -124,7 +124,6 @@ export default function CanvasImageSequence({ progress, frameCount, onBgColorExt
       <canvas
         ref={canvasRef}
         className="w-full h-full object-cover"
-        style={{ touchAction: 'none' }}
       />
       
       {!loaded && (
