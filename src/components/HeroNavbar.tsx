@@ -54,17 +54,27 @@ export default function HeroNavbar() {
         >
           <div className="mx-auto px-5 h-[68px] flex items-center justify-between w-full">
             {/* Brand Logo */}
-            <Link href="/" className="flex items-center gap-2 group hover:opacity-80 transition-opacity" onClick={() => setIsOpen(false)}>
-              <Image 
-                src="/images/logo/ShriDev_Freelance_logo.png" 
-                alt="ShriDev Freelance" 
-                width={40} 
-                height={40} 
-                className="object-contain hover:scale-105 transition-transform"
-              />
-              <span className="text-[#0F172A] font-extrabold tracking-tight text-lg hidden sm:block">
-                ShriDev Freelance
-              </span>
+            <Link href="/" className="flex items-center gap-2 sm:gap-3 group hover:opacity-90 transition-opacity" onClick={() => setIsOpen(false)}>
+              <div className="relative w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0">
+                <Image 
+                  src="/images/logo/ShriDev_Freelance_logo.png" 
+                  alt="ShriDev Freelance Icon" 
+                  fill
+                  className="object-contain group-hover:scale-105 transition-transform drop-shadow-sm"
+                />
+              </div>
+              <div className="flex flex-col items-center justify-center mt-0.5">
+                <span className="text-[#1E293B] font-black tracking-tight text-[20px] sm:text-[26px] leading-none mb-0.5">
+                  ShriDev
+                </span>
+                <div className="flex items-center gap-1 sm:gap-1.5 w-full">
+                  <div className="flex-1 h-[1.5px] bg-gradient-to-r from-transparent to-[#00C896] rounded-full" />
+                  <span className="text-[#00C896] font-bold tracking-[0.2em] text-[9px] sm:text-[11px] uppercase">
+                    Freelance
+                  </span>
+                  <div className="flex-1 h-[1.5px] bg-gradient-to-l from-transparent to-[#00C896] rounded-full" />
+                </div>
+              </div>
             </Link>
 
             {/* Desktop Center Links */}
