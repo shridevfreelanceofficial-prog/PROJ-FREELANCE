@@ -1,67 +1,18 @@
 import Link from 'next/link';
-import HomeHeader from '@/components/HomeHeader';
-import ParticlesHeroBackground from '@/components/ParticlesHeroBackground';
+import ScrollytellingHero from '@/components/animations/ScrollytellingHero';
 import Reveal from '@/components/animations/Reveal';
 import TiltCard from '@/components/animations/TiltCard';
 
 export default function Home() {
   return (
-    <div className="min-h-screen flex flex-col relative overflow-hidden">
+    <div className="min-h-screen flex flex-col relative overflow-x-clip">
       {/* Page Background Gradient */}
       <div className="fixed inset-0 -z-10 bg-gradient-to-br from-[#F8FAFC] via-[#D1FAE5]/30 to-[#10B981]/10" />
       <div className="fixed top-0 right-0 -z-10 w-96 h-96 bg-[#10B981]/5 rounded-full blur-3xl" />
       <div className="fixed bottom-0 left-0 -z-10 w-96 h-96 bg-[#0F766E]/5 rounded-full blur-3xl" />
-      {/* Header */}
-      <HomeHeader />
-
-      {/* Hero Section */}
+      {/* New Scrollytelling Hero */}
       <main className="flex-1">
-        <section
-          className="w-full pt-16 pb-10 min-h-[560px] sm:min-h-[520px] md:min-h-0 relative overflow-hidden"
-        >
-          <ParticlesHeroBackground />
-
-          <div className="max-w-7xl mx-auto">
-            <div className="max-w-4xl mx-auto text-center relative z-10 px-4 py-10">
-            <Reveal delay={0.05} y={22} once={false}>
-              <h1 className="text-5xl md:text-6xl font-bold text-[#0B1220] mb-6">
-                Build. Launch. Scale.
-                <span className="block text-[#059669]">Modern Web Solutions for Your Business</span>
-              </h1>
-            </Reveal>
-            <Reveal delay={0.12} y={18} once={false}>
-              <p className="text-xl text-[#0B1220]/80 mb-8 max-w-2xl mx-auto">
-                We build clean, fast, and reliable web experiences from landing pages to full dashboards.
-                Manage projects, collaborate with your team, and showcase your work professionally.
-              </p>
-            </Reveal>
-            <Reveal delay={0.18} y={14} once={false}>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link
-                  href="/projects"
-                  className="px-8 py-3 bg-[#10B981] text-white rounded-lg hover:bg-[#0F766E] font-medium transition-colors shadow-lg"
-                >
-                  View Projects
-                </Link>
-                <Link
-                  href="/certificate-verification"
-                  className="px-8 py-3 border-2 border-[#0F766E]/40 text-[#0B1220] rounded-lg hover:bg-[#D1FAE5]/35 font-medium transition-colors"
-                >
-                  Verify Certificate
-                </Link>
-                <Link
-                  href="/contact"
-                  className="px-8 py-3 bg-white/80 backdrop-blur border-2 border-white text-[#111827] rounded-lg hover:bg-[#F8FAFC] font-medium transition-colors"
-                >
-                  Get a Quote
-                </Link>
-              </div>
-            </Reveal>
-            </div>
-          </div>
-        </section>
-
-        {/* What We Do */}
+        <ScrollytellingHero />        {/* What We Do */}
         <section className="py-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <Reveal className="mb-12">

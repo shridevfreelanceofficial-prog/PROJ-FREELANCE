@@ -1,6 +1,6 @@
-import HomeHeader from '@/components/HomeHeader';
 import ProjectsShowcaseGrid from '@/components/ProjectsShowcaseGrid';
 import { query } from '@/lib/db';
+import Reveal from '@/components/animations/Reveal';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -23,38 +23,47 @@ export default async function ProjectsPage() {
   );
 
   return (
-    <div className="min-h-screen flex flex-col relative overflow-hidden">
-      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-[#F8FAFC] via-[#D1FAE5]/25 to-[#10B981]/10" />
-      <div className="fixed top-0 right-0 -z-10 w-96 h-96 bg-[#10B981]/5 rounded-full blur-3xl" />
-      <div className="fixed bottom-0 left-0 -z-10 w-96 h-96 bg-[#0F766E]/5 rounded-full blur-3xl" />
+    <div className="min-h-screen flex flex-col relative overflow-hidden bg-[#F4FFFA]">
+      <div className="fixed inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#00C896]/10 via-transparent to-transparent opacity-80" />
+      <div className="fixed top-20 right-0 -z-10 w-[500px] h-[500px] bg-[#00E6A8]/10 rounded-full blur-[120px]" />
+      <div className="fixed bottom-0 left-0 -z-10 w-[600px] h-[600px] bg-[#0F766E]/5 rounded-full blur-[150px]" />
 
-      <HomeHeader />
-
-      <main className="flex-1">
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-10">
-          <div className="max-w-3xl">
-            <h1 className="text-4xl md:text-5xl font-bold text-[#111827]">Projects</h1>
-            <p className="mt-3 text-[#374151]">
-              Explore our featured work.
+      <main className="flex-1 pt-32 pb-16 relative z-10 w-full">
+        <section className="max-w-7xl mx-auto px-6 lg:px-8 w-full">
+          
+          <Reveal className="max-w-4xl mx-auto text-center mb-16" delay={0.1}>
+            <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-[#0F172A] mb-6 drop-shadow-sm">
+              Our Projects
+            </h1>
+            <p className="text-xl md:text-2xl font-medium text-[#475569]">
+              Explore our featured digital experiences, modern web applications, and premium platforms.
             </p>
-          </div>
+          </Reveal>
 
-          <div className="mt-10">
+          <Reveal delay={0.2} y={30} className="w-full">
             {projects.length === 0 ? (
-              <div className="rounded-2xl bg-white/70 backdrop-blur-sm border border-[#D1FAE5] p-10 text-center">
-                <h2 className="text-xl font-bold text-[#111827]">No projects yet</h2>
-                <p className="mt-2 text-[#6B7280]">Projects added by admin will appear here.</p>
+              <div className="rounded-3xl bg-white/50 backdrop-blur-xl border border-white p-12 text-center max-w-2xl mx-auto shadow-xl shadow-[#00C896]/5 hover:shadow-2xl hover:scale-[1.02] transition-all duration-300">
+                <svg className="w-16 h-16 mx-auto text-[#0F172A]/20 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+                <h2 className="text-2xl font-bold text-[#0F172A]">Innovation in Progress</h2>
+                <p className="mt-3 text-lg text-[#475569]">Our showcase is currently being crafted. Check back soon for our latest work.</p>
               </div>
             ) : (
-              <ProjectsShowcaseGrid projects={projects} />
+              <div className="bg-white/30 p-4 md:p-8 rounded-[2rem] border border-white/50 backdrop-blur-md shadow-2xl shadow-[#00C896]/10">
+                <ProjectsShowcaseGrid projects={projects} />
+              </div>
             )}
-          </div>
+          </Reveal>
         </section>
       </main>
 
-      <footer className="bg-[#0F766E] text-white py-8 mt-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p className="text-sm opacity-80">© 2026 ShriDev Freelance. All rights reserved.</p>
+      <footer className="bg-[#0F172A] text-white py-12 relative z-10 border-t border-white/10 mt-auto">
+        <div className="max-w-7xl mx-auto px-6 text-center">
+          <div className="w-12 h-12 bg-white/10 rounded-full mx-auto mb-6 flex items-center justify-center">
+            <div className="w-6 h-6 rounded-full bg-gradient-to-r from-[#00C896] to-[#00E6A8]" />
+          </div>
+          <p className="text-sm font-medium text-white/50">© {new Date().getFullYear()} ShriDev Freelance. Crafted for the modern web.</p>
         </div>
       </footer>
     </div>
