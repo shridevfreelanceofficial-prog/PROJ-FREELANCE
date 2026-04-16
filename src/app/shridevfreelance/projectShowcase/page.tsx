@@ -3,8 +3,7 @@ import { Card, CardBody } from '@/components/ui';
 import HomeHeader from '@/components/HomeHeader';
 import Link from 'next/link';
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+export const revalidate = 300;
 
 interface ShowcaseProject {
   id: string;
@@ -166,15 +165,6 @@ export default async function ProjectShowcasePage() {
           </div>
         )}
       </main>
-
-      {/* Footer */}
-      <footer className="bg-[#0F766E] text-white py-8 mt-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p className="text-sm opacity-80">
-            © 2026 ShriDev Freelance. All rights reserved.
-          </p>
-        </div>
-      </footer>
     </div>
   );
 }

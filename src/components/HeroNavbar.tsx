@@ -11,10 +11,6 @@ export default function HeroNavbar() {
   
   const { scrollY } = useScroll();
   const [isOpen, setIsOpen] = useState(false);
-  
-  if (pathname?.startsWith('/admin') || pathname?.startsWith('/member')) {
-    return null;
-  }
 
   // Floating pill glassmorphism logic (appears on scroll, pill width stays proper)
   const navBackground = useTransform(scrollY, [0, 50], ['rgba(255, 255, 255, 0)', 'rgba(255, 255, 255, 0.85)']);
@@ -30,6 +26,12 @@ export default function HeroNavbar() {
       document.body.style.overflow = 'unset';
     }
   }, [isOpen]);
+
+  const shouldHideNavbar = pathname?.startsWith('/admin') || pathname?.startsWith('/member');
+
+  if (shouldHideNavbar) {
+    return null;
+  }
 
   const navLinks = [
     { name: 'Home', path: '/' },

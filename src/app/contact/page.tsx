@@ -50,7 +50,7 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <h3 className="text-2xl font-bold text-[#0F172A]">Shrikesh Shetty</h3>
-                      <p className="text-[#00C896] font-bold">Brand Experience Director</p>
+                      <p className="text-[#00C896] font-bold">Founder</p>
                     </div>
                   </div>
 
@@ -110,15 +110,6 @@ export default function ContactPage() {
           </div>
         </div>
       </main>
-
-      <footer className="bg-[#0F172A] text-white py-12 relative z-10 border-t border-white/10 mt-auto">
-        <div className="max-w-7xl mx-auto px-6 text-center">
-          <div className="w-12 h-12 bg-white/10 rounded-full mx-auto mb-6 flex items-center justify-center">
-            <div className="w-6 h-6 rounded-full bg-gradient-to-r from-[#00C896] to-[#00E6A8]" />
-          </div>
-          <p className="text-sm font-medium text-white/50">© {new Date().getFullYear()} ShriDev Freelance. Crafted for the modern web.</p>
-        </div>
-      </footer>
     </div>
   );
 }

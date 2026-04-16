@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Button, Card, CardBody } from '@/components/ui';
 
@@ -58,22 +59,22 @@ export default function CertificateVerificationClient() {
 
   return (
     <div className="min-h-screen relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-[#0F766E] via-[#10B981] to-[#34D399]"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-[#0B1220] via-[#0F766E] to-[#10B981]"></div>
       <div
-        className="absolute inset-0 opacity-20"
+        className="absolute inset-0 opacity-15"
         style={{
           backgroundImage: 'radial-gradient(circle at 25% 25%, white 1px, transparent 1px)',
           backgroundSize: '50px 50px',
         }}
       ></div>
 
-      <div className="absolute top-20 left-10 w-72 h-72 bg-white/10 rounded-full blur-3xl"></div>
-      <div className="absolute bottom-20 right-10 w-96 h-96 bg-white/10 rounded-full blur-3xl"></div>
+      <div className="absolute top-24 left-10 w-80 h-80 bg-emerald-400/10 rounded-full blur-3xl"></div>
+      <div className="absolute bottom-20 right-10 w-[28rem] h-[28rem] bg-teal-300/10 rounded-full blur-3xl"></div>
 
-      <div className="relative z-10 py-12 px-4">
-        <div className="max-w-2xl mx-auto">
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-white/20 backdrop-blur-sm rounded-2xl mb-4 shadow-lg">
+      <div className="relative z-10 pt-32 pb-14 px-4">
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-10">
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-white/10 ring-1 ring-white/15 backdrop-blur-xl rounded-2xl mb-5 shadow-2xl">
               <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
                   strokeLinecap="round"
@@ -83,27 +84,37 @@ export default function CertificateVerificationClient() {
                 />
               </svg>
             </div>
-            <h1 className="text-4xl font-bold text-white mb-3 drop-shadow-lg">Certificate Verification</h1>
-            <p className="text-white/80 text-lg">Verify the authenticity of your ShriDev Freelance certificate</p>
+            <h1 className="text-4xl sm:text-5xl font-extrabold text-white mb-3 tracking-tight drop-shadow">Certificate Verification</h1>
+            <p className="text-white/75 text-base sm:text-lg">Verify the authenticity of your ShriDev Freelance certificate</p>
           </div>
 
-          <Card className="backdrop-blur-xl bg-white/95 shadow-2xl border-0">
-            <CardBody className="p-8">
+          <Card className="backdrop-blur-2xl bg-white/95 shadow-[0_30px_80px_-40px_rgba(0,0,0,0.65)] border border-white/40">
+            <CardBody className="p-7 sm:p-8">
               <form onSubmit={handleVerify} className="space-y-5">
                 <div>
                   <label className="block text-sm font-medium text-[#111827] mb-2">Certificate Code</label>
-                  <input
-                    type="text"
-                    value={certificateCode}
-                    onChange={(e) => setCertificateCode(e.target.value.toUpperCase())}
-                    placeholder="Enter certificate code (e.g., SHR-XXXX-XXXX)"
-                    required
-                    className="w-full px-5 py-4 text-lg rounded-xl border-2 border-[#D1FAE5] focus:border-[#10B981] focus:ring-4 focus:ring-[#10B981]/20 focus:outline-none transition-all bg-[#F8FAFC]"
-                  />
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={certificateCode}
+                      onChange={(e) => setCertificateCode(e.target.value.toUpperCase())}
+                      placeholder="Enter certificate code (e.g., SHR-XXXX-XXXX)"
+                      required
+                      className="w-full px-5 py-4 text-lg rounded-2xl border border-[#D1FAE5] focus:border-[#10B981] focus:ring-4 focus:ring-[#10B981]/20 focus:outline-none transition-all bg-white/80 tracking-wider"
+                    />
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4">
+                      <div className="h-9 w-9 rounded-xl bg-emerald-50 ring-1 ring-emerald-100 flex items-center justify-center">
+                        <svg className="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 11c0 1.657-1.343 3-3 3S6 12.657 6 11s1.343-3 3-3 3 1.343 3 3z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.4 15a7.97 7.97 0 00.6-3 8 8 0 10-16 0 7.97 7.97 0 00.6 3" />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
                 </div>
                 <Button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-[#0F766E] to-[#10B981] hover:from-[#0F766E] hover:to-[#059669] text-white py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all"
+                  className="w-full bg-gradient-to-r from-[#0F766E] to-[#10B981] hover:from-[#0B5F59] hover:to-[#059669] text-white py-4 text-lg font-semibold rounded-2xl shadow-lg hover:shadow-xl transition-all"
                   size="lg"
                   isLoading={loading}
                 >
@@ -114,9 +125,9 @@ export default function CertificateVerificationClient() {
           </Card>
 
           {error && (
-            <Card className="mt-6 backdrop-blur-xl bg-white/95 shadow-2xl border-2 border-red-300">
-              <CardBody className="p-8 text-center">
-                <div className="w-20 h-20 bg-gradient-to-br from-red-100 to-red-200 rounded-full flex items-center justify-center mx-auto mb-5 shadow-inner">
+            <Card className="mt-6 backdrop-blur-2xl bg-white/95 shadow-[0_30px_80px_-40px_rgba(0,0,0,0.65)] border border-red-200">
+              <CardBody className="p-7 sm:p-8 text-center">
+                <div className="w-20 h-20 bg-gradient-to-br from-red-50 to-red-100 rounded-full ring-1 ring-red-200 flex items-center justify-center mx-auto mb-5 shadow-inner">
                   <svg className="w-10 h-10 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
@@ -128,9 +139,9 @@ export default function CertificateVerificationClient() {
           )}
 
           {result && (
-            <Card className="mt-6 backdrop-blur-xl bg-white/95 shadow-2xl overflow-hidden">
-              <div className="bg-gradient-to-r from-[#0F766E] via-[#10B981] to-[#34D399] px-8 py-6 text-center">
-                <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+            <Card className="mt-6 backdrop-blur-2xl bg-white/95 shadow-[0_30px_80px_-40px_rgba(0,0,0,0.65)] overflow-hidden border border-white/40">
+              <div className="bg-gradient-to-r from-[#0F766E] via-[#10B981] to-[#34D399] px-8 py-7 text-center">
+                <div className="w-20 h-20 bg-white/15 ring-1 ring-white/25 backdrop-blur-xl rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
                   <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
@@ -139,8 +150,21 @@ export default function CertificateVerificationClient() {
                 <p className="text-white/90">This certificate is authentic and verified</p>
               </div>
 
-              <CardBody className="p-8">
-                <div className="bg-gradient-to-br from-[#F0FDF4] to-[#D1FAE5] rounded-2xl p-6 space-y-4">
+              <CardBody className="p-7 sm:p-8">
+                <div className="relative overflow-hidden bg-gradient-to-br from-[#F0FDF4] to-[#D1FAE5] rounded-3xl p-6 sm:p-7 ring-1 ring-emerald-200/40 shadow-[inset_0_1px_0_rgba(255,255,255,0.65)]">
+                  <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                    <div className="relative w-[340px] h-[340px] sm:w-[420px] sm:h-[420px] opacity-[0.07]">
+                      <Image
+                        src="/images/logo/ShriDev_Freelance_logo.png"
+                        alt="ShriDev Freelance"
+                        fill
+                        className="object-contain"
+                        priority={false}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="relative z-10 space-y-4">
                   <div className="flex justify-between items-center py-3 border-b border-[#10B981]/20">
                     <span className="text-[#6B7280] font-medium">Certificate Holder</span>
                     <span className="font-bold text-[#111827] text-lg">{result.member_name}</span>
@@ -183,6 +207,7 @@ export default function CertificateVerificationClient() {
                       ✓ Authentic
                     </span>
                   </div>
+                  </div>
                 </div>
 
                 <div className="mt-6 text-center">
@@ -204,9 +229,9 @@ export default function CertificateVerificationClient() {
           )}
 
           <p className="text-center mt-8">
-            <a href="/" className="text-white/80 hover:text-white text-sm font-medium transition-colors">
+            <Link href="/" className="text-white/80 hover:text-white text-sm font-medium transition-colors">
               ← Back to Home
-            </a>
+            </Link>
           </p>
         </div>
       </div>

@@ -8,6 +8,7 @@ export default function ScrollytellingHero() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [bgColor, setBgColor] = useState('#F4FFFA');
   const [activeLayer, setActiveLayer] = useState(0);
+  const [showScrollHint, setShowScrollHint] = useState(true);
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -15,6 +16,7 @@ export default function ScrollytellingHero() {
   });
 
   useMotionValueEvent(scrollYProgress, 'change', (latest) => {
+    setShowScrollHint(latest <= 0.001);
     if (latest < 0.16) setActiveLayer(0);
     else if (latest < 0.37) setActiveLayer(1);
     else if (latest < 0.61) setActiveLayer(2);
@@ -35,6 +37,37 @@ export default function ScrollytellingHero() {
   return (
     <section ref={containerRef} className="relative w-full h-[500vh] transition-colors duration-1000 ease-out" style={{ backgroundColor: bgColor }}>
       <div className="sticky top-0 left-0 w-full h-screen overflow-hidden flex items-center justify-center">
+
+        <AnimatePresence>
+          {showScrollHint && (
+            <motion.div
+              key="scroll-hint"
+              initial={{ opacity: 0, y: -6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.25 }}
+              className="absolute top-24 left-1/2 -translate-x-1/2 z-30 pointer-events-none"
+            >
+              <div className="flex flex-col items-center gap-2">
+                <div className="px-4 py-2 rounded-full bg-white/55 backdrop-blur-md border border-white/40 shadow-md">
+                  <p className="text-xs sm:text-sm font-black tracking-wide text-[#0F172A]">
+                    Scroll to explore
+                  </p>
+                </div>
+                <motion.div
+                  aria-hidden="true"
+                  animate={{ y: [0, 6, 0] }}
+                  transition={{ duration: 1.2, repeat: Infinity, ease: 'easeInOut' }}
+                  className="w-8 h-8 rounded-full bg-white/40 backdrop-blur-md border border-white/40 flex items-center justify-center"
+                >
+                  <svg className="w-4 h-4 text-[#0F172A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </motion.div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
         
         {/* Background Effect: Glow during explosion */}
         <motion.div 
