@@ -206,6 +206,20 @@ CREATE TABLE IF NOT EXISTS contact_submissions (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Plan inquiry submissions
+CREATE TABLE IF NOT EXISTS plan_inquiries (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    phone VARCHAR(50),
+    plan_type VARCHAR(50) NOT NULL,
+    plan_name VARCHAR(100) NOT NULL,
+    subject VARCHAR(255),
+    message TEXT NOT NULL,
+    is_read BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Project showcase table
 CREATE TABLE IF NOT EXISTS project_showcase (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -243,3 +257,5 @@ CREATE INDEX idx_certificates_code ON certificates(certificate_code);
 CREATE INDEX idx_notifications_user ON notifications(user_type, user_id);
 CREATE INDEX idx_contact_submissions_created_at ON contact_submissions(created_at);
 CREATE INDEX idx_contact_submissions_is_read ON contact_submissions(is_read);
+CREATE INDEX idx_plan_inquiries_created_at ON plan_inquiries(created_at);
+CREATE INDEX idx_plan_inquiries_is_read ON plan_inquiries(is_read);

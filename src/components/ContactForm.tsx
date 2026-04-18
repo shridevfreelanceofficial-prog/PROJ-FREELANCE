@@ -9,17 +9,21 @@ export default function ContactForm({
   onSubmitted,
   title,
   description,
+  initialSubject,
+  initialMessage,
 }: {
   showBackLink?: boolean;
   onSubmitted?: () => void;
   title?: string;
   description?: string;
+  initialSubject?: string;
+  initialMessage?: string;
 }) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
-  const [subject, setSubject] = useState('');
-  const [message, setMessage] = useState('');
+  const [subject, setSubject] = useState(initialSubject ?? '');
+  const [message, setMessage] = useState(initialMessage ?? '');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);

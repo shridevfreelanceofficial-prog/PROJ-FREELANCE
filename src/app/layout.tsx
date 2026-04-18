@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import GlobalContactModal from "@/components/GlobalContactModal";
 import HeroNavbar from "@/components/HeroNavbar";
+import RootLayoutClient from "./RootLayoutClient";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -53,12 +54,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${inter.variable} font-sans antialiased bg-[#F8FAFC]`}>
         <HeroNavbar />
-        {children}
-        <footer className="bg-[#0F766E] text-white py-8">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <p className="text-sm opacity-80">© 2026 ShriDev Freelance. All rights reserved.</p>
-          </div>
-        </footer>
+        <RootLayoutClient>{children}</RootLayoutClient>
         <GlobalContactModal />
       </body>
     </html>

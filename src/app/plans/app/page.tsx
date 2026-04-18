@@ -128,7 +128,7 @@ export default function AppPlansPage() {
                     
                     <div className="mt-auto relative z-10 w-full">
                       <Link
-                        href={`/contact?plan=app-${plan.name.toLowerCase()}`}
+                        href={`/plans/request?type=app&plan=${encodeURIComponent(plan.name.toLowerCase())}`}
                         className={`w-full inline-flex items-center justify-center px-6 py-4 rounded-full font-bold shadow-lg transition-all duration-300 active:scale-95 ${plan.popular ? 'bg-gradient-to-r from-[#00C896] to-[#00E6A8] text-[#0F172A] hover:shadow-[#00C896]/40 hover:scale-105' : 'bg-white/10 text-white hover:bg-[#00E6A8] hover:text-[#0F172A] hover:shadow-[#00E6A8]/30 hover:-translate-y-1'}`}
                       >
                         Select {plan.name}
