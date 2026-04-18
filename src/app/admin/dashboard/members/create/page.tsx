@@ -33,6 +33,7 @@ export default function CreateMemberPage() {
     password: '',
     residential_location: '',
     role: '',
+    customRole: '',
     signature: null as File | null,
     profile_image: null as File | null,
   });
@@ -82,7 +83,11 @@ export default function CreateMemberPage() {
       submitData.append('github_username', formData.github_username);
       submitData.append('password', formData.password);
       submitData.append('residential_location', formData.residential_location);
-      submitData.append('role', formData.role);
+      
+      // Use customRole if "Other" is selected, otherwise use the selected role
+      const finalRole = formData.role === 'Other' ? formData.customRole : formData.role;
+      submitData.append('role', finalRole);
+      
       if (formData.profile_image) {
         submitData.append('profile_image', formData.profile_image);
       }
@@ -185,7 +190,14 @@ export default function CreateMemberPage() {
               </label>
               <select
                 value={formData.role}
-                onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                onChange={(e) => {
+                  const newRole = e.target.value;
+                  setFormData({ 
+                    ...formData, 
+                    role: newRole,
+                    customRole: newRole === 'Other' ? formData.customRole : ''
+                  });
+                }}
                 className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#10B981] focus:border-[#10B981] focus:outline-none"
               >
                 <option value="">Select a role</option>
@@ -196,6 +208,17 @@ export default function CreateMemberPage() {
                 ))}
               </select>
             </div>
+
+            {formData.role === 'Other' && (
+              <Input
+                label="Custom Role"
+                value={formData.customRole}
+                onChange={(e) => setFormData({ ...formData, customRole: e.target.value })}
+                placeholder="Enter custom role"
+                required
+                helperText="Specify the role when 'Other' is selected"
+              />
+            )}
 
             {/* Profile Picture Upload */}
             <div>

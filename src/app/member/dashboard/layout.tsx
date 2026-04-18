@@ -28,6 +28,20 @@ export default function MemberDashboardLayout({
 
   useEffect(() => {
     checkAuth();
+    
+    // Periodically check session validity every 30 seconds
+    const interval = setInterval(async () => {
+      try {
+        const response = await fetch('/api/member/me');
+        if (!response.ok) {
+          router.push('/member/login?error=deactivated');
+        }
+      } catch {
+        // Ignore errors, will be caught on next request
+      }
+    }, 30000);
+
+    return () => clearInterval(interval);
   }, []);
 
   const checkAuth = async () => {

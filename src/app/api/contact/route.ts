@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 import nodemailer from 'nodemailer';
+import { notifyAdmins } from '@/lib/notifications';
 
 export async function POST(request: Request) {
   try {
@@ -28,6 +29,14 @@ export async function POST(request: Request) {
        RETURNING id`,
       [name, email, phone, subject, message]
     );
+
+    await notifyAdmins({
+      title: `New Contact Submission: ${subject}`,
+      message: `${name} (${email}) has submitted a new contact form message.`,
+      type: 'contact_submission',
+      action_url: '/admin/dashboard/contact-details',
+      action_data: { submission_id: inserted[0]?.id },
+    });
 
     // Send Email Notification
     try {

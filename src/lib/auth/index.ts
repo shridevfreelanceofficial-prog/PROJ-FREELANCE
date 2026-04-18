@@ -105,7 +105,7 @@ export async function getCurrentUser(): Promise<{ user: AdminUser | MemberUser; 
       'SELECT id, full_name, email, phone, residential_location, role, signature_url, profile_image_url, is_active FROM members WHERE id = $1',
       [payload.userId]
     );
-    if (member) return { user: member, userType: 'member' };
+    if (member && member.is_active) return { user: member, userType: 'member' };
   }
 
   return null;

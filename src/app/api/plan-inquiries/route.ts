@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 import nodemailer from 'nodemailer';
+import { notifyAdmins } from '@/lib/notifications';
 
 export async function POST(request: Request) {
   try {
@@ -31,6 +32,14 @@ export async function POST(request: Request) {
        RETURNING id`,
       [name, email, phone, planType, planName, subject, message]
     );
+
+    await notifyAdmins({
+      title: `New Plan Inquiry: ${planName}`,
+      message: `${name} is interested in the ${planName} plan (${planType}).`,
+      type: 'plan_inquiry',
+      action_url: '/admin/dashboard/plan-inquiries',
+      action_data: { inquiry_id: inserted[0]?.id },
+    });
 
     try {
       const transporter = nodemailer.createTransport({
