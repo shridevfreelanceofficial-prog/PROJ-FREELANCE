@@ -28,6 +28,8 @@ export default function HeroNavbar() {
   }, [isOpen]);
 
   const shouldHideNavbar = pathname?.startsWith('/admin') || pathname?.startsWith('/member');
+  const isCertificateVerificationPage = pathname === '/certificate-verification';
+  const useWhiteText = isCertificateVerificationPage;
 
   if (shouldHideNavbar) {
     return null;
@@ -66,7 +68,7 @@ export default function HeroNavbar() {
                 />
               </div>
               <div className="flex flex-col items-center justify-center mt-0.5">
-                <span className="text-[#1E293B] font-black tracking-tight text-[20px] sm:text-[26px] leading-none mb-0.5">
+                <span className={`font-black tracking-tight text-[20px] sm:text-[26px] leading-none mb-0.5 ${useWhiteText ? 'text-white' : 'text-[#1E293B]'}`}>
                   ShriDev
                 </span>
                 <div className="flex items-center gap-1 sm:gap-1.5 w-full">
@@ -80,13 +82,15 @@ export default function HeroNavbar() {
             </Link>
 
             {/* Desktop Center Links */}
-            <div className="hidden lg:flex items-center gap-8 text-[#1E293B] text-sm font-bold tracking-wide">
+            <div className={`hidden lg:flex items-center gap-8 text-sm font-bold tracking-wide ${useWhiteText ? 'text-white' : 'text-[#1E293B]'}`}>
               {navLinks.map((link) => (
-                <Link 
-                  key={link.name} 
-                  href={link.path} 
-                  className={link.highlight 
-                    ? "text-[#0F766E] hover:text-[#00C896] hover:-translate-y-0.5 transition-all border-b border-[#0F766E]/30 hover:border-transparent"
+                <Link
+                  key={link.name}
+                  href={link.path}
+                  className={link.highlight
+                    ? useWhiteText
+                      ? "text-[#00C896] hover:text-[#34D399] hover:-translate-y-0.5 transition-all border-b border-[#00C896]/30 hover:border-transparent"
+                      : "text-[#0F766E] hover:text-[#00C896] hover:-translate-y-0.5 transition-all border-b border-[#0F766E]/30 hover:border-transparent"
                     : "hover:text-[#00C896] hover:-translate-y-0.5 transition-all"
                   }
                 >
@@ -97,8 +101,8 @@ export default function HeroNavbar() {
 
             {/* Desktop Right CTA */}
             <div className="hidden lg:flex gap-4">
-              <Link 
-                href="/contact"
+              <Link
+                href="/start-project"
                 className="flex items-center justify-center px-6 py-2.5 text-sm font-bold text-white shadow-xl shadow-[#00C896]/20 bg-gradient-to-r from-[#00C896] to-[#00E6A8] hover:scale-105 hover:shadow-2xl hover:shadow-[#00C896]/40 active:scale-95 rounded-full transition-all duration-300"
               >
                 Start a Project
@@ -172,7 +176,7 @@ export default function HeroNavbar() {
               transition={{ delay: 0.4 }}
             >
               <Link
-                href="/contact"
+                href="/start-project"
                 onClick={() => setIsOpen(false)}
                 className="w-full flex items-center justify-center py-5 bg-white text-[#0F172A] font-black tracking-widest uppercase text-lg rounded-2xl hover:bg-[#00E6A8] active:scale-95 transition-all shadow-xl shadow-[#00E6A8]/10"
               >
