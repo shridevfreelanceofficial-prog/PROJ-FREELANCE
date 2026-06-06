@@ -14,7 +14,8 @@ export default function GlobalContactModal() {
       pathname.startsWith('/admin') ||
       pathname.startsWith('/member') ||
       pathname === '/contact' ||
-      pathname.startsWith('/plans')
+      pathname.startsWith('/plans') ||
+      pathname.startsWith('/proposals')
     );
   }, [pathname]);
 

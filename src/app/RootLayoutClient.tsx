@@ -10,7 +10,7 @@ export default function RootLayoutClient({
   const pathname = usePathname();
 
   // Hide footer on admin and member dashboard routes
-  const hideFooter = pathname?.startsWith('/admin') || pathname?.startsWith('/member');
+  const hideFooter = pathname?.startsWith('/admin') || pathname?.startsWith('/member') || pathname?.startsWith('/proposals');
 
   return (
     <>
