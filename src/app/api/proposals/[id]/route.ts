@@ -2,7 +2,9 @@ import { NextResponse } from 'next/server';
 import { queryOne, query } from '@/lib/db';
 import { sendNotificationEmail } from '@/lib/email';
 
-export async function GET(request: Request, context: { params: { id: string } }) {
+type RouteContext = { params: Promise<{ id: string }> };
+
+export async function GET(request: Request, context: RouteContext) {
   try {
     const { id } = await context.params;
 
@@ -30,7 +32,7 @@ export async function GET(request: Request, context: { params: { id: string } })
   }
 }
 
-export async function PATCH(request: Request, context: { params: { id: string } }) {
+export async function PATCH(request: Request, context: RouteContext) {
   try {
     const { id } = await context.params;
     const { status } = await request.json();

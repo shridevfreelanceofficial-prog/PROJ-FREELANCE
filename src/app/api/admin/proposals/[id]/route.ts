@@ -2,7 +2,9 @@ import { NextResponse } from 'next/server';
 import { query, queryOne } from '@/lib/db';
 import { getCurrentUser } from '@/lib/auth';
 
-export async function GET(request: Request, context: { params: { id: string } }) {
+type RouteContext = { params: Promise<{ id: string }> };
+
+export async function GET(request: Request, context: RouteContext) {
   try {
     const auth = await getCurrentUser();
     if (!auth || auth.userType !== 'admin') {
@@ -29,7 +31,7 @@ export async function GET(request: Request, context: { params: { id: string } })
   }
 }
 
-export async function PUT(request: Request, context: { params: { id: string } }) {
+export async function PUT(request: Request, context: RouteContext) {
   try {
     const auth = await getCurrentUser();
     if (!auth || auth.userType !== 'admin') {
@@ -61,7 +63,7 @@ export async function PUT(request: Request, context: { params: { id: string } })
   }
 }
 
-export async function DELETE(request: Request, context: { params: { id: string } }) {
+export async function DELETE(request: Request, context: RouteContext) {
   try {
     const auth = await getCurrentUser();
     if (!auth || auth.userType !== 'admin') {
