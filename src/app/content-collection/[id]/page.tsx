@@ -190,15 +190,15 @@ export default function ContentCollectionPublicPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Full Name *</label>
-                <input type="text" name="contact_name" required className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#10B981] outline-none transition-all" placeholder="John Doe" />
+                <input type="text" name="contact_name" required className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#10B981] outline-none transition-all" placeholder="e.g. Shrikesh Shetty" />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Email Address *</label>
-                <input type="email" name="contact_email" required className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#10B981] outline-none transition-all" placeholder="john@example.com" />
+                <input type="email" name="contact_email" required className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#10B981] outline-none transition-all" placeholder="e.g. shrikesh@example.com" />
               </div>
               <div className="md:col-span-2">
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Phone Number</label>
-                <input type="tel" name="contact_phone" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#10B981] outline-none transition-all" placeholder="+1 (555) 000-0000" />
+                <input type="tel" name="contact_phone" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#10B981] outline-none transition-all" placeholder="+91 98765 43210" />
               </div>
             </div>
           </div>
@@ -213,7 +213,7 @@ export default function ContentCollectionPublicPage() {
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Detailed Business Description *</label>
                 <p className="text-xs text-gray-500 mb-3">Please tell us exactly what your business does, your history, and your core values. This text will be used on your website.</p>
-                <textarea name="about_business" required rows={5} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#10B981] outline-none transition-all resize-y" placeholder="We are a family-owned restaurant that started in 2005..." />
+                <textarea name="about_business" required rows={5} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#10B981] outline-none transition-all resize-y" placeholder="e.g. We are a family-owned local business based in Mumbai started in 2005..." />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Target Audience</label>
