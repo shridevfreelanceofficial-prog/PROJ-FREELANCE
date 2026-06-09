@@ -27,7 +27,7 @@ export default function GlobalContactModal() {
     }
 
     setOpen(false);
-    const timer = window.setTimeout(() => setOpen(true), 4800);
+    const timer = window.setTimeout(() => setOpen(true), 10000);
     return () => window.clearTimeout(timer);
   }, [pathname, disabled]);
 

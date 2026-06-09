@@ -28,8 +28,19 @@ export default function HeroNavbar() {
   }, [isOpen]);
 
   const shouldHideNavbar = pathname?.startsWith('/admin') || pathname?.startsWith('/member') || pathname?.startsWith('/proposals') || pathname?.startsWith('/content-collection');
+  const [isScrolledPastHero, setIsScrolledPastHero] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolledPastHero(window.scrollY > window.innerHeight * 0.85);
+    };
+    handleScroll();
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   const isCertificateVerificationPage = pathname === '/certificate-verification';
-  const useWhiteText = isCertificateVerificationPage;
+  const useWhiteText = isCertificateVerificationPage || (pathname === '/' && !isScrolledPastHero);
 
   if (shouldHideNavbar) {
     return null;
