@@ -27,7 +27,7 @@ export default function HeroNavbar() {
     }
   }, [isOpen]);
 
-  const shouldHideNavbar = pathname?.startsWith('/admin') || pathname?.startsWith('/member') || pathname?.startsWith('/proposals');
+  const shouldHideNavbar = pathname?.startsWith('/admin') || pathname?.startsWith('/member') || pathname?.startsWith('/proposals') || pathname?.startsWith('/content-collection');
   const isCertificateVerificationPage = pathname === '/certificate-verification';
   const useWhiteText = isCertificateVerificationPage;
 

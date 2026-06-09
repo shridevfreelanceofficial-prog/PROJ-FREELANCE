@@ -518,3 +518,166 @@ export async function sendDailyReportReminderEmail(
     html,
   });
 }
+
+// Send content collection submission notification to admin
+export async function sendContentCollectionEmail(options: {
+  to: string;
+  adminName: string;
+  businessName: string;
+  contactName: string;
+  contactEmail: string;
+  contactPhone: string;
+  aboutBusiness: string;
+  targetAudience: string;
+  preferredStyle: string;
+  colorPreferences: string;
+  referenceWebsites: string;
+  websiteRequirements: string;
+  additionalNotes: string;
+  socialMedia: { instagram?: string; facebook?: string; linkedin?: string; twitter?: string };
+  imageCount: number;
+  hasLogo: boolean;
+  collectionUrl: string;
+}): Promise<boolean> {
+  const {
+    to, adminName, businessName, contactName, contactEmail, contactPhone,
+    aboutBusiness, targetAudience, preferredStyle, colorPreferences,
+    referenceWebsites, websiteRequirements, additionalNotes,
+    socialMedia, imageCount, hasLogo, collectionUrl,
+  } = options;
+
+  const socialEntries = Object.entries(socialMedia).filter(([, v]) => v);
+
+  const row = (label: string, value: string) =>
+    value
+      ? `<tr>
+           <td style="padding:8px 12px;color:#6B7280;font-size:13px;white-space:nowrap;vertical-align:top;width:160px;">${label}</td>
+           <td style="padding:8px 12px;color:#111827;font-size:13px;">${value}</td>
+         </tr>`
+      : '';
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <style>
+        body { font-family: Arial, sans-serif; background: #F8FAFC; margin: 0; padding: 0; color: #111827; }
+        .wrap { max-width: 620px; margin: 30px auto; background: #fff; border-radius: 14px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.07); }
+        .header { background: linear-gradient(135deg, #10B981 0%, #0F766E 100%); padding: 32px 30px 28px; text-align: center; }
+        .header h1 { margin: 0 0 4px; font-size: 22px; color: #fff; }
+        .header p { margin: 0; font-size: 14px; color: #D1FAE5; }
+        .badge { display: inline-block; background: rgba(255,255,255,0.2); color: #fff; border-radius: 20px; padding: 4px 14px; font-size: 12px; font-weight: bold; margin-top: 10px; letter-spacing: 0.5px; }
+        .section { padding: 20px 28px 0; }
+        .section-title { font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; color: #10B981; margin-bottom: 10px; }
+        table.info { width: 100%; border-collapse: collapse; background: #F0FDF4; border-radius: 10px; overflow: hidden; }
+        .assets { display: flex; gap: 12px; margin: 0 28px; }
+        .asset-chip { flex: 1; background: #F0FDF4; border: 1px solid #D1FAE5; border-radius: 10px; padding: 12px 16px; text-align: center; }
+        .asset-chip .num { font-size: 22px; font-weight: bold; color: #10B981; }
+        .asset-chip .lbl { font-size: 12px; color: #6B7280; margin-top: 2px; }
+        .prose { background: #F0FDF4; border-radius: 10px; padding: 14px 16px; font-size: 13px; color: #374151; line-height: 1.7; white-space: pre-wrap; }
+        .cta { text-align: center; padding: 28px; }
+        .btn { display: inline-block; background: linear-gradient(135deg, #10B981, #0F766E); color: #fff !important; text-decoration: none; padding: 13px 32px; border-radius: 10px; font-weight: bold; font-size: 15px; }
+        .divider { height: 1px; background: #E5E7EB; margin: 20px 28px 0; }
+        .footer { background: #F8FAFC; text-align: center; padding: 18px; font-size: 12px; color: #9CA3AF; border-top: 1px solid #E5E7EB; }
+      </style>
+    </head>
+    <body>
+      <div class="wrap">
+
+        <!-- Header -->
+        <div class="header">
+          <h1>📬 New Content Submission</h1>
+          <p>A business has submitted their content collection form</p>
+          <span class="badge">${businessName}</span>
+        </div>
+
+        <!-- Greeting -->
+        <div style="padding: 20px 28px 0;">
+          <p style="margin:0;font-size:14px;color:#374151;">Hello <strong>${adminName}</strong>, a new content submission has been received. Here are the details:</p>
+        </div>
+
+        <!-- Contact Info -->
+        <div class="section">
+          <div class="section-title">Contact Details</div>
+          <table class="info">
+            ${row('Name', contactName)}
+            ${row('Email', contactEmail)}
+            ${row('Phone', contactPhone)}
+          </table>
+        </div>
+
+        ${aboutBusiness ? `
+        <!-- About -->
+        <div class="section">
+          <div class="section-title">About the Business</div>
+          <div class="prose">${aboutBusiness}</div>
+        </div>` : ''}
+
+        ${(targetAudience || preferredStyle || colorPreferences || referenceWebsites || websiteRequirements) ? `
+        <!-- Preferences -->
+        <div class="section">
+          <div class="section-title">Website Preferences</div>
+          <table class="info">
+            ${row('Target Audience', targetAudience)}
+            ${row('Preferred Style', preferredStyle)}
+            ${row('Colors', colorPreferences)}
+            ${row('References', referenceWebsites)}
+            ${row('Requirements', websiteRequirements)}
+          </table>
+        </div>` : ''}
+
+        ${socialEntries.length > 0 ? `
+        <!-- Social -->
+        <div class="section">
+          <div class="section-title">Social Media</div>
+          <table class="info">
+            ${socialEntries.map(([k, v]) => row(k.charAt(0).toUpperCase() + k.slice(1), v as string)).join('')}
+          </table>
+        </div>` : ''}
+
+        ${additionalNotes ? `
+        <!-- Notes -->
+        <div class="section">
+          <div class="section-title">Additional Notes</div>
+          <div class="prose">${additionalNotes}</div>
+        </div>` : ''}
+
+        <!-- Assets -->
+        <div class="section">
+          <div class="section-title">Uploaded Assets</div>
+          <div class="assets">
+            <div class="asset-chip">
+              <div class="num">${hasLogo ? '✓' : '—'}</div>
+              <div class="lbl">Logo</div>
+            </div>
+            <div class="asset-chip">
+              <div class="num">${imageCount}</div>
+              <div class="lbl">Image${imageCount !== 1 ? 's' : ''}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- CTA -->
+        <div class="cta">
+          <p style="color:#6B7280;font-size:13px;margin-bottom:16px;">View the full submission and download all assets from the admin panel.</p>
+          <a href="${collectionUrl}" class="btn">View Full Submission →</a>
+        </div>
+
+        <div class="footer">
+          Automated notification from ShriDev Freelance · Admin Panel<br>
+          You are receiving this because you are an administrator.
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  return sendEmail({
+    to,
+    subject: `📬 New Content Submission — ${businessName} (${contactName || 'Anonymous'})`,
+    html,
+  });
+}
