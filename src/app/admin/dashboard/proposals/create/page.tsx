@@ -38,7 +38,8 @@ export default function CreateProposalPage() {
       });
 
       if (response.ok) {
-        router.push('/admin/dashboard/proposals');
+        const data = await response.json();
+        router.push(`/admin/dashboard/proposals/${data.proposal.id}`);
       } else {
         const errorData = await response.json();
         alert(`Error: ${errorData.error}`);

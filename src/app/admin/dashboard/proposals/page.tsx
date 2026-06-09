@@ -33,14 +33,7 @@ export default function ProposalsPage() {
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'accepted': return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400';
-      case 'rejected': return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400';
-      case 'viewed': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400';
-      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
-    }
-  };
+
 
   if (loading) {
     return (
@@ -84,7 +77,6 @@ export default function ProposalsPage() {
                   <th className="px-6 py-4 text-sm font-medium text-gray-500 dark:text-gray-400">Business Name</th>
                   <th className="px-6 py-4 text-sm font-medium text-gray-500 dark:text-gray-400">Title</th>
                   <th className="px-6 py-4 text-sm font-medium text-gray-500 dark:text-gray-400">Date</th>
-                  <th className="px-6 py-4 text-sm font-medium text-gray-500 dark:text-gray-400">Status</th>
                   <th className="px-6 py-4 text-sm font-medium text-gray-500 dark:text-gray-400 text-right">Actions</th>
                 </tr>
               </thead>
@@ -101,23 +93,16 @@ export default function ProposalsPage() {
                       {new Date(proposal.created_at).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium uppercase tracking-wider ${getStatusColor(proposal.status)}`}>
-                        {proposal.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
                       <div className="flex items-center justify-end gap-3">
-                        <a 
-                          href={`/proposals/${proposal.id}`} 
-                          target="_blank"
-                          rel="noreferrer"
+                        <Link 
+                          href={`/admin/dashboard/proposals/${proposal.id}`} 
                           className="text-gray-500 hover:text-[#10B981] dark:text-gray-400 dark:hover:text-[#10B981] transition-colors p-1"
-                          title="View Proposal Link"
+                          title="View Brochure"
                         >
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                           </svg>
-                        </a>
+                        </Link>
                         <Link 
                           href={`/admin/dashboard/proposals/edit/${proposal.id}`}
                           className="text-gray-500 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400 transition-colors p-1"
