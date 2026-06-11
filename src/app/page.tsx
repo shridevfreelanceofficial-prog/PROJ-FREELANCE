@@ -32,16 +32,18 @@ export default async function Home() {
   ];
 
   return (
-    <div className="relative w-full">
+    <main className="h-[100dvh] w-full overflow-y-scroll snap-y snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]" style={{ scrollPaddingTop: '85px' }}>
 
       {/* ===================== SECTION 1 — HERO ===================== */}
-      <div className="sticky top-0 h-screen overflow-hidden z-10">
+      <div className="snap-start w-full h-0" aria-hidden="true" />
+      <div className="sticky top-0 h-[100dvh] overflow-hidden z-10">
         <ModernHero projectImages={localBackgroundImages} />
       </div>
 
       {/* ===================== SECTION 2 — SERVICES ===================== */}
-      <div className="sticky top-[85px] h-[calc(100vh-85px)] z-20 bg-white rounded-t-[2.5rem] shadow-[0_-20px_50px_rgba(0,0,0,0.15)] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-        <div className="py-20 flex flex-col justify-center relative min-h-[calc(100vh-85px)]">
+      <div className="snap-start w-full h-0" aria-hidden="true" />
+      <div className="sticky top-[85px] h-[calc(100dvh-85px)] z-20 bg-white rounded-t-[2.5rem] shadow-[0_-20px_50px_rgba(0,0,0,0.15)] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        <div className="py-20 flex flex-col justify-center relative min-h-[calc(100dvh-85px)]">
           <div className="absolute inset-0 -z-10 pointer-events-none">
             <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[700px] h-[700px] bg-[#10B981]/8 rounded-full blur-3xl" />
             <div className="absolute -bottom-24 right-[-10%] w-[500px] h-[500px] bg-[#0F766E]/8 rounded-full blur-3xl" />
@@ -111,8 +113,9 @@ export default async function Home() {
       </div>
 
       {/* ===================== SECTION 3 — PROCESS ===================== */}
-      <div className="sticky top-[85px] h-[calc(100vh-85px)] z-30 bg-[#F8FAFC] shadow-[0_-20px_50px_rgba(0,0,0,0.10)] border-t border-slate-200 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-        <div className="py-20 flex flex-col justify-center min-h-[calc(100vh-85px)]">
+      <div className="snap-start w-full h-0" aria-hidden="true" />
+      <div className="sticky top-[85px] h-[calc(100dvh-85px)] z-30 bg-[#F8FAFC] shadow-[0_-20px_50px_rgba(0,0,0,0.10)] border-t border-slate-200 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        <div className="py-20 flex flex-col justify-center min-h-[calc(100dvh-85px)]">
           <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8">
             <Reveal className="text-center mb-14">
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#D1FAE5]/60 border border-[#D1FAE5] text-[#0F766E] font-bold tracking-wide text-sm">
@@ -147,8 +150,9 @@ export default async function Home() {
       </div>
 
       {/* ===================== SECTION 4 — WHY US ===================== */}
-      <div className="sticky top-[85px] h-[calc(100vh-85px)] z-40 bg-white shadow-[0_-20px_50px_rgba(0,0,0,0.08)] border-t border-slate-100 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-        <div className="py-20 flex flex-col justify-center relative min-h-[calc(100vh-85px)]">
+      <div className="snap-start w-full h-0" aria-hidden="true" />
+      <div className="sticky top-[85px] h-[calc(100dvh-85px)] z-40 bg-white shadow-[0_-20px_50px_rgba(0,0,0,0.08)] border-t border-slate-100 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        <div className="py-20 flex flex-col justify-center relative min-h-[calc(100dvh-85px)]">
           <div className="absolute inset-0 -z-10 pointer-events-none">
             <div className="absolute top-1/2 left-[-10%] w-[520px] h-[520px] bg-[#00E6A8]/10 rounded-full blur-3xl" />
           </div>
@@ -201,8 +205,9 @@ export default async function Home() {
       </div>
 
       {/* ===================== SECTION 5 — FOUNDER ===================== */}
-      <div className="sticky top-[85px] h-[calc(100vh-85px)] z-50 bg-[#F8FAFC] shadow-[0_-20px_50px_rgba(0,0,0,0.08)] border-t border-slate-200 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-        <div className="py-20 flex flex-col justify-center relative min-h-[calc(100vh-85px)]">
+      <div className="snap-start w-full h-0" aria-hidden="true" />
+      <div className="sticky top-[85px] h-[calc(100dvh-85px)] z-50 bg-[#F8FAFC] shadow-[0_-20px_50px_rgba(0,0,0,0.08)] border-t border-slate-200 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        <div className="py-20 flex flex-col justify-center relative min-h-[calc(100dvh-85px)]">
           <div className="absolute -top-24 left-[-10%] w-[520px] h-[520px] bg-[#10B981]/10 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute -bottom-24 right-[-10%] w-[520px] h-[520px] bg-[#00E6A8]/10 rounded-full blur-3xl pointer-events-none" />
           <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8">
@@ -261,8 +266,9 @@ export default async function Home() {
       </div>
 
       {/* ===================== SECTION 6 — PROJECTS + CTA ===================== */}
-      <div className="sticky top-[85px] h-[calc(100vh-85px)] z-[60] bg-white shadow-[0_-20px_50px_rgba(0,0,0,0.08)] border-t border-slate-100 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-        <div className="py-20 flex flex-col justify-center min-h-[calc(100vh-85px)]">
+      <div className="snap-start w-full h-0" aria-hidden="true" />
+      <div className="sticky top-[85px] h-[calc(100dvh-85px)] z-[60] bg-white shadow-[0_-20px_50px_rgba(0,0,0,0.08)] border-t border-slate-100 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        <div className="py-20 flex flex-col justify-center min-h-[calc(100dvh-85px)]">
           <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8">
             <Reveal className="mb-10">
               <div className="flex items-end justify-between gap-6 flex-wrap">
@@ -312,6 +318,6 @@ export default async function Home() {
         </div>
       </div>
 
-    </div>
+    </main>
   );
 }
