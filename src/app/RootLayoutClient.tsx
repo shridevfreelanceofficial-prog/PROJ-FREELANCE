@@ -1,6 +1,8 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
+import { isToolSubdomain } from '@/lib/subdomain';
 
 export default function RootLayoutClient({
   children,
@@ -8,8 +10,18 @@ export default function RootLayoutClient({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const [isTool, setIsTool] = useState(false);
 
-  const hideFooter = pathname?.startsWith('/admin') || pathname?.startsWith('/member') || pathname?.startsWith('/proposals') || pathname?.startsWith('/content-collection');
+  useEffect(() => {
+    setIsTool(isToolSubdomain(pathname));
+  }, [pathname]);
+
+  const hideFooter =
+    pathname?.startsWith('/admin') ||
+    pathname?.startsWith('/member') ||
+    pathname?.startsWith('/proposals') ||
+    pathname?.startsWith('/content-collection') ||
+    isTool;
 
   return (
     <>

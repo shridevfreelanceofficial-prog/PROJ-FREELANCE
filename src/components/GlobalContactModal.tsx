@@ -1,32 +1,30 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import ContactForm from '@/components/ContactForm';
+import { isToolSubdomain } from '@/lib/subdomain';
 
 export default function GlobalContactModal() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const isSubdomain = typeof window !== 'undefined' ? isToolSubdomain(pathname) : pathname?.startsWith('/tools');
 
-  const disabled = useMemo(() => {
-    if (!pathname) return false;
-    return (
-      pathname.startsWith('/admin') ||
-      pathname.startsWith('/member') ||
+  const disabled = Boolean(
+    isSubdomain ||
+      pathname?.startsWith('/admin') ||
+      pathname?.startsWith('/member') ||
       pathname === '/contact' ||
-      pathname.startsWith('/plans') ||
-      pathname.startsWith('/proposals') ||
-      pathname.startsWith('/content-collection')
-    );
-  }, [pathname]);
+      pathname?.startsWith('/plans') ||
+      pathname?.startsWith('/proposals') ||
+      pathname?.startsWith('/content-collection')
+  );
 
   useEffect(() => {
     if (disabled) {
-      setOpen(false);
       return;
     }
 
-    setOpen(false);
     const timer = window.setTimeout(() => setOpen(true), 10000);
     return () => window.clearTimeout(timer);
   }, [pathname, disabled]);

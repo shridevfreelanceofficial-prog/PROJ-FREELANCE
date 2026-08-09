@@ -1,0 +1,23 @@
+Dropping tables if exist...
+Creating base table...
+✓ Base table created.
+Executing: ALTER TABLE profilemitraa_profiles ADD COLUMN phone VARCHAR(50)
+Executing: ALTER TABLE profilemitraa_profiles ADD COLUMN dob VARCHAR(50)
+Executing: ALTER TABLE profilemitraa_profiles ADD COLUMN location TEXT
+Executing: ALTER TABLE profilemitraa_profiles ADD COLUMN headline VARCHAR(255)
+Executing: ALTER TABLE profilemitraa_profiles ADD COLUMN profile_photo_url TEXT
+Executing: ALTER TABLE profilemitraa_profiles ADD COLUMN professional_title VARCHAR(255)
+Executing: ALTER TABLE profilemitraa_profiles ADD COLUMN experience_level VARCHAR(100)
+Executing: ALTER TABLE profilemitraa_profiles ADD COLUMN current_job_role VARCHAR(255)
+Executing: ALTER TABLE profilemitraa_profiles ADD COLUMN experience_years VARCHAR(50)
+Executing: ALTER TABLE profilemitraa_profiles ADD COLUMN employment_type VARCHAR(100)
+Executing: ALTER TABLE profilemitraa_profiles ADD COLUMN company VARCHAR(255)
+Executing: ALTER TABLE profilemitraa_profiles ADD COLUMN about_me TEXT
+Executing: ALTER TABLE profilemitraa_profiles ADD COLUMN tech_skills JSONB DEFAULT '[]'
+Executing: ALTER TABLE profilemitraa_profiles ADD COLUMN tools JSONB DEFAULT '[]'
+Executing: ALTER TABLE profilemitraa_profiles ADD COLUMN soft_skills JSONB DEFAULT '[]'
+Executing: ALTER TABLE profilemitraa_profiles ADD COLUMN languages JSONB DEFAULT '[]'
+Executing: ALTER TABLE profilemitraa_profiles ADD COLUMN certifications JSONB DEFAULT '[]'
+Executing: ALTER TABLE profilemitraa_profiles ADD COLUMN created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+Executing: ALTER TABLE profilemitraa_profiles ADD COLUMN updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+✓ All fields added successfully.

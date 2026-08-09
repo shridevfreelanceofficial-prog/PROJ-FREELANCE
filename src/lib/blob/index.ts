@@ -6,9 +6,10 @@ export interface UploadResult {
 }
 
 // Generate a signed URL for private blob access (valid for 1 hour)
-export function getSignedUrl(blobUrl: string): string {
-  // For private blobs, we need to create a download endpoint
-  // The URL will be proxied through our API
+export function getSignedUrl(blobUrl?: string | null): string {
+  if (!blobUrl) return '';
+  if (blobUrl.startsWith('/api/blob/download')) return blobUrl;
+  if (!blobUrl.startsWith('http://') && !blobUrl.startsWith('https://')) return blobUrl;
   return `/api/blob/download?url=${encodeURIComponent(blobUrl)}`;
 }
 

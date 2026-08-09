@@ -5,9 +5,15 @@ import { useScroll, useTransform, motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
+import { isToolSubdomain } from '@/lib/subdomain';
 
 export default function HeroNavbar() {
   const pathname = usePathname();
+  const [isTool, setIsTool] = useState(false);
+
+  useEffect(() => {
+    setIsTool(isToolSubdomain(pathname));
+  }, [pathname]);
   
   const { scrollY } = useScroll();
   const [isOpen, setIsOpen] = useState(false);
@@ -27,7 +33,12 @@ export default function HeroNavbar() {
     }
   }, [isOpen]);
 
-  const shouldHideNavbar = pathname?.startsWith('/admin') || pathname?.startsWith('/member') || pathname?.startsWith('/proposals') || pathname?.startsWith('/content-collection');
+  const shouldHideNavbar =
+    pathname?.startsWith('/admin') ||
+    pathname?.startsWith('/member') ||
+    pathname?.startsWith('/proposals') ||
+    pathname?.startsWith('/content-collection') ||
+    isTool;
   const [isScrolledPastHero, setIsScrolledPastHero] = useState(false);
 
   useEffect(() => {
