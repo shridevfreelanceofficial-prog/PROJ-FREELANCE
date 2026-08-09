@@ -528,7 +528,7 @@ export default function CompleteProfilePage() {
             <div className="flex items-center justify-between pt-4">
               <button
                 type="button"
-                onClick={() => router.push('/dashboard')}
+                onClick={() => router.push('/tools/profilemitraa/dashboard')}
                 className="px-6 py-2.5 border border-slate-200 hover:border-slate-300 text-slate-500 hover:text-slate-700 bg-white font-bold text-[12.5px] rounded-xl transition-all"
               >
                 Skip for now

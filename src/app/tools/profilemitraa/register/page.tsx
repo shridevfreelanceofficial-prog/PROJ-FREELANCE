@@ -442,7 +442,7 @@ export default function ProfileMitraaRegisterPage() {
           {/* Form Footer */}
           <p className="text-center font-bold text-xs text-slate-500 select-none pt-0.5">
             Already have an account?{' '}
-            <Link href="/login" className="text-[#009670] hover:underline font-extrabold">
+            <Link href="/tools/profilemitraa/login" className="text-[#009670] hover:underline font-extrabold">
               Sign In
             </Link>
           </p>

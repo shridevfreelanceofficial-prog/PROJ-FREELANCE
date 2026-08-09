@@ -27,13 +27,11 @@ export function middleware(request: NextRequest) {
     // If the path does not already begin with /tools/[subdomain]
     if (!url.pathname.startsWith(`/tools/${subdomain}`)) {
       const targetPath = `/tools/${subdomain}${url.pathname === '/' ? '' : url.pathname}`;
-      
+
+      // Keep the SAME origin — do not change the hostname.
+      // Changing the hostname makes Next.js treat this as a cross-origin proxy request
+      // which breaks on Vercel and custom servers. Internal path rewrites must share the same origin.
       const rewriteUrl = new URL(targetPath, request.url);
-      if (currentHost.endsWith('localhost') || currentHost.endsWith('127.0.0.1')) {
-        rewriteUrl.hostname = 'localhost';
-      } else {
-        rewriteUrl.hostname = 'shridevfreelance.online';
-      }
 
       console.log(`[MIDDLEWARE REWRITE] Rewriting ${request.url} -> ${rewriteUrl.href}`);
 

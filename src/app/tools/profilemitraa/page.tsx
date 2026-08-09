@@ -48,13 +48,13 @@ export default function ProfileMitraaPage() {
           {/* Auth CTA Buttons */}
           <div className="flex items-center gap-3">
             <Link
-              href="/login"
+              href="/tools/profilemitraa/login"
               className="px-4 py-2 text-sm font-semibold text-gray-700 border border-gray-200 hover:border-gray-300 hover:bg-gray-50 rounded-xl transition-all"
             >
               Login
             </Link>
             <Link
-              href="/register"
+              href="/tools/profilemitraa/register"
               className="px-5 py-2.5 text-sm font-semibold text-white bg-[#059669] hover:bg-[#047857] rounded-xl shadow-md shadow-emerald-600/20 transition-all flex items-center gap-2"
             >
               Get Started Free
@@ -98,7 +98,7 @@ export default function ProfileMitraaPage() {
               {/* CTA Buttons */}
               <div className="flex flex-wrap items-center gap-4 w-full sm:w-auto mb-10">
                 <Link
-                  href="/register"
+                  href="/tools/profilemitraa/register"
                   className="w-full sm:w-auto px-7 py-3.5 rounded-xl bg-[#059669] hover:bg-[#047857] text-white font-bold text-base transition-all shadow-xl shadow-emerald-600/25 flex items-center justify-center gap-2 hover:-translate-y-0.5"
                 >
                   Get Started for Free
