@@ -1025,11 +1025,113 @@ function CreatePortfolioContent() {
                     </div>
                   </div>
 
+                  {/* Global Theme & Styling Panel */}
+                  <div className="bg-white border border-slate-200 rounded-xl p-3.5 space-y-3">
+                    <h4 className="text-xs font-black text-slate-800 flex items-center gap-1.5">
+                      <span>🎨</span> Theme & Styling Options
+                    </h4>
+
+                    {/* Mode Selector */}
+                    <div className="space-y-1">
+                      <label className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">Appearance Mode</label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const updated = { ...customizedData, theme_mode: 'dark' };
+                            setCustomizedData(updated);
+                            iframeRef.current?.contentWindow?.postMessage({
+                              type: 'portfolio-update',
+                              data: { title, tagline, description, profile_image_url: profileImageUrl, design_theme: designTheme, sections, customized_data: updated }
+                            }, '*');
+                          }}
+                          className={`py-1.5 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 border transition-all ${
+                            (customizedData.theme_mode || 'dark') === 'dark'
+                              ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
+                              : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                          }`}
+                        >
+                          🌙 Dark Mode
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const updated = { ...customizedData, theme_mode: 'light' };
+                            setCustomizedData(updated);
+                            iframeRef.current?.contentWindow?.postMessage({
+                              type: 'portfolio-update',
+                              data: { title, tagline, description, profile_image_url: profileImageUrl, design_theme: designTheme, sections, customized_data: updated }
+                            }, '*');
+                          }}
+                          className={`py-1.5 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 border transition-all ${
+                            customizedData.theme_mode === 'light'
+                              ? 'bg-[#009670] text-white border-[#009670] shadow-xs'
+                              : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                          }`}
+                        >
+                          ☀️ Light Mode
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Accent Color Palette */}
+                    <div className="space-y-1.5">
+                      <label className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">Accent Color Theme</label>
+                      <div className="flex flex-wrap gap-1.5">
+                        {[
+                          { name: 'Emerald', hex: '#10B981' },
+                          { name: 'Blue', hex: '#3B82F6' },
+                          { name: 'Violet', hex: '#8B5CF6' },
+                          { name: 'Orange', hex: '#F97316' },
+                          { name: 'Crimson', hex: '#EF4444' },
+                          { name: 'Cyan', hex: '#06B6D4' },
+                          { name: 'Amber', hex: '#F59E0B' },
+                          { name: 'Rose', hex: '#F43F5E' },
+                        ].map((c) => {
+                          const active = (customizedData.theme_color || '#10B981').toLowerCase() === c.hex.toLowerCase();
+                          return (
+                            <button
+                              type="button"
+                              key={c.name}
+                              title={c.name}
+                              onClick={() => {
+                                const updated = { ...customizedData, theme_color: c.hex };
+                                setCustomizedData(updated);
+                                iframeRef.current?.contentWindow?.postMessage({
+                                  type: 'portfolio-update',
+                                  data: { title, tagline, description, profile_image_url: profileImageUrl, design_theme: designTheme, sections, customized_data: updated }
+                                }, '*');
+                              }}
+                              className={`w-6 h-6 rounded-full border-2 transition-transform ${
+                                active ? 'scale-125 border-slate-900 ring-2 ring-slate-400/30' : 'border-white hover:scale-110 shadow-xs'
+                              }`}
+                              style={{ backgroundColor: c.hex }}
+                            />
+                          );
+                        })}
+                        <input
+                          type="color"
+                          title="Custom Color"
+                          value={customizedData.theme_color || '#10B981'}
+                          onChange={(e) => {
+                            const updated = { ...customizedData, theme_color: e.target.value };
+                            setCustomizedData(updated);
+                            iframeRef.current?.contentWindow?.postMessage({
+                              type: 'portfolio-update',
+                              data: { title, tagline, description, profile_image_url: profileImageUrl, design_theme: designTheme, sections, customized_data: updated }
+                            }, '*');
+                          }}
+                          className="w-6 h-6 rounded-full cursor-pointer border border-slate-300 p-0 bg-transparent"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="border-t border-slate-205/65 pt-4 space-y-4">
                     {/* Hero customized inputs */}
                     {selectedEditorSection === 'hero' && (
-                      <div className="space-y-3">
-                        <h4 className="text-xs font-bold text-slate-800 flex items-center gap-1">⚡ Intro Customization</h4>
+                      <div className="space-y-3.5">
+                        <h4 className="text-xs font-bold text-slate-800 flex items-center gap-1">⚡ Hero Section & Image</h4>
                         <div className="space-y-1">
                           <label className="text-[9px] font-bold text-slate-500 uppercase">Glow Header/Title</label>
                           <input
@@ -1075,18 +1177,99 @@ function CreatePortfolioContent() {
                             className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold focus:outline-none focus:border-[#009670] bg-white text-slate-800 resize-none"
                           />
                         </div>
+
+                        {/* Hero Image & Position Shifter */}
+                        <div className="border border-slate-200 rounded-xl p-3 bg-white space-y-2">
+                          <label className="text-[9px] font-bold text-slate-600 uppercase flex items-center justify-between">
+                            <span>🖼️ Hero Image</span>
+                            <span className="text-[8.5px] text-slate-400 font-normal">Dedicated Hero Banner/Photo</span>
+                          </label>
+                          <div className="flex gap-2 items-center">
+                            <label className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-lg cursor-pointer border border-slate-200 transition-colors shrink-0">
+                              Upload Image
+                              <input
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (!file) return;
+                                  const reader = new FileReader();
+                                  reader.onload = (ev) => {
+                                    const imgUrl = ev.target?.result as string;
+                                    setProfileImageUrl(imgUrl);
+                                    const updated = { ...customizedData, hero_image_url: imgUrl };
+                                    setCustomizedData(updated);
+                                    iframeRef.current?.contentWindow?.postMessage({
+                                      type: 'portfolio-update',
+                                      data: { title, tagline, description, profile_image_url: imgUrl, design_theme: designTheme, sections, customized_data: updated }
+                                    }, '*');
+                                  };
+                                  reader.readAsDataURL(file);
+                                }}
+                              />
+                            </label>
+                            <input
+                              type="text"
+                              placeholder="Or paste Image URL..."
+                              value={customizedData.hero_image_url || profileImageUrl || ''}
+                              onChange={(e) => {
+                                const imgUrl = e.target.value;
+                                setProfileImageUrl(imgUrl);
+                                const updated = { ...customizedData, hero_image_url: imgUrl };
+                                setCustomizedData(updated);
+                                iframeRef.current?.contentWindow?.postMessage({
+                                  type: 'portfolio-update',
+                                  data: { title, tagline, description, profile_image_url: imgUrl, design_theme: designTheme, sections, customized_data: updated }
+                                }, '*');
+                              }}
+                              className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold focus:outline-none focus:border-[#009670]"
+                            />
+                          </div>
+                          {/* Image Placement Shifter */}
+                          <div className="space-y-1 pt-1">
+                            <label className="text-[8.5px] font-bold text-slate-500 uppercase">Shift Image Placement</label>
+                            <div className="grid grid-cols-3 gap-1.5">
+                              {[
+                                { id: 'left', label: '⬅️ Left' },
+                                { id: 'center', label: '⏹️ Center' },
+                                { id: 'right', label: '➡️ Right' },
+                              ].map((pos) => (
+                                <button
+                                  type="button"
+                                  key={pos.id}
+                                  onClick={() => {
+                                    const updated = { ...customizedData, hero_image_position: pos.id };
+                                    setCustomizedData(updated);
+                                    iframeRef.current?.contentWindow?.postMessage({
+                                      type: 'portfolio-update',
+                                      data: { title, tagline, description, profile_image_url: profileImageUrl, design_theme: designTheme, sections, customized_data: updated }
+                                    }, '*');
+                                  }}
+                                  className={`py-1 text-[10px] font-bold rounded border transition-all ${
+                                    (customizedData.hero_image_position || 'left') === pos.id
+                                      ? 'bg-[#009670] text-white border-[#009670]'
+                                      : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
+                                  }`}
+                                >
+                                  {pos.label}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     )}
 
                     {/* About section input */}
                     {selectedEditorSection === 'about' && (
-                      <div className="space-y-3">
-                        <h4 className="text-xs font-bold text-slate-800 flex items-center gap-1">👤 About Copy Override</h4>
+                      <div className="space-y-3.5">
+                        <h4 className="text-xs font-bold text-slate-800 flex items-center gap-1">👤 About Us Section & Image</h4>
                         <div className="space-y-1">
                           <label className="text-[9px] font-bold text-slate-500 uppercase">About paragraph</label>
                           <textarea
-                            rows={5}
-                            placeholder="Write a custom description just for this template style..."
+                            rows={4}
+                            placeholder="Write a custom description just for this section..."
                             value={customizedData.about?.text || ''}
                             onChange={(e) => {
                               const updated = {
@@ -1101,6 +1284,220 @@ function CreatePortfolioContent() {
                             }}
                             className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold focus:outline-none focus:border-[#009670] bg-white text-slate-800 resize-none"
                           />
+                        </div>
+
+                        {/* About Us Image & Position Shifter */}
+                        <div className="border border-slate-200 rounded-xl p-3 bg-white space-y-2">
+                          <label className="text-[9px] font-bold text-slate-600 uppercase flex items-center justify-between">
+                            <span>📷 About Us Image</span>
+                            <span className="text-[8.5px] text-slate-400 font-normal">Dedicated About Photo</span>
+                          </label>
+                          <div className="flex gap-2 items-center">
+                            <label className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-lg cursor-pointer border border-slate-200 transition-colors shrink-0">
+                              Upload Image
+                              <input
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (!file) return;
+                                  const reader = new FileReader();
+                                  reader.onload = (ev) => {
+                                    const imgUrl = ev.target?.result as string;
+                                    const updated = {
+                                      ...customizedData,
+                                      about: { ...customizedData.about, image_url: imgUrl }
+                                    };
+                                    setCustomizedData(updated);
+                                    iframeRef.current?.contentWindow?.postMessage({
+                                      type: 'portfolio-update',
+                                      data: { title, tagline, description, profile_image_url: profileImageUrl, design_theme: designTheme, sections, customized_data: updated }
+                                    }, '*');
+                                  };
+                                  reader.readAsDataURL(file);
+                                }}
+                              />
+                            </label>
+                            <input
+                              type="text"
+                              placeholder="Or paste Image URL..."
+                              value={customizedData.about?.image_url || ''}
+                              onChange={(e) => {
+                                const updated = {
+                                  ...customizedData,
+                                  about: { ...customizedData.about, image_url: e.target.value }
+                                };
+                                setCustomizedData(updated);
+                                iframeRef.current?.contentWindow?.postMessage({
+                                  type: 'portfolio-update',
+                                  data: { title, tagline, description, profile_image_url: profileImageUrl, design_theme: designTheme, sections, customized_data: updated }
+                                }, '*');
+                              }}
+                              className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold focus:outline-none focus:border-[#009670]"
+                            />
+                          </div>
+                          {/* Image Placement Shifter */}
+                          <div className="space-y-1 pt-1">
+                            <label className="text-[8.5px] font-bold text-slate-500 uppercase">Shift Image Placement</label>
+                            <div className="grid grid-cols-3 gap-1.5">
+                              {[
+                                { id: 'left', label: '⬅️ Left' },
+                                { id: 'center', label: '⏹️ Center' },
+                                { id: 'right', label: '➡️ Right' },
+                              ].map((pos) => (
+                                <button
+                                  type="button"
+                                  key={pos.id}
+                                  onClick={() => {
+                                    const updated = {
+                                      ...customizedData,
+                                      about: { ...customizedData.about, image_position: pos.id }
+                                    };
+                                    setCustomizedData(updated);
+                                    iframeRef.current?.contentWindow?.postMessage({
+                                      type: 'portfolio-update',
+                                      data: { title, tagline, description, profile_image_url: profileImageUrl, design_theme: designTheme, sections, customized_data: updated }
+                                    }, '*');
+                                  }}
+                                  className={`py-1 text-[10px] font-bold rounded border transition-all ${
+                                    (customizedData.about?.image_position || 'right') === pos.id
+                                      ? 'bg-[#009670] text-white border-[#009670]'
+                                      : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
+                                  }`}
+                                >
+                                  {pos.label}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Projects Section - Upload & Clipboard Banner Image */}
+                    {selectedEditorSection === 'projects' && (
+                      <div className="space-y-3.5">
+                        <h4 className="text-xs font-bold text-slate-800 flex items-center gap-1">📁 Project Banners & Banners Upload/Paste</h4>
+                        <p className="text-[10.5px] text-slate-500">Upload a project banner image or click to paste directly from your clipboard!</p>
+                        
+                        {/* Project Banners Manager */}
+                        <div className="space-y-3">
+                          <div className="border border-slate-200 rounded-xl p-3 bg-white space-y-2">
+                            <label className="text-[9.5px] font-bold text-slate-600 uppercase flex items-center justify-between">
+                              <span>🖼️ Default Project Banner</span>
+                              <span className="text-[8.5px] text-slate-400">Upload or Paste</span>
+                            </label>
+                            
+                            {/* File Upload + Clipboard Paste Buttons */}
+                            <div className="flex gap-2 items-center flex-wrap">
+                              <label className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-lg cursor-pointer border border-slate-200 transition-colors shrink-0">
+                                📁 Choose File
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  className="hidden"
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (!file) return;
+                                    const reader = new FileReader();
+                                    reader.onload = (ev) => {
+                                      const imgUrl = ev.target?.result as string;
+                                      const updated = {
+                                        ...customizedData,
+                                        projects: { ...customizedData.projects, default_banner: imgUrl }
+                                      };
+                                      setCustomizedData(updated);
+                                      iframeRef.current?.contentWindow?.postMessage({
+                                        type: 'portfolio-update',
+                                        data: { title, tagline, description, profile_image_url: profileImageUrl, design_theme: designTheme, sections, customized_data: updated }
+                                      }, '*');
+                                    };
+                                    reader.readAsDataURL(file);
+                                  }}
+                                />
+                              </label>
+
+                              {/* Paste from Clipboard Button */}
+                              <button
+                                type="button"
+                                onClick={async () => {
+                                  try {
+                                    if (navigator.clipboard && navigator.clipboard.read) {
+                                      const items = await navigator.clipboard.read();
+                                      for (const item of items) {
+                                        const imgType = item.types.find(t => t.startsWith('image/'));
+                                        if (imgType) {
+                                          const blob = await item.getType(imgType);
+                                          const reader = new FileReader();
+                                          reader.onload = (ev) => {
+                                            const imgUrl = ev.target?.result as string;
+                                            const updated = {
+                                              ...customizedData,
+                                              projects: { ...customizedData.projects, default_banner: imgUrl }
+                                            };
+                                            setCustomizedData(updated);
+                                            iframeRef.current?.contentWindow?.postMessage({
+                                              type: 'portfolio-update',
+                                              data: { title, tagline, description, profile_image_url: profileImageUrl, design_theme: designTheme, sections, customized_data: updated }
+                                            }, '*');
+                                          };
+                                          reader.readAsDataURL(blob);
+                                          return;
+                                        }
+                                      }
+                                    }
+                                    alert('No image found in clipboard. Copy an image or screenshot first, then click here!');
+                                  } catch {
+                                    alert('Click into the paste box below and press Ctrl+V to paste your clipboard image!');
+                                  }
+                                }}
+                                className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-[#009670] text-xs font-bold rounded-lg border border-emerald-200 transition-colors shrink-0 flex items-center gap-1"
+                              >
+                                📋 Paste Clipboard Image
+                              </button>
+                            </div>
+
+                            {/* Drop/Paste Target Box */}
+                            <div
+                              onPaste={(e) => {
+                                const items = e.clipboardData.items;
+                                for (let i = 0; i < items.length; i++) {
+                                  if (items[i].type.indexOf('image') !== -1) {
+                                    const file = items[i].getAsFile();
+                                    if (file) {
+                                      const reader = new FileReader();
+                                      reader.onload = (ev) => {
+                                        const imgUrl = ev.target?.result as string;
+                                        const updated = {
+                                          ...customizedData,
+                                          projects: { ...customizedData.projects, default_banner: imgUrl }
+                                        };
+                                        setCustomizedData(updated);
+                                        iframeRef.current?.contentWindow?.postMessage({
+                                          type: 'portfolio-update',
+                                          data: { title, tagline, description, profile_image_url: profileImageUrl, design_theme: designTheme, sections, customized_data: updated }
+                                        }, '*');
+                                      };
+                                      reader.readAsDataURL(file);
+                                    }
+                                  }
+                                }
+                              }}
+                              className="border-2 border-dashed border-slate-200 rounded-lg p-2.5 text-center bg-slate-50/60 hover:bg-slate-50 transition-colors cursor-pointer"
+                            >
+                              <p className="text-[10px] text-slate-500 font-semibold">
+                                📌 Click here & press <kbd className="px-1 py-0.5 bg-white border rounded font-mono text-[9px]">Ctrl+V</kbd> to paste screenshot directly!
+                              </p>
+                              {customizedData.projects?.default_banner && (
+                                <img
+                                  src={customizedData.projects.default_banner}
+                                  alt="Banner preview"
+                                  className="mt-2 h-16 w-full object-cover rounded-md border border-slate-200"
+                                />
+                              )}
+                            </div>
+                          </div>
                         </div>
                       </div>
                     )}

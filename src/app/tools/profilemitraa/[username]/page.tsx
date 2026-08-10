@@ -99,709 +99,270 @@ export default async function PublicPortfolioPage({ params }: { params: Promise<
     return fallback;
   };
 
-  const profilePic = portfolio.profile_image_url || profile.profile_photo_url || '';
-  const techSkills: string[] = Array.isArray(profile.tech_skills) ? profile.tech_skills : [];
-  const tools: string[] = Array.isArray(profile.tools) ? profile.tools : [];
-  const softSkills: string[] = Array.isArray(profile.soft_skills) ? profile.soft_skills : [];
+  // Color Theme & Mode parameters
+  const themeColor = customData.theme_color || '#10B981';
+  const isLightMode = customData.theme_mode === 'light';
+  
+  // Hex to RGB helper
+  let hexCode = (themeColor || '#10B981').replace('#', '');
+  if (hexCode.length === 3) hexCode = hexCode.split('').map((x: string) => x + x).join('');
+  const num = parseInt(hexCode, 16) || 0x10B981;
+  const rgb = {
+    r: (num >> 16) & 255,
+    g: (num >> 8) & 255,
+    b: num & 255
+  };
 
-  // ── TEMPLATE 1: Tech Minimalist (Dark) ──────────────────────────────────
+  // Images & Placement Shifting
+  const heroPic = customData.hero_image_url || portfolio.profile_image_url || profile.profile_photo_url || '';
+  const heroPos = customData.hero_image_position || 'left';
+
+  const aboutPic = customData.about?.image_url || portfolio.profile_image_url || profile.profile_photo_url || '';
+  const aboutPos = customData.about?.image_position || 'right';
+
+  const defaultProjectBanner = customData.projects?.default_banner || '';
+
+  const getHeroFlexClass = (pos: string) => {
+    if (pos === 'right') return 'flex-col sm:flex-row-reverse text-center sm:text-right';
+    if (pos === 'center') return 'flex-col text-center items-center justify-center';
+    return 'flex-col sm:flex-row text-center sm:text-left';
+  };
+
+  const getAboutFlexClass = (pos: string) => {
+    if (pos === 'left') return 'flex-col md:flex-row';
+    if (pos === 'center') return 'flex-col text-center items-center';
+    return 'flex-col md:flex-row-reverse';
+  };
+
+  // ── TEMPLATE 1: Tech Minimalist ──────────────────────────────────
   if (themeKey === 'minimal_dark') {
+    const bgColor = isLightMode ? '#F8FAFC' : '#030712';
+    const textColor = isLightMode ? '#0F172A' : '#E2E8F0';
+    const cardBg = isLightMode ? 'rgba(255, 255, 255, 0.9)' : 'rgba(10, 17, 30, 0.7)';
+    const cardBorder = isLightMode ? `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.2)` : `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.15)`;
+
     return (
-      <div className="min-h-screen bg-[#070C14] text-[#E2E8F0] font-mono selection:bg-[#10B981]/30 pb-24">
+      <div className="min-h-screen font-mono selection:bg-emerald-500/30 pb-24 relative overflow-x-hidden" style={{ backgroundColor: bgColor, color: textColor }}>
         <style>{`
-          body { background-color: #070C14; font-family: 'JetBrains Mono', 'Fira Code', monospace; }
-          @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&family=Inter:wght@400;500;700;900&display=swap');
-          .glow-green { box-shadow: 0 0 28px rgba(16,185,129,0.3), 0 0 60px rgba(16,185,129,0.1); }
-          .tag-item { transition: all 200ms ease; }
-          .tag-item:hover { border-color: #10B981; color: #34D399; box-shadow: 0 0 10px rgba(16,185,129,0.25); }
+          @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700;800&family=Inter:wght@300;400;500;700;950&display=swap');
+          
+          body { 
+            background-color: ${bgColor}; 
+            color: ${textColor};
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            overflow-x: hidden;
+          }
+          
+          .cyber-grid {
+            background-image: 
+              linear-gradient(to right, rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.04) 1px, transparent 1px),
+              linear-gradient(to bottom, rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.04) 1px, transparent 1px);
+            background-size: 30px 30px;
+          }
+
+          .led-pulse {
+            box-shadow: 0 0 8px rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.8), 0 0 16px rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.4);
+            animation: led-pulse-anim 2s infinite ease-in-out;
+          }
+          @keyframes led-pulse-anim {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.3; transform: scale(0.9); }
+          }
+
+          .tech-card {
+            background: ${cardBg};
+            border: 1px solid ${cardBorder};
+            transition: all 400ms cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+          }
+          .tech-card:hover {
+            border-color: ${themeColor};
+            box-shadow: 0 10px 30px -10px rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.2);
+            transform: translateY(-2px);
+          }
+
+          .corner-brkt::before, .corner-brkt::after {
+            content: '';
+            position: absolute;
+            width: 8px; height: 8px;
+            border-color: rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.4);
+            border-style: solid;
+            transition: all 300ms ease;
+            pointer-events: none;
+          }
+          .corner-brkt::before { top: -1px; left: -1px; border-width: 1px 0 0 1px; }
+          .corner-brkt::after { bottom: -1px; right: -1px; border-width: 0 1px 1px 0; }
+          .tech-card:hover .corner-brkt::before { border-color: ${themeColor}; width: 14px; height: 14px; }
+          .tech-card:hover .corner-brkt::after { border-color: ${themeColor}; width: 14px; height: 14px; }
+
+          .reveal-item {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: revealUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+          }
+          @keyframes revealUp { to { opacity: 1; transform: translateY(0); } }
         `}</style>
 
-        {/* Ambient glow decorations */}
-        <div className="fixed top-0 right-0 w-[500px] h-[500px] bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
-        <div className="fixed bottom-0 left-0 w-[400px] h-[400px] bg-blue-500/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="fixed inset-0 cyber-grid pointer-events-none z-0" />
+        <div className="fixed -top-40 -right-40 w-[600px] h-[600px] rounded-full blur-[140px] pointer-events-none z-0 animate-pulse" style={{ backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.12)`, animationDuration: '8s' }} />
 
-        {/* Nav */}
-        <nav className="sticky top-0 z-30 bg-[#070C14]/90 backdrop-blur-md border-b border-emerald-500/10 px-6 py-4 flex items-center justify-between">
-          <span className="text-xs font-bold text-[#10B981] tracking-[0.25em] uppercase">{user.full_name || user.username}</span>
-          <div className="flex gap-5 text-[11px] text-slate-400 font-bold tracking-wider flex-wrap">
-            {sectionsArr.filter((sec: any) => sec.enabled && sec.id !== 'hero').map((sec: any) => (
-              <a key={sec.id} href={`#${sec.id}`} className="hover:text-[#10B981] transition-colors uppercase">{sec.name?.toUpperCase().replace(' ME', '').replace('FORM', '').slice(0, 15)}</a>
-            ))}
-          </div>
-        </nav>
-
-        <div className="max-w-4xl mx-auto px-6 pt-16 space-y-20">
-          {/* Header Section */}
-          <header className="flex flex-col sm:flex-row items-center gap-6 border-b border-emerald-500/20 pb-8">
-            {profilePic ? (
-              <img src={profilePic} alt="Avatar" className="w-[100px] h-[100px] rounded-lg object-cover border-2 border-[#10B981] shadow-lg shadow-emerald-500/25 shrink-0" />
-            ) : (
-              <div className="w-[100px] h-[100px] rounded-lg bg-[#0F172A] border-2 border-dashed border-[#10B981] flex items-center justify-center text-4xl shrink-0">💻</div>
-            )}
-            <div className="text-center sm:text-left space-y-2">
-              <span className="text-[10px] font-bold text-[#10B981] tracking-widest uppercase bg-[#10B981]/15 px-2.5 py-0.5 rounded border border-[#10B981]/30">Active Developer Mode</span>
-              <h1 className="text-3xl font-black tracking-tight text-white">{getVal('hero', 'title', portfolio.title || user.full_name || user.username)}</h1>
-              <p className="text-xs text-[#10B981] font-bold">&gt; {getVal('hero', 'subtitle', portfolio.tagline || profile.headline || 'Creative Engineer')}</p>
-            </div>
-          </header>
-
-          {/* Dynamic Sections Loop */}
-          {sectionsArr.map((sec: any) => {
-            const secId = sec.id || sec;
-            const enabled = sec.enabled !== undefined ? sec.enabled : true;
-            if (!enabled) return null;
-
-            switch (secId) {
-              case 'hero':
-                return (
-                  <section id="hero" key="hero" className="space-y-4 bg-[#0A111E] border border-emerald-500/10 rounded-xl p-6 shadow-inner relative overflow-hidden">
-                    <div className="absolute top-0 left-0 w-1 h-full bg-[#10B981]" />
-                    <h3 className="text-xs uppercase font-extrabold tracking-widest text-[#10B981] flex items-center gap-1.5">
-                      <span>⚡</span> SYSTEM._INTRO
-                    </h3>
-                    <p className="text-sm text-slate-350 leading-relaxed font-sans">{getVal('hero', 'description', portfolio.description || profile.about_me || '')}</p>
-                    {isEnabled('contact') && (
-                      <a href="#contact" className="inline-flex items-center gap-2 px-5 py-2.5 border border-[#10B981] text-[#10B981] hover:bg-[#10B981] hover:text-white text-xs font-black rounded-lg transition-all tracking-widest uppercase">
-                        INITIATE CONTACT ▶
-                      </a>
-                    )}
-                  </section>
-                );
-              case 'about':
-                return (
-                  <section id="about" key="about" className="space-y-5">
-                    <h2 className="text-[10px] font-black text-[#10B981] tracking-[0.3em] uppercase flex items-center gap-2 font-mono">
-                      <span className="w-6 h-px bg-[#10B981]" /> ABOUT_ME.md
-                    </h2>
-                    <div className="bg-[#0A111E] border border-[#10B981]/15 rounded-xl p-6 space-y-4 relative overflow-hidden">
-                      <div className="absolute left-0 top-0 bottom-0 w-px bg-[#10B981]" />
-                      <p className="text-sm text-slate-300 leading-relaxed font-sans whitespace-pre-wrap">{getVal('about', 'text', profile.about_me || portfolio.description || '')}</p>
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t border-slate-800 text-xs font-mono">
-                        <div><span className="text-[#10B981]">LOC:</span><p className="text-slate-300 mt-0.5">{portfolio.location || profile.location || 'Remote'}</p></div>
-                        <div><span className="text-[#10B981]">LNG:</span><p className="text-slate-300 mt-0.5">{portfolio.language || 'English'}</p></div>
-                        <div><span className="text-[#10B981]">EXP:</span><p className="text-slate-300 mt-0.5">{profile.experience_years || 'N/A'} yrs</p></div>
-                        <div><span className="text-[#10B981]">TYPE:</span><p className="text-slate-300 mt-0.5">{profile.employment_type || 'Full-time'}</p></div>
-                      </div>
-                    </div>
-                  </section>
-                );
-              case 'skills':
-                return (
-                  <section id="skills" key="skills" className="space-y-5">
-                    <h2 className="text-[10px] font-black text-[#10B981] tracking-[0.3em] uppercase flex items-center gap-2 font-mono">
-                      <span className="w-6 h-px bg-[#10B981]" /> TECH_STACK.json
-                    </h2>
-                    <p className="text-xs text-slate-500 font-sans italic">{getVal('skills', 'description', 'Technologies, frameworks, and tools I work with professionally:')}</p>
-                    <div className="space-y-4">
-                      {techSkills.length > 0 && (
-                        <div>
-                          <span className="text-[9px] text-[#10B981] font-black tracking-widest uppercase mb-2 block font-mono">LANGUAGES & FRAMEWORKS</span>
-                          <div className="flex flex-wrap gap-2">
-                            {techSkills.map((skill) => (
-                              <span key={skill} className="tag-item px-3 py-1.5 bg-[#10B981]/5 border border-[#10B981]/25 rounded text-xs font-bold text-[#34D399]">{skill}</span>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                      {tools.length > 0 && (
-                        <div>
-                          <span className="text-[9px] text-slate-500 font-black tracking-widest uppercase mb-2 block font-mono">TOOLS & PLATFORMS</span>
-                          <div className="flex flex-wrap gap-2">
-                            {tools.map((tool) => (
-                              <span key={tool} className="tag-item px-3 py-1.5 bg-slate-900 border border-slate-800 rounded text-xs text-slate-400">{tool}</span>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </section>
-                );
-              case 'projects':
-                return (
-                  <section id="projects" key="projects" className="space-y-5">
-                    <h2 className="text-[10px] font-black text-[#10B981] tracking-[0.3em] uppercase flex items-center gap-2 font-mono">
-                      <span className="w-6 h-px bg-[#10B981]" /> PROJECTS.log
-                    </h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                      {projects.length > 0 ? projects.map((project) => (
-                        <div key={project.id} className="bg-[#0A111E] border border-slate-800 hover:border-[#10B981]/40 rounded-xl p-5 space-y-3 transition-all group">
-                          <div className="flex justify-between items-start">
-                            <h3 className="text-sm font-black text-white font-mono group-hover:text-[#10B981] transition-colors">{project.title}</h3>
-                            {project.projectUrl && (
-                              <a href={project.projectUrl} target="_blank" rel="noreferrer" className="text-[10px] text-[#10B981] font-mono hover:underline shrink-0 ml-2">URL ▶</a>
-                            )}
-                          </div>
-                          <p className="text-xs text-slate-400 leading-relaxed font-sans line-clamp-3">{project.description}</p>
-                          {project.technologies && (
-                            <div className="flex flex-wrap gap-1.5 pt-2 border-t border-slate-800">
-                              {project.technologies.split(',').map((t) => (
-                                <span key={t} className="px-2 py-0.5 bg-slate-900 border border-slate-800 rounded text-[10px] font-mono text-slate-500">{t.trim()}</span>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      )) : (
-                        <div className="col-span-2 bg-[#0A111E] border border-slate-800 rounded-xl p-8 text-center text-xs text-slate-500 font-sans">
-                          No projects have been published yet.
-                        </div>
-                      )}
-                    </div>
-                  </section>
-                );
-              case 'experience':
-                return (
-                  <section id="experience" key="experience" className="space-y-5">
-                    <h2 className="text-[10px] font-black text-[#10B981] tracking-[0.3em] uppercase flex items-center gap-2 font-mono">
-                      <span className="w-6 h-px bg-[#10B981]" /> WORK_HISTORY.csv
-                    </h2>
-                    <div className="bg-[#0A111E] border border-slate-800 rounded-xl p-6 flex flex-col sm:flex-row justify-between gap-4 font-sans">
-                      <div>
-                        <h3 className="text-sm font-black text-white font-mono">{profile.current_job_role || profile.current_role || 'Software Engineer'}</h3>
-                        <p className="text-xs text-slate-400 mt-1">{profile.company || 'Freelance / Open Source'}</p>
-                      </div>
-                      <div className="text-left sm:text-right shrink-0">
-                        <span className="inline-block text-[10px] font-bold bg-[#10B981]/10 text-[#34D399] px-3 py-1 rounded border border-[#10B981]/20">{profile.experience_years || 'N/A'} Years</span>
-                        <p className="text-[10px] text-slate-500 mt-1 uppercase tracking-wider font-mono">{profile.employment_type || 'Full-time'}</p>
-                      </div>
-                    </div>
-                  </section>
-                );
-              case 'education':
-                return (
-                  <section id="education" key="education" className="space-y-5">
-                    <h2 className="text-[10px] font-black text-[#10B981] tracking-[0.3em] uppercase flex items-center gap-2 font-mono">
-                      <span className="w-6 h-px bg-[#10B981]" /> ACADEMIC_LOG.db
-                    </h2>
-                    <div className="space-y-3">
-                      {education.length > 0 ? education.map((edu) => (
-                        <div key={edu.id} className="bg-[#0A111E] border border-slate-800 rounded-xl p-5 flex flex-col sm:flex-row justify-between gap-3 sm:items-center font-sans">
-                          <div>
-                            <h3 className="text-xs font-black text-white">{edu.degree}{edu.fieldOfStudy ? ` in ${edu.fieldOfStudy}` : ''}</h3>
-                            <p className="text-[11px] text-slate-400 mt-1">{edu.school}</p>
-                          </div>
-                          <span className="text-[10px] bg-slate-900 border border-slate-800 text-slate-400 px-3 py-1 rounded font-mono shrink-0">
-                            {edu.startYear && edu.endYear ? `${edu.startYear} – ${edu.endYear}` : (edu.endYear || edu.startYear || '')}
-                          </span>
-                        </div>
-                      )) : (
-                        <p className="text-xs text-slate-500 font-sans p-4 bg-[#0A111E] rounded-xl border border-slate-800">No education records added yet.</p>
-                      )}
-                    </div>
-                  </section>
-                );
-              case 'certifications':
-                return (
-                  <section id="certifications" key="certifications" className="space-y-5">
-                    <h2 className="text-[10px] font-black text-[#10B981] tracking-[0.3em] uppercase flex items-center gap-2 font-mono">
-                      <span className="w-6 h-px bg-[#10B981]" /> VERIFIED_CERTS.x509
-                    </h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {Array.isArray(profile.certifications) && profile.certifications.length > 0 ? profile.certifications.map((c: any, index: number) => (
-                        <div key={index} className="bg-[#0A111E] border border-slate-800 rounded-xl p-4 flex items-center gap-3 font-sans">
-                          <span className="text-xl shrink-0">🏆</span>
-                          <div>
-                            <p className="text-xs font-black text-white">{c.name || c}</p>
-                            <p className="text-[9px] text-[#10B981] font-mono mt-0.5">{c.issuer || 'Online Certification'}</p>
-                          </div>
-                        </div>
-                      )) : (
-                        <p className="text-xs text-slate-500 font-sans p-4 bg-[#0A111E] rounded-xl border border-slate-800 col-span-2">No certificates found.</p>
-                      )}
-                    </div>
-                  </section>
-                );
-              case 'contact':
-                return (
-                  <section id="contact" key="contact" className="space-y-5">
-                    <h2 className="text-[10px] font-black text-[#10B981] tracking-[0.3em] uppercase flex items-center gap-2 font-mono">
-                      <span className="w-6 h-px bg-[#10B981]" /> ESTABLISH_CONTACT.sh
-                    </h2>
-                    <p className="text-xs text-slate-400 font-sans">{getVal('contact', 'prompt', 'Input parameters below to initiate collaboration or send a message:')}</p>
-                    <div className="bg-[#0A111E] border border-slate-800 rounded-xl p-6 space-y-4 max-w-lg font-sans">
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="space-y-1">
-                          <label className="text-[9px] text-slate-500 font-mono uppercase">Name</label>
-                          <input type="text" placeholder="Your Name" className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-xs text-slate-300 focus:outline-none focus:border-[#10B981]" />
-                        </div>
-                        <div className="space-y-1">
-                          <label className="text-[9px] text-slate-500 font-mono uppercase">Email</label>
-                          <input type="email" placeholder="your@email.com" className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-xs text-slate-300 focus:outline-none focus:border-[#10B981]" />
-                        </div>
-                      </div>
-                      <div className="space-y-1">
-                        <label className="text-[9px] text-slate-500 font-mono uppercase">Message</label>
-                        <textarea rows={4} placeholder="Tell me about your project or collaboration idea..." className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-xs text-slate-300 focus:outline-none focus:border-[#10B981] resize-none" />
-                      </div>
-                      <button className="w-full py-2.5 bg-[#10B981] hover:bg-emerald-600 text-white font-mono text-xs font-black rounded-lg transition-colors uppercase tracking-widest">
-                        EXECUTE._SEND()
-                      </button>
-                    </div>
-                  </section>
-                );
-              default:
-                if (secId?.startsWith('custom_')) {
-                  const customText = customData[secId]?.text || sec.description || '';
-                  return (
-                    <section id={secId} key={secId} className="space-y-5">
-                      <h2 className="text-[10px] font-black text-[#10B981] tracking-[0.3em] uppercase flex items-center gap-2 font-mono">
-                        <span className="w-6 h-px bg-[#10B981]" /> {sec.name ? `${sec.name.replace(/\s+/g, '_').toUpperCase()}.txt` : 'CUSTOM_SECTION.txt'}
-                      </h2>
-                      <div className="bg-[#0A111E] border border-emerald-500/10 rounded-xl p-6 relative overflow-hidden">
-                        <div className="absolute left-0 top-0 bottom-0 w-px bg-[#10B981]" />
-                        <p className="text-sm text-slate-305 leading-relaxed font-sans whitespace-pre-wrap">{customText}</p>
-                      </div>
-                    </section>
-                  );
-                }
-                return null;
-            }
-          })}
-        </div>
-
-        <footer className="mt-24 border-t border-slate-800/50 py-6 text-center">
-          <p className="text-[10px] font-mono text-slate-600">Built with <span className="text-[#10B981]">ProfileMitraa</span> &bull; {user.full_name || user.username}</p>
-        </footer>
-      </div>
-    );
-  }
-
-  // ── TEMPLATE 2: Creative Glassmorphism ──────────────────────────────────
-  if (themeKey === 'creative_glass') {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-[#1E1B4B] via-[#3B0764] to-[#881337] text-white font-sans pb-24 relative overflow-x-hidden">
-        <style>{`
-          @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&family=Playfair+Display:wght@700;900&display=swap');
-          body { font-family: 'Outfit', sans-serif; }
-          .glass { background: rgba(255,255,255,0.06); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.12); }
-          .glass-hover:hover { background: rgba(255,255,255,0.10); border-color: rgba(255,255,255,0.22); }
-        `}</style>
-
-        {/* Fluid blob decorations */}
-        <div className="fixed top-0 left-1/4 w-[600px] h-[600px] rounded-full bg-violet-600/20 blur-[120px] pointer-events-none" />
-        <div className="fixed bottom-0 right-0 w-[500px] h-[500px] rounded-full bg-rose-600/20 blur-[120px] pointer-events-none" />
-        <div className="fixed top-1/2 left-0 w-[300px] h-[300px] rounded-full bg-amber-500/10 blur-[80px] pointer-events-none" />
-
-        {/* Nav */}
-        <nav className="sticky top-0 z-30 glass border-b border-white/10 px-6 py-4 flex items-center justify-between">
-          <span className="text-sm font-black tracking-tight bg-gradient-to-r from-violet-300 to-rose-300 bg-clip-text text-transparent">{user.full_name || user.username}</span>
-          <div className="flex gap-5 text-xs text-white/60 font-semibold flex-wrap">
-            {sectionsArr.filter((sec: any) => sec.enabled && sec.id !== 'hero').map((sec: any) => (
-              <a key={sec.id} href={`#${sec.id}`} className="hover:text-white transition-colors capitalize">{sec.name?.replace(' Me', '').replace('Form', '').slice(0, 15)}</a>
-            ))}
-          </div>
-        </nav>
-
-        <div className="max-w-3xl mx-auto px-6 pt-16 space-y-16 relative z-10">
-          {/* Hero Header */}
-          <header className="text-center flex flex-col items-center space-y-6">
-            {profilePic ? (
-              <div className="relative">
-                <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-violet-500 to-rose-500 blur-xl opacity-60 scale-110" />
-                <img src={profilePic} alt={user.full_name} className="relative w-32 h-32 rounded-full object-cover border-2 border-white/30 shadow-2xl" />
+        <div className="max-w-4xl mx-auto px-6 pt-16 space-y-20 relative z-10">
+          <header className={`tech-card rounded-2xl p-8 flex items-center gap-8 relative overflow-hidden reveal-item ${getHeroFlexClass(heroPos)}`}>
+            <div className="corner-brkt absolute inset-0" />
+            {heroPic ? (
+              <div className="relative group shrink-0">
+                <div className="absolute inset-0 rounded-2xl blur-md opacity-70 group-hover:opacity-100 transition-opacity" style={{ backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.3)` }} />
+                <img src={heroPic} alt={user.full_name || 'Hero Avatar'} className="relative w-32 h-32 rounded-2xl object-cover border shadow-xl shrink-0 transition-transform group-hover:scale-105" style={{ borderColor: themeColor }} />
               </div>
             ) : (
-              <div className="w-32 h-32 rounded-full glass flex items-center justify-center text-5xl">🎨</div>
+              <div className="w-32 h-32 rounded-2xl border border-dashed flex items-center justify-center text-4xl shrink-0 shadow-lg relative group" style={{ borderColor: themeColor, backgroundColor: isLightMode ? '#F1F5F9' : '#0b1329' }}>💻</div>
             )}
-            <div className="space-y-3">
-              <span className="text-[10px] font-bold tracking-widest text-rose-300 uppercase bg-rose-500/20 px-4 py-1.5 rounded-full border border-rose-400/25">Creative Portfolio</span>
-              <h1 className="text-4xl sm:text-6xl font-black tracking-tight leading-tight" style={{ fontFamily: 'Playfair Display, serif' }}>
-                {getVal('hero', 'title', portfolio.title || user.full_name || user.username)}
+            <div className="space-y-3 flex-1">
+              <div className="inline-flex items-center gap-2 text-[9px] font-black tracking-widest uppercase px-3 py-1 rounded border" style={{ color: themeColor, borderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.3)`, backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.1)` }}>
+                <span className="w-1.5 h-1.5 rounded-full led-pulse" style={{ backgroundColor: themeColor }} />
+                ACTIVE_PORTFOLIO_SYSTEM
+              </div>
+              <h1 className={`text-3xl sm:text-4xl font-extrabold tracking-tight font-sans ${isLightMode ? 'text-slate-900' : 'text-white'}`}>
+                {getVal('hero', 'title', portfolio.title || `${user.full_name || user.username} Portfolio`)}
               </h1>
-              <p className="text-base text-white/70 font-semibold">{getVal('hero', 'subtitle', portfolio.tagline || profile.headline || 'Creative Professional')}</p>
+              <p className="text-xs font-bold tracking-wide font-mono" style={{ color: themeColor }}>&gt; {getVal('hero', 'subtitle', portfolio.tagline || profile.headline || 'Creative Professional')}</p>
             </div>
-            {isEnabled('contact') && (
-              <a href="#contact" className="px-8 py-3 bg-gradient-to-r from-violet-500 to-rose-500 hover:from-violet-600 hover:to-rose-600 text-white font-black text-sm rounded-2xl transition-all shadow-xl shadow-rose-900/30 uppercase tracking-widest">
-                Let&apos;s Collaborate ✦
-              </a>
-            )}
           </header>
 
-          {/* Dynamic Sections Loop */}
-          {sectionsArr.map((sec: any) => {
+          {sectionsArr.filter((sec: any) => { const secId = sec.id || sec; const enabled = sec.enabled !== undefined ? sec.enabled : true; return enabled; }).map((sec: any, index: number) => {
             const secId = sec.id || sec;
-            const enabled = sec.enabled !== undefined ? sec.enabled : true;
-            if (!enabled) return null;
-
+            const revealDelay = `${(index + 1) * 100}ms`;
             switch (secId) {
-              case 'hero':
-                return (
-                  <section id="hero" key="hero" className="space-y-4">
-                    <p className="text-sm text-white/60 leading-relaxed font-light text-center max-w-lg mx-auto">{getVal('hero', 'description', portfolio.description || profile.about_me || '')}</p>
-                  </section>
-                );
-              case 'about':
-                return (
-                  <section id="about" key="about" className="space-y-5">
-                    <h2 className="text-sm font-black text-rose-300 uppercase tracking-widest flex items-center gap-2">
-                      <span className="text-violet-400">✦</span> About
-                    </h2>
-                    <div className="glass rounded-3xl p-7 space-y-5">
-                      <p className="text-sm text-white/75 leading-relaxed font-light whitespace-pre-wrap">{getVal('about', 'text', profile.about_me || portfolio.description || '')}</p>
-                      <div className="grid grid-cols-2 gap-4 pt-4 border-t border-white/10 text-xs font-semibold">
-                        <div className="glass rounded-2xl p-4"><span className="text-white/40 block mb-1">Location</span><span className="text-white">{portfolio.location || profile.location || 'Remote'}</span></div>
-                        <div className="glass rounded-2xl p-4"><span className="text-white/40 block mb-1">Experience</span><span className="text-white">{profile.experience_years || 'N/A'} Years</span></div>
-                      </div>
-                    </div>
-                  </section>
-                );
-              case 'skills':
-                return (
-                  <section id="skills" key="skills" className="space-y-5">
-                    <h2 className="text-sm font-black text-rose-300 uppercase tracking-widest flex items-center gap-2">
-                      <span className="text-violet-400">✦</span> Skillsets
-                    </h2>
-                    <div className="glass rounded-3xl p-7 space-y-5">
-                      <p className="text-xs text-white/50 font-light italic">{getVal('skills', 'description', 'Creative technologies and design systems I specialise in:')}</p>
-                      <div className="flex flex-wrap gap-2">
-                        {techSkills.map((skill) => (
-                          <span key={skill} className="px-4 py-2 rounded-full bg-violet-500/20 border border-violet-400/25 text-xs font-bold text-violet-200 hover:bg-violet-500/30 transition-all">{skill}</span>
-                        ))}
-                        {tools.map((tool) => (
-                          <span key={tool} className="px-4 py-2 rounded-full bg-rose-500/15 border border-rose-400/20 text-xs text-rose-200">{tool}</span>
-                        ))}
-                        {softSkills.map((s) => (
-                          <span key={s} className="px-4 py-2 rounded-full bg-amber-500/10 border border-amber-400/15 text-xs text-amber-200">{s}</span>
-                        ))}
-                      </div>
-                    </div>
-                  </section>
-                );
-              case 'projects':
-                return (
-                  <section id="projects" key="projects" className="space-y-5">
-                    <h2 className="text-sm font-black text-rose-300 uppercase tracking-widest flex items-center gap-2">
-                      <span className="text-violet-400">✦</span> Selected Works
-                    </h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                      {projects.length > 0 ? projects.map((project) => (
-                        <div key={project.id} className="glass glass-hover rounded-3xl p-6 space-y-3 transition-all group cursor-default">
-                          <div className="flex justify-between items-start">
-                            <h3 className="text-sm font-black text-white uppercase tracking-wide group-hover:text-rose-300 transition-colors">{project.title}</h3>
-                            {project.projectUrl && (
-                              <a href={project.projectUrl} target="_blank" rel="noreferrer" className="text-[10px] text-rose-300 hover:underline shrink-0 ml-2">View ↗</a>
-                            )}
-                          </div>
-                          <p className="text-xs text-white/55 leading-relaxed font-light line-clamp-3">{project.description}</p>
-                          {project.technologies && (
-                            <div className="flex flex-wrap gap-1.5 pt-2">
-                              {project.technologies.split(',').map((t) => (
-                                <span key={t} className="px-2 py-0.5 rounded bg-white/10 text-[9px] font-semibold text-white/60">{t.trim()}</span>
-                              ))}
-                            </div>
-                          )}
+              case 'hero': return null;
+              case 'about': return (
+                <section key="about" className="space-y-4 reveal-item" style={{ animationDelay: revealDelay }}>
+                  <h2 className="text-[10px] font-black tracking-[0.3em] uppercase flex items-center gap-2 font-mono" style={{ color: themeColor }}><span className="w-6 h-px" style={{ backgroundColor: themeColor }} /> ABOUT_ME.md</h2>
+                  <div className={`tech-card rounded-2xl p-8 gap-8 relative overflow-hidden flex ${getAboutFlexClass(aboutPos)}`}>
+                    <div className="corner-brkt absolute inset-0" />
+                    <div className="space-y-6 flex-1">
+                      <p className={`text-sm leading-relaxed font-sans whitespace-pre-wrap ${isLightMode ? 'text-slate-700' : 'text-slate-300'}`}>{getVal('about', 'text', profile.about_me || 'About section content goes here.')}</p>
+                      <div className="grid grid-cols-2 gap-4 text-xs font-mono pt-2">
+                        <div className="p-3 rounded border" style={{ backgroundColor: isLightMode ? '#F1F5F9' : 'rgba(11, 19, 41, 0.4)', borderColor: isLightMode ? '#E2E8F0' : '#1E293B' }}>
+                          <span className="block text-[9px] uppercase tracking-wider mb-1 font-bold" style={{ color: themeColor }}>LOCATION:</span>
+                          <span className={isLightMode ? 'text-slate-800 font-semibold' : 'text-slate-300 font-semibold'}>{portfolio.location || profile.location || 'Not set'}</span>
                         </div>
-                      )) : (
-                        <div className="col-span-2 glass rounded-3xl p-8 text-center text-xs text-white/40">No works published yet.</div>
-                      )}
-                    </div>
-                  </section>
-                );
-              case 'experience':
-                return (
-                  <section id="experience" key="experience" className="space-y-5">
-                    <h2 className="text-sm font-black text-rose-300 uppercase tracking-widest flex items-center gap-2">
-                      <span className="text-violet-400">✦</span> Tenure
-                    </h2>
-                    <div className="glass rounded-3xl p-7 flex flex-col sm:flex-row justify-between gap-4">
-                      <div>
-                        <h3 className="text-sm font-black text-white">{profile.current_job_role || profile.current_role || 'Creative Director'}</h3>
-                        <p className="text-xs text-white/50 mt-1">{profile.company || 'Freelance Creative Studio'}</p>
-                      </div>
-                      <div className="text-left sm:text-right shrink-0">
-                        <span className="inline-block text-[10px] font-bold bg-violet-600/30 text-violet-300 px-3 py-1.5 rounded-full border border-violet-500/20">{profile.experience_years || 'N/A'} Years Exp</span>
-                        <p className="text-[10px] text-white/40 mt-1 uppercase tracking-wider">{profile.employment_type || 'Full-time'}</p>
-                      </div>
-                    </div>
-                  </section>
-                );
-              case 'education':
-                return (
-                  <section id="education" key="education" className="space-y-5">
-                    <h2 className="text-sm font-black text-rose-300 uppercase tracking-widest flex items-center gap-2">
-                      <span className="text-violet-400">✦</span> Credentials
-                    </h2>
-                    <div className="space-y-3">
-                      {education.length > 0 ? education.map((edu) => (
-                        <div key={edu.id} className="glass rounded-3xl p-5 flex flex-col sm:flex-row justify-between sm:items-center gap-3">
-                          <div>
-                            <h3 className="text-xs font-black text-white uppercase tracking-wide">{edu.degree}{edu.fieldOfStudy ? ` in ${edu.fieldOfStudy}` : ''}</h3>
-                            <p className="text-[11px] text-white/50 mt-1">{edu.school}</p>
-                          </div>
-                          <span className="text-[10px] glass px-3 py-1 rounded-full text-white/60 shrink-0">
-                            {edu.startYear && edu.endYear ? `${edu.startYear} – ${edu.endYear}` : (edu.endYear || edu.startYear || '')}
-                          </span>
+                        <div className="p-3 rounded border" style={{ backgroundColor: isLightMode ? '#F1F5F9' : 'rgba(11, 19, 41, 0.4)', borderColor: isLightMode ? '#E2E8F0' : '#1E293B' }}>
+                          <span className="block text-[9px] uppercase tracking-wider mb-1 font-bold" style={{ color: themeColor }}>LANGUAGE:</span>
+                          <span className={isLightMode ? 'text-slate-800 font-semibold' : 'text-slate-300 font-semibold'}>{portfolio.language || 'English'}</span>
                         </div>
-                      )) : <p className="glass rounded-3xl p-6 text-xs text-white/40 text-center">No credentials registered yet.</p>}
-                    </div>
-                  </section>
-                );
-              case 'certifications':
-                return (
-                  <section id="certifications" key="certifications" className="space-y-5">
-                    <h2 className="text-sm font-black text-rose-300 uppercase tracking-widest flex items-center gap-2">
-                      <span className="text-violet-400">✦</span> Certifications
-                    </h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {Array.isArray(profile.certifications) && profile.certifications.length > 0 ? profile.certifications.map((c: any, index: number) => (
-                        <div key={index} className="glass rounded-3xl p-4 flex items-center gap-3">
-                          <span className="text-xl shrink-0">🏆</span>
-                          <div>
-                            <p className="text-xs font-black text-white">{c.name || c}</p>
-                            <p className="text-[9px] text-rose-300 mt-0.5">{c.issuer || 'Professional Certification'}</p>
-                          </div>
-                        </div>
-                      )) : <p className="glass rounded-3xl p-6 text-xs text-white/40 text-center col-span-2">No certifications listed yet.</p>}
-                    </div>
-                  </section>
-                );
-              case 'contact':
-                return (
-                  <section id="contact" key="contact" className="space-y-5">
-                    <h2 className="text-sm font-black text-rose-300 uppercase tracking-widest flex items-center gap-2">
-                      <span className="text-violet-400">✦</span> Contact
-                    </h2>
-                    <div className="glass rounded-3xl p-7 space-y-4 max-w-lg">
-                      <p className="text-xs text-white/50 font-light">{getVal('contact', 'prompt', "Let's connect and co-create something extraordinary:")}</p>
-                      <div className="space-y-3">
-                        <div className="grid grid-cols-2 gap-3">
-                          <input type="text" placeholder="Your Name" className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-2xl text-xs text-white placeholder-white/30 focus:outline-none focus:border-white/30" />
-                          <input type="email" placeholder="Email Address" className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-2xl text-xs text-white placeholder-white/30 focus:outline-none focus:border-white/30" />
-                        </div>
-                        <textarea rows={4} placeholder="Tell me about your project..." className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-2xl text-xs text-white placeholder-white/30 focus:outline-none focus:border-white/30 resize-none" />
-                        <button className="w-full py-3 bg-gradient-to-r from-violet-500 to-rose-500 hover:from-violet-600 hover:to-rose-600 text-white font-black text-xs rounded-2xl shadow-lg uppercase tracking-widest transition-all">
-                          Send Message ✦
-                        </button>
                       </div>
                     </div>
-                  </section>
-                );
-              default:
-                if (secId?.startsWith('custom_')) {
-                  const customText = customData[secId]?.text || sec.description || '';
-                  return (
-                    <section id={secId} key={secId} className="space-y-5">
-                      <h2 className="text-sm font-black text-rose-300 uppercase tracking-widest flex items-center gap-2">
-                        <span className="text-violet-400">✦</span> {sec.name || 'Custom Section'}
-                      </h2>
-                      <div className="glass rounded-3xl p-7">
-                        <p className="text-sm text-white/75 leading-relaxed font-light whitespace-pre-wrap">{customText}</p>
-                      </div>
-                    </section>
-                  );
-                }
-                return null;
+                    {aboutPic && <div className="shrink-0 max-w-[220px] w-full flex flex-col items-center justify-center"><img src={aboutPic} alt="About Us" className="w-full h-48 object-cover rounded-xl border shadow-md" style={{ borderColor: themeColor }} /></div>}
+                  </div>
+                </section>
+              );
+              case 'skills': return (
+                <section key="skills" className="space-y-4 reveal-item" style={{ animationDelay: revealDelay }}>
+                  <h2 className="text-[10px] font-black tracking-[0.3em] uppercase flex items-center gap-2 font-mono" style={{ color: themeColor }}><span className="w-6 h-px" style={{ backgroundColor: themeColor }} /> TECH_STACK.json</h2>
+                  <div className="tech-card rounded-2xl p-8 space-y-6 relative">
+                    <div className="corner-brkt absolute inset-0" />
+                    <p className={`text-xs font-sans italic ${isLightMode ? 'text-slate-500' : 'text-slate-400'}`}>{getVal('skills', 'description', 'Core competencies, technical frameworks, and productivity tools:')}</p>
+                    <div className="space-y-5 font-mono">
+                      {Array.isArray(profile.tech_skills) && profile.tech_skills.length > 0 && (<div><span className="text-[9px] font-bold tracking-widest uppercase mb-3 block" style={{ color: themeColor }}>&lt;LANGUAGES_&_FRAMEWORKS&gt;</span><div className="flex flex-wrap gap-2">{profile.tech_skills.map((s: string, i: number) => <span key={i} className="px-3 py-1.5 border rounded text-xs font-bold transition-all" style={{ backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.1)`, borderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.3)`, color: themeColor }}>{s}</span>)}</div></div>)}
+                      {Array.isArray(profile.tools) && profile.tools.length > 0 && (<div><span className="text-[9px] font-bold tracking-widest uppercase mb-3 block text-slate-400">&lt;TOOLS_&_PLATFORMS&gt;</span><div className="flex flex-wrap gap-2">{profile.tools.map((t: string, i: number) => <span key={i} className={`px-3 py-1.5 border rounded text-xs ${isLightMode ? 'bg-slate-100 border-slate-200 text-slate-700' : 'bg-slate-900/60 border-slate-800 text-slate-300'}`}>{t}</span>)}</div></div>)}
+                    </div>
+                  </div>
+                </section>
+              );
+              case 'projects': return (
+                <section key="projects" className="space-y-4 reveal-item" style={{ animationDelay: revealDelay }}>
+                  <h2 className="text-[10px] font-black tracking-[0.3em] uppercase flex items-center gap-2 font-mono" style={{ color: themeColor }}><span className="w-6 h-px" style={{ backgroundColor: themeColor }} /> PROJECTS.log</h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">{projects.length > 0 ? projects.map((p: any, i: number) => <div key={i} className="tech-card rounded-2xl overflow-hidden flex flex-col group">{p.bannerUrl && <img src={p.bannerUrl} alt={p.title} className="w-full h-36 object-cover border-b" style={{ borderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.2)` }} />}<div className="p-6 space-y-3 flex-1 flex flex-col justify-between relative"><div className="corner-brkt absolute inset-0 pointer-events-none" /><div className="space-y-2"><div className="flex justify-between items-start"><h3 className={`text-sm font-bold ${isLightMode ? 'text-slate-900' : 'text-white'}`}>{p.title}</h3>{p.projectUrl && <a href={p.projectUrl} target="_blank" rel="noreferrer" className="text-[9px] hover:underline flex items-center gap-1 font-semibold shrink-0 ml-2" style={{ color: themeColor }}>LINK ↗</a>}</div><p className={`text-xs leading-relaxed font-sans line-clamp-3 ${isLightMode ? 'text-slate-600' : 'text-slate-400'}`}>{p.description}</p></div>{p.technologies && <div className="flex flex-wrap gap-1.5 pt-3 border-t border-slate-800/40">{p.technologies.split(',').map((t: string, i: number) => <span key={i} className={`px-2.5 py-0.5 border rounded text-[9px] ${isLightMode ? 'bg-slate-100 border-slate-200 text-slate-600' : 'bg-slate-900 border-slate-800 text-slate-400'}`}>{t.trim()}</span>)}</div>}</div></div>) : <div className="col-span-2 tech-card rounded-2xl p-8 text-center text-xs text-slate-500 relative"><div className="corner-brkt absolute inset-0" />No projects published yet.</div>}</div>
+                </section>
+              );
+              case 'experience': return (
+                <section key="experience" className="space-y-4 reveal-item" style={{ animationDelay: revealDelay }}>
+                  <h2 className="text-[10px] font-black tracking-[0.3em] uppercase flex items-center gap-2 font-mono" style={{ color: themeColor }}><span className="w-6 h-px" style={{ backgroundColor: themeColor }} /> WORK_HISTORY.csv</h2>
+                  <div className="tech-card rounded-2xl p-6 flex flex-col sm:flex-row justify-between gap-4 font-sans relative"><div className="corner-brkt absolute inset-0" /><div className="space-y-1"><h3 className={`text-sm font-bold font-mono ${isLightMode ? 'text-slate-900' : 'text-white'}`}>{profile.current_job_role || profile.current_role || 'Software Engineer'}</h3><p className={`text-xs ${isLightMode ? 'text-slate-600' : 'text-slate-400'}`}>{profile.company || 'Freelance / Open Source Studio'}</p></div><div className="text-left sm:text-right shrink-0 font-mono space-y-1"><span className="inline-block text-[9px] font-bold px-3 py-1 rounded border led-pulse" style={{ backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.1)`, borderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.3)`, color: themeColor }}>{profile.experience_years || 'N/A'} Years_Exp</span><p className="text-[9px] text-slate-400 uppercase tracking-widest block">{profile.employment_type || 'Full-time'}</p></div></div>
+                </section>
+              );
+              case 'education': return (
+                <section key="education" className="space-y-4 reveal-item" style={{ animationDelay: revealDelay }}>
+                  <h2 className="text-[10px] font-black tracking-[0.3em] uppercase flex items-center gap-2 font-mono" style={{ color: themeColor }}><span className="w-6 h-px" style={{ backgroundColor: themeColor }} /> ACADEMIC_LOG.db</h2>
+                  <div className="space-y-3">{education.length > 0 ? education.map((e: any, i: number) => <div key={i} className="tech-card rounded-2xl p-5 flex flex-col sm:flex-row justify-between gap-3 sm:items-center font-sans relative"><div className="corner-brkt absolute inset-0" /><div><h3 className={`text-xs font-bold font-mono ${isLightMode ? 'text-slate-900' : 'text-white'}`}>{e.degree} in {e.fieldOfStudy}</h3><p className={`text-[11px] mt-1 ${isLightMode ? 'text-slate-600' : 'text-slate-400'}`}>{e.school}</p></div><span className={`text-[9px] border px-3 py-1 rounded font-mono shrink-0 ${isLightMode ? 'bg-slate-100 border-slate-200 text-slate-700' : 'bg-slate-900 border-slate-800 text-slate-400'}`}>[{e.startYear} - {e.endYear}]</span></div>) : <div className="tech-card rounded-2xl p-5 text-xs text-slate-500 font-sans text-center relative"><div className="corner-brkt absolute inset-0" />No education records registered.</div>}</div>
+                </section>
+              );
+              case 'certifications': return (
+                <section key="certifications" className="space-y-4 reveal-item" style={{ animationDelay: revealDelay }}>
+                  <h2 className="text-[10px] font-black tracking-[0.3em] uppercase flex items-center gap-2 font-mono" style={{ color: themeColor }}><span className="w-6 h-px" style={{ backgroundColor: themeColor }} /> VERIFIED_CERTS.x509</h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">{Array.isArray(profile.certifications) && profile.certifications.length > 0 ? profile.certifications.map((c: any, i: number) => <div key={i} className="tech-card rounded-2xl p-4 flex items-center gap-3 relative"><div className="corner-brkt absolute inset-0" /><span className="text-xl">🏆</span><div className="font-sans"><p className={`text-xs font-bold font-mono ${isLightMode ? 'text-slate-900' : 'text-white'}`}>{c.name || c}</p><p className="text-[9px] font-mono mt-0.5" style={{ color: themeColor }}>{c.issuer || 'Online Certification'}</p></div></div>) : <div className="tech-card rounded-2xl p-4 text-xs text-slate-500 font-sans text-center col-span-2 relative"><div className="corner-brkt absolute inset-0" />No certificates registered.</div>}</div>
+                </section>
+              );
+              case 'contact': return (
+                <section key="contact" className="space-y-4 reveal-item" style={{ animationDelay: revealDelay }}>
+                  <h2 className="text-[10px] font-black tracking-[0.3em] uppercase flex items-center gap-2 font-mono" style={{ color: themeColor }}><span className="w-6 h-px" style={{ backgroundColor: themeColor }} /> ESTABLISH_CONTACT.sh</h2>
+                  <div className="tech-card rounded-2xl p-8 space-y-5 max-w-lg relative"><div className="corner-brkt absolute inset-0" /><p className={`text-xs font-sans ${isLightMode ? 'text-slate-600' : 'text-slate-400'}`}>{getVal('contact', 'prompt', 'Send a direct message below:')}</p><form action={`mailto:${user.email || ''}`} method="post" className="space-y-3 font-sans"><div className="grid grid-cols-2 gap-3"><input required type="text" placeholder="Name" className={`w-full px-3 py-2 border rounded text-xs ${isLightMode ? 'bg-slate-100 border-slate-200 text-slate-700' : 'bg-slate-950/40 border-slate-800 text-slate-200'}`} /><input required type="email" placeholder="Email" className={`w-full px-3 py-2 border rounded text-xs ${isLightMode ? 'bg-slate-100 border-slate-200 text-slate-700' : 'bg-slate-950/40 border-slate-800 text-slate-200'}`} /></div><textarea required rows={3} placeholder="Message..." className={`w-full px-3 py-2 border rounded text-xs ${isLightMode ? 'bg-slate-100 border-slate-200 text-slate-700' : 'bg-slate-950/40 border-slate-800 text-slate-200'}`} /><button type="submit" className="w-full py-3 text-white font-mono text-xs font-bold rounded transition-colors border" style={{ backgroundColor: themeColor, borderColor: themeColor }}>SEND MESSAGE ➔</button></form></div>
+                </section>
+              );
+              default: return null;
             }
           })}
         </div>
-
-        <footer className="mt-24 border-t border-white/10 py-6 text-center">
-          <p className="text-xs text-white/30">Crafted with <span className="text-rose-400">ProfileMitraa</span> &bull; {user.full_name || user.username}</p>
-        </footer>
+        <footer className="mt-20 border-t py-8 text-center relative z-10" style={{ borderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.15)` }}><p className="text-[10px] text-slate-500 tracking-wider uppercase">Built with <span className="font-bold" style={{ color: themeColor }}>ProfileMitraa</span> &bull; {user.full_name || user.username} &bull; All Rights Reserved</p></footer>
       </div>
     );
   }
 
-  // ── TEMPLATE 3: Corporate Blue (Default) ───────────────────────────────────
+  // ── TEMPLATE 2 & 3: Creative / Corporate ──────────────────────────────────
+  const bgStyle = isLightMode ? '#F1F5F9' : '#070514';
+  const textStyle = isLightMode ? '#0F172A' : '#FFFFFF';
+  const cardBgStyle = isLightMode ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.03)';
+  const borderStyle = isLightMode ? `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.25)` : `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.15)`;
+
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 font-sans pb-24">
+    <div className="min-h-screen font-sans pb-20 relative overflow-x-hidden" style={{ backgroundColor: bgStyle, color: textStyle }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #F8FAFC; }
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;900&display=swap');
+        body { font-family: 'Outfit', sans-serif; background-color: ${bgStyle}; color: ${textStyle}; overflow-x: hidden; }
+        .custom-card {
+          background: ${cardBgStyle};
+          border: 1px solid ${borderStyle};
+          backdrop-filter: blur(20px);
+          transition: all 400ms cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .custom-card:hover {
+          border-color: ${themeColor};
+          transform: translateY(-4px);
+          box-shadow: 0 20px 40px rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.15);
+        }
       `}</style>
-
-      {/* Nav */}
-      <nav className="bg-[#1E293B] sticky top-0 z-30 px-6 py-4 flex items-center justify-between shadow-lg">
-        <span className="text-sm font-black text-white tracking-tight">{user.full_name || user.username}</span>
-        <div className="flex gap-6 text-xs text-slate-400 font-semibold flex-wrap">
-          {sectionsArr.filter((sec: any) => sec.enabled && sec.id !== 'hero').map((sec: any) => (
-            <a key={sec.id} href={`#${sec.id}`} className="hover:text-white transition-colors capitalize">{sec.name?.replace(' Me', '').replace('Form', '').slice(0, 15)}</a>
-          ))}
-        </div>
-      </nav>
-
-      <div className="max-w-4xl mx-auto px-6 pt-12 space-y-14">
-        {/* Hero Header */}
-        <header className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8 flex flex-col sm:flex-row items-center gap-8">
-          {profilePic ? (
-            <img src={profilePic} alt={user.full_name} className="w-32 h-32 rounded-full object-cover border-4 border-slate-100 shadow-lg shrink-0" />
-          ) : (
-            <div className="w-32 h-32 rounded-full bg-slate-100 border-2 border-slate-200 flex items-center justify-center text-5xl shrink-0">💼</div>
-          )}
-          <div className="text-center sm:text-left space-y-3">
-            <span className="inline-block text-[9px] font-black tracking-widest text-sky-600 bg-sky-50 px-3 py-1 rounded border border-sky-200 uppercase">Professional Portfolio</span>
-            <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">{getVal('hero', 'title', portfolio.title || user.full_name || user.username)}</h1>
-            <p className="text-sm font-bold text-slate-500">{getVal('hero', 'subtitle', portfolio.tagline || profile.headline || 'Business Consultant')}</p>
-            <p className="text-sm text-slate-500 leading-relaxed max-w-xl font-normal">{getVal('hero', 'description', portfolio.description || profile.about_me || '')}</p>
-            {isEnabled('contact') && (
-              <a href="#contact" className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#1E293B] hover:bg-slate-700 text-white text-xs font-black rounded-xl transition-all shadow-sm">
-                Schedule Consultation →
-              </a>
-            )}
+      <div className="fixed top-12 left-1/4 w-[500px] h-[500px] rounded-full blur-[130px] pointer-events-none z-0" style={{ backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.15)` }} />
+      <div className="max-w-3xl mx-auto px-6 pt-16 space-y-16 relative z-10">
+        <header className={`custom-card rounded-3xl p-8 flex items-center gap-8 ${getHeroFlexClass(heroPos)}`}>
+          {heroPic ? (
+            <div className="relative group shrink-0">
+              <div className="absolute inset-0 rounded-2xl blur-xl opacity-60 scale-110" style={{ backgroundColor: themeColor }} />
+              <img src={heroPic} alt="Hero Avatar" className="relative w-32 h-32 rounded-2xl object-cover border-2 shadow-2xl" style={{ borderColor: themeColor }} />
+            </div>
+          ) : (<div className="w-32 h-32 rounded-2xl custom-card flex items-center justify-center text-5xl shrink-0">🎨</div>)}
+          <div className="space-y-3 flex-1">
+            <span className="inline-block text-[10px] font-black tracking-widest uppercase px-4 py-1.5 rounded-full border" style={{ backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.15)`, color: themeColor, borderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.3)` }}>Featured Portfolio</span>
+            <h1 className="text-4xl sm:text-5xl font-black tracking-tight leading-tight">{getVal('hero', 'title', portfolio.title || `${user.full_name || user.username} Portfolio`)}</h1>
+            <p className="text-base font-semibold" style={{ color: themeColor }}>{getVal('hero', 'subtitle', portfolio.tagline || profile.headline || 'Creative Professional')}</p>
           </div>
         </header>
 
-        {/* Dynamic Sections Loop */}
-        {sectionsArr.map((sec: any) => {
+        {sectionsArr.filter((sec: any) => { const secId = sec.id || sec; const enabled = sec.enabled !== undefined ? sec.enabled : true; return enabled; }).map((sec: any, idx: number) => {
           const secId = sec.id || sec;
-          const enabled = sec.enabled !== undefined ? sec.enabled : true;
-          if (!enabled) return null;
-
           switch (secId) {
-            case 'hero':
-              return null; // Already rendered in header above
-            case 'about':
-              return (
-                <section id="about" key="about" className="space-y-4">
-                  <h2 className="text-[10px] font-black text-slate-700 uppercase tracking-widest border-l-4 border-sky-500 pl-3">Professional Profile</h2>
-                  <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-7 space-y-5">
-                    <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">{getVal('about', 'text', profile.about_me || portfolio.description || '')}</p>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-slate-100 text-xs font-semibold text-slate-600">
-                      <div><span className="text-slate-400 uppercase text-[9px] block mb-1">Location</span>{portfolio.location || profile.location || 'Remote'}</div>
-                      <div><span className="text-slate-400 uppercase text-[9px] block mb-1">Experience</span>{profile.experience_years || 'N/A'} Years</div>
-                      <div><span className="text-slate-400 uppercase text-[9px] block mb-1">Employment</span>{profile.employment_type || 'Full-time'}</div>
-                      <div><span className="text-slate-400 uppercase text-[9px] block mb-1">Language</span>{portfolio.language || 'English'}</div>
-                    </div>
-                  </div>
-                </section>
-              );
-            case 'skills':
-              return (
-                <section id="skills" key="skills" className="space-y-4">
-                  <h2 className="text-[10px] font-black text-slate-700 uppercase tracking-widest border-l-4 border-sky-500 pl-3">Technical Competencies</h2>
-                  <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-7 space-y-4">
-                    <p className="text-xs text-slate-400 italic">{getVal('skills', 'description', 'Corporate stack and professional domain expertise:')}</p>
-                    <div className="flex flex-wrap gap-2">
-                      {techSkills.map((skill) => (
-                        <span key={skill} className="px-3.5 py-1.5 bg-slate-100 border border-slate-200 text-xs font-bold text-slate-700 rounded-lg hover:border-sky-400 hover:text-sky-700 transition-all">{skill}</span>
-                      ))}
-                      {tools.map((tool) => (
-                        <span key={tool} className="px-3.5 py-1.5 bg-slate-50 border border-slate-200 text-xs text-slate-500 rounded-lg">{tool}</span>
-                      ))}
-                    </div>
-                  </div>
-                </section>
-              );
-            case 'projects':
-              return (
-                <section id="projects" key="projects" className="space-y-4">
-                  <h2 className="text-[10px] font-black text-slate-700 uppercase tracking-widest border-l-4 border-sky-500 pl-3">Key Deliverables</h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {projects.length > 0 ? projects.map((project) => (
-                      <div key={project.id} className="bg-white border border-slate-200 hover:border-sky-400 hover:shadow-md rounded-2xl p-6 space-y-3 transition-all flex flex-col">
-                        <div>
-                          <h3 className="text-sm font-black text-slate-900 leading-snug">{project.title}</h3>
-                          <p className="text-xs text-slate-500 leading-relaxed mt-2 line-clamp-3">{project.description}</p>
-                        </div>
-                        {project.technologies && (
-                          <div className="flex flex-wrap gap-1.5">
-                            {project.technologies.split(',').map((t) => (
-                              <span key={t} className="px-2 py-0.5 bg-sky-50 border border-sky-200 text-[9px] text-sky-700 rounded font-semibold">{t.trim()}</span>
-                            ))}
-                          </div>
-                        )}
-                        {project.projectUrl && (
-                          <a href={project.projectUrl} target="_blank" rel="noreferrer" className="text-xs font-bold text-sky-600 hover:text-sky-700 flex items-center gap-1 mt-auto">
-                            View Resource →
-                          </a>
-                        )}
-                      </div>
-                    )) : (
-                      <div className="col-span-2 bg-white border border-slate-200 p-8 rounded-2xl text-center text-xs text-slate-400">No key deliverables published yet.</div>
-                    )}
-                  </div>
-                </section>
-              );
-            case 'experience':
-              return (
-                <section id="experience" key="experience" className="space-y-4">
-                  <h2 className="text-[10px] font-black text-slate-700 uppercase tracking-widest border-l-4 border-sky-500 pl-3">Tenure Timeline</h2>
-                  <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-7 flex flex-col sm:flex-row justify-between gap-4">
-                    <div>
-                      <h3 className="text-sm font-black text-slate-900">{profile.current_job_role || profile.current_role || 'Senior Consultant'}</h3>
-                      <p className="text-xs text-slate-500 mt-1">{profile.company || 'Corporate Enterprise Ltd.'}</p>
-                    </div>
-                    <div className="text-left sm:text-right shrink-0">
-                      <span className="inline-block text-[10px] font-black bg-sky-50 text-sky-700 border border-sky-200 rounded px-3 py-1">{profile.experience_years || 'N/A'} Years</span>
-                      <p className="text-[10px] text-slate-400 mt-1 uppercase tracking-wider">{profile.employment_type || 'Full-time'}</p>
-                    </div>
-                  </div>
-                </section>
-              );
-            case 'education':
-              return (
-                <section id="education" key="education" className="space-y-4">
-                  <h2 className="text-[10px] font-black text-slate-700 uppercase tracking-widest border-l-4 border-sky-500 pl-3">Educational Background</h2>
-                  <div className="space-y-3">
-                    {education.length > 0 ? education.map((edu) => (
-                      <div key={edu.id} className="bg-white border border-slate-200 rounded-2xl shadow-sm p-5 flex flex-col sm:flex-row justify-between sm:items-center gap-3">
-                        <div>
-                          <h3 className="text-xs font-black text-slate-900">{edu.degree}{edu.fieldOfStudy ? ` in ${edu.fieldOfStudy}` : ''}</h3>
-                          <p className="text-[11px] text-slate-500 mt-1">{edu.school}</p>
-                        </div>
-                        <span className="text-[10px] bg-slate-100 text-slate-600 font-bold px-3 py-1.5 rounded-lg border border-slate-200 shrink-0">
-                          {edu.startYear && edu.endYear ? `${edu.startYear} – ${edu.endYear}` : (edu.endYear || edu.startYear || '')}
-                        </span>
-                      </div>
-                    )) : <div className="bg-white border border-slate-200 p-6 rounded-2xl text-xs text-slate-400 text-center">No academic credentials yet.</div>}
-                  </div>
-                </section>
-              );
-            case 'certifications':
-              return (
-                <section id="certifications" key="certifications" className="space-y-4">
-                  <h2 className="text-[10px] font-black text-slate-700 uppercase tracking-widest border-l-4 border-sky-500 pl-3">Certifications</h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {Array.isArray(profile.certifications) && profile.certifications.length > 0 ? profile.certifications.map((c: any, i: number) => (
-                      <div key={i} className="bg-white border border-slate-200 rounded-2xl p-4 flex items-center gap-3 shadow-sm">
-                        <span className="text-xl">🏆</span>
-                        <div>
-                          <p className="text-xs font-black text-slate-900">{c.name || c}</p>
-                          <p className="text-[9px] text-sky-600 font-bold mt-0.5">{c.issuer || 'Professional Certification'}</p>
-                        </div>
-                      </div>
-                    )) : <div className="col-span-2 bg-white border border-slate-200 p-6 rounded-2xl text-xs text-slate-400 text-center">No certifications listed yet.</div>}
-                  </div>
-                </section>
-              );
-            case 'contact':
-              return (
-                <section id="contact" key="contact" className="space-y-4">
-                  <h2 className="text-[10px] font-black text-slate-700 uppercase tracking-widest border-l-4 border-sky-500 pl-3">Schedule a Consultation</h2>
-                  <div className="bg-white border border-slate-200 shadow-sm rounded-2xl p-7 space-y-4 max-w-lg">
-                    <p className="text-xs text-slate-500">{getVal('contact', 'prompt', 'Fill in your details below to request a professional consultation or enquiry:')}</p>
-                    <div className="space-y-3">
-                      <div className="grid grid-cols-2 gap-3">
-                        <input type="text" placeholder="Full Name" className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 focus:outline-none focus:border-sky-400" />
-                        <input type="email" placeholder="Email Address" className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 focus:outline-none focus:border-sky-400" />
-                      </div>
-                      <textarea rows={4} placeholder="Briefly describe your requirements..." className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 focus:outline-none focus:border-sky-400 resize-none" />
-                      <button className="w-full py-2.5 bg-[#1E293B] hover:bg-slate-700 text-white font-black text-xs rounded-xl uppercase tracking-widest transition-all shadow-sm">
-                        Submit Request →
-                      </button>
-                    </div>
-                  </div>
-                </section>
-              );
-            default:
-              if (secId?.startsWith('custom_')) {
-                const customText = customData[secId]?.text || sec.description || '';
-                return (
-                  <section id={secId} key={secId} className="space-y-4">
-                    <h2 className="text-[10px] font-black text-slate-700 uppercase tracking-widest border-l-4 border-sky-500 pl-3">{sec.name || 'Custom Section'}</h2>
-                    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-7">
-                      <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">{customText}</p>
-                    </div>
-                  </section>
-                );
-              }
-              return null;
+            case 'hero': return <section key="hero" className="custom-card rounded-3xl p-8 space-y-3"><p className={`text-sm leading-relaxed font-light ${isLightMode ? 'text-slate-700' : 'text-white/80'}`}>{getVal('hero', 'description', portfolio.description || profile.about_me || 'Description text goes here.')}</p></section>;
+            case 'about': return <section key="about" className="space-y-4"><h2 className="text-sm font-black uppercase tracking-widest flex items-center gap-2" style={{ color: themeColor }}><span>✦</span> About Us</h2><div className={`custom-card rounded-3xl p-8 gap-8 flex ${getAboutFlexClass(aboutPos)}`}><div className="space-y-4 flex-1"><p className={`text-sm leading-relaxed font-light whitespace-pre-wrap ${isLightMode ? 'text-slate-700' : 'text-white/80'}`}>{getVal('about', 'text', profile.about_me || 'About section content goes here.')}</p><div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-200/20 text-xs font-semibold"><div className="custom-card rounded-2xl p-4"><span className="block mb-1 text-[10px] uppercase tracking-wider font-bold" style={{ color: themeColor }}>Location</span><span className="font-bold">{portfolio.location || profile.location || 'Not set'}</span></div><div className="custom-card rounded-2xl p-4"><span className="block mb-1 text-[10px] uppercase tracking-wider font-bold" style={{ color: themeColor }}>Language</span><span className="font-bold">{portfolio.language || 'English'}</span></div></div></div>{aboutPic && <div className="shrink-0 max-w-[220px] w-full flex flex-col items-center justify-center"><img src={aboutPic} alt="About Us" className="w-full h-48 object-cover rounded-2xl border shadow-lg" style={{ borderColor: themeColor }} /></div>}</div></section>;
+            case 'skills': return <section key="skills" className="space-y-4"><h2 className="text-sm font-black uppercase tracking-widest flex items-center gap-2" style={{ color: themeColor }}><span>✦</span> Skills & Tools</h2><div className="custom-card rounded-3xl p-8 space-y-4"><p className={`text-xs font-light italic ${isLightMode ? 'text-slate-500' : 'text-white/50'}`}>{getVal('skills', 'description', 'Specialized tools and technical frameworks:')}</p><div className="flex flex-wrap gap-2">{Array.isArray(profile.tech_skills) && profile.tech_skills.map((s: string, i: number) => <span key={i} className="px-4 py-2 rounded-full border text-xs font-bold" style={{ backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.15)`, borderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.3)`, color: themeColor }}>{s}</span>)}{Array.isArray(profile.tools) && profile.tools.map((t: string, i: number) => <span key={i} className={`px-4 py-2 rounded-full border text-xs ${isLightMode ? 'bg-slate-100 border-slate-200 text-slate-700' : 'bg-white/5 border-white/10 text-white/70'}`}>{t}</span>)}</div></div></section>;
+            case 'projects': return <section key="projects" className="space-y-4"><h2 className="text-sm font-black uppercase tracking-widest flex items-center gap-2" style={{ color: themeColor }}><span>✦</span> Featured Projects</h2><div className="grid grid-cols-1 sm:grid-cols-2 gap-5">{projects.length > 0 ? projects.map((p: any, i: number) => <div key={i} className="custom-card rounded-3xl overflow-hidden flex flex-col group">{p.bannerUrl && <img src={p.bannerUrl} alt={p.title} className="w-full h-36 object-cover border-b" style={{ borderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.2)` }} />}<div className="p-6 space-y-3 flex-1 flex flex-col justify-between"><div className="space-y-2"><div className="flex justify-between items-start"><h3 className="text-sm font-black uppercase tracking-wide">{p.title}</h3>{p.projectUrl && <a href={p.projectUrl} target="_blank" rel="noreferrer" className="text-[10px] font-bold hover:underline" style={{ color: themeColor }}>Link ↗</a>}</div><p className={`text-xs leading-relaxed font-light line-clamp-3 ${isLightMode ? 'text-slate-600' : 'text-white/60'}`}>{p.description}</p></div>{p.technologies && <div className="flex flex-wrap gap-1.5 pt-2">{p.technologies.split(',').map((t: string, i: number) => <span key={i} className={`px-2.5 py-0.5 rounded text-[9px] font-semibold ${isLightMode ? 'bg-slate-100 text-slate-600' : 'bg-white/5 text-white/50'}`}>{t.trim()}</span>)}</div>}</div></div>) : <div className="col-span-2 custom-card rounded-3xl p-8 text-center text-xs text-slate-400">No projects added.</div>}</div></section>;
+            case 'experience': return <section key="experience" className="space-y-4"><h2 className="text-sm font-black uppercase tracking-widest flex items-center gap-2" style={{ color: themeColor }}><span>✦</span> Experience</h2><div className="custom-card rounded-3xl p-8 flex flex-col sm:flex-row justify-between gap-4"><div className="space-y-1"><h3 className="text-sm font-black">{profile.current_job_role || 'Specialist'}</h3><p className={`text-xs ${isLightMode ? 'text-slate-600' : 'text-white/60'}`}>{profile.company || 'Enterprise'}</p></div><div className="text-left sm:text-right shrink-0"><span className="inline-block text-[10px] font-bold px-3 py-1 rounded-full border" style={{ backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.15)`, color: themeColor, borderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.3)` }}>{profile.experience_years || 'N/A'} Years Exp</span></div></div></section>;
+            case 'education': return <section key="education" className="space-y-4"><h2 className="text-sm font-black uppercase tracking-widest flex items-center gap-2" style={{ color: themeColor }}><span>✦</span> Education</h2><div className="space-y-3">{education.length > 0 ? education.map((e: any, i: number) => <div key={i} className="custom-card rounded-3xl p-6 flex flex-col sm:flex-row justify-between sm:items-center gap-3"><div><h3 className="text-xs font-black uppercase tracking-wide">{e.degree} in {e.fieldOfStudy}</h3><p className={`text-[11px] mt-1 font-light ${isLightMode ? 'text-slate-600' : 'text-white/60'}`}>{e.school}</p></div><span className="text-[9px] custom-card px-3 py-1 rounded-full text-slate-400 shrink-0">{e.startYear} - {e.endYear}</span></div>) : <div className="custom-card rounded-3xl p-6 text-xs text-slate-400 text-center">No education records added.</div>}</div></section>;
+            case 'certifications': return <section key="certifications" className="space-y-4"><h2 className="text-sm font-black uppercase tracking-widest flex items-center gap-2" style={{ color: themeColor }}><span>✦</span> Certifications</h2><div className="grid grid-cols-1 sm:grid-cols-2 gap-3">{Array.isArray(profile.certifications) && profile.certifications.length > 0 ? profile.certifications.map((c: any, i: number) => <div key={i} className="custom-card rounded-3xl p-4 flex items-center gap-3"><span className="text-xl shrink-0">🏆</span><div><p className="text-xs font-black">{c.name || c}</p><p className="text-[9px] font-medium mt-0.5" style={{ color: themeColor }}>{c.issuer || 'Certification'}</p></div></div>) : <div className="custom-card rounded-3xl p-6 text-xs text-slate-400 text-center col-span-2">No certifications listed.</div>}</div></section>;
+            case 'contact': return <section key="contact" className="space-y-4"><h2 className="text-sm font-black uppercase tracking-widest flex items-center gap-2" style={{ color: themeColor }}><span>✦</span> Contact</h2><div className="custom-card rounded-3xl p-8 space-y-4 max-w-lg"><p className={`text-xs font-light ${isLightMode ? 'text-slate-600' : 'text-white/60'}`}>{getVal('contact', 'prompt', "Let's connect:")}</p><form action={`mailto:${user.email || ''}`} method="post" className="space-y-3"><div className="grid grid-cols-2 gap-3"><input required type="text" placeholder="Name" className={`w-full px-4 py-3 border rounded-2xl text-xs ${isLightMode ? 'bg-slate-100 border-slate-200 text-slate-700' : 'bg-white/5 border-white/10 text-white/80'}`} /><input required type="email" placeholder="Email" className={`w-full px-4 py-3 border rounded-2xl text-xs ${isLightMode ? 'bg-slate-100 border-slate-200 text-slate-700' : 'bg-white/5 border-white/10 text-white/80'}`} /></div><textarea required rows={3} placeholder="Message..." className={`w-full px-4 py-3 border rounded-2xl text-xs resize-none ${isLightMode ? 'bg-slate-100 border-slate-200 text-slate-700' : 'bg-white/5 border-white/10 text-white/80'}`} /><button type="submit" className="w-full py-3.5 font-black text-xs rounded-2xl uppercase tracking-widest text-white border" style={{ backgroundColor: themeColor, borderColor: themeColor }}>Send Message ✦</button></form></div></section>;
+            default: return null;
           }
         })}
       </div>
-
-      <footer className="mt-20 border-t border-slate-200 py-6 text-center bg-white">
-        <p className="text-xs text-slate-400">Built with <span className="text-sky-600 font-bold">ProfileMitraa</span> &bull; {user.full_name || user.username}</p>
-      </footer>
+      <footer className="mt-20 border-t py-8 text-center relative z-10" style={{ borderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.15)` }}><p className="text-[10px] text-slate-500 tracking-wider uppercase">Built with <span className="font-bold" style={{ color: themeColor }}>ProfileMitraa</span> &bull; {user.full_name || user.username} &bull; All Rights Reserved</p></footer>
     </div>
   );
 }
