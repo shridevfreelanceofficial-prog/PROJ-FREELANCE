@@ -12,6 +12,7 @@ interface Certification {
 
 export default function Step3SkillsPage() {
   const router = useRouter();
+  const isToolsPath = typeof window !== 'undefined' && window.location.pathname.startsWith('/tools/profilemitraa');
 
   // Dynamic tags/skills lists
   const [techSkills, setTechSkills] = useState<string[]>([
@@ -67,7 +68,7 @@ export default function Step3SkillsPage() {
       .then(async (res) => {
         if (!res.ok) {
           if (res.status === 401) {
-            router.push('/tools/profilemitraa/login');
+            router.push(isToolsPath ? '/tools/profilemitraa/login' : '/login');
           }
           return;
         }

@@ -8,6 +8,7 @@ interface FollowUser { id: string; full_name: string; username: string; profile_
 
 export default function ProfileMitraaPublicProfilePage({ params }: { params: Promise<{ username: string }> }) {
   const { username } = use(params);
+  const isToolsPath = typeof window !== 'undefined' && window.location.pathname.startsWith('/tools/profilemitraa');
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
@@ -82,7 +83,7 @@ export default function ProfileMitraaPublicProfilePage({ params }: { params: Pro
   }, [username]);
 
   const handleFollow = async () => {
-    if (!isLoggedIn) { window.location.href = '/tools/profilemitraa/login'; return; }
+    if (!isLoggedIn) { window.location.href = isToolsPath ? '/tools/profilemitraa/login' : '/login'; return; }
     setFollowLoading(true);
     try {
       const method = isFollowing ? 'DELETE' : 'POST';
@@ -117,7 +118,7 @@ export default function ProfileMitraaPublicProfilePage({ params }: { params: Pro
       </div>
       <h1 className="text-xl font-black text-slate-800">Profile Not Found</h1>
       <p className="text-sm text-slate-500 mt-1 max-w-sm">The username &quot;{username}&quot; does not exist or their profile has not been set up yet.</p>
-      <Link href="/tools/profilemitraa" className="mt-5 px-6 py-2.5 bg-[#009670] text-white hover:bg-[#047857] font-bold text-xs rounded-xl shadow-md transition-colors">Go to Home</Link>
+      <Link href={isToolsPath ? "/tools/profilemitraa" : "/"} className="mt-5 px-6 py-2.5 bg-[#009670] text-white hover:bg-[#047857] font-bold text-xs rounded-xl shadow-md transition-colors">Go to Home</Link>
     </div>
   );
 
@@ -193,8 +194,8 @@ export default function ProfileMitraaPublicProfilePage({ params }: { params: Pro
           <span className="font-extrabold text-slate-800 text-sm tracking-tight">Profile<span className="text-[#009670]">Mitraa</span></span>
         </div>
         <div className="flex items-center gap-3">
-          <Link href="/tools/profilemitraa/users" className="text-xs font-bold text-slate-500 hover:text-[#009670] transition-colors">← Community</Link>
-          <Link href="/tools/profilemitraa/register" className="px-4 py-1.5 bg-[#009670] hover:bg-[#047857] text-white font-bold text-xs rounded-lg transition-colors">Create Yours</Link>
+          <Link href={isToolsPath ? "/tools/profilemitraa/users" : "/users"} className="text-xs font-bold text-slate-500 hover:text-[#009670] transition-colors">← Community</Link>
+          <Link href={isToolsPath ? "/tools/profilemitraa/register" : "/register"} className="px-4 py-1.5 bg-[#009670] hover:bg-[#047857] text-white font-bold text-xs rounded-lg transition-colors">Create Yours</Link>
         </div>
       </header>
 
@@ -250,7 +251,7 @@ export default function ProfileMitraaPublicProfilePage({ params }: { params: Pro
           {/* Follow / Edit button */}
           <div className="z-10 shrink-0">
             {isSelf ? (
-              <Link href="/tools/profilemitraa/complete-profile" className="px-5 py-2.5 border border-slate-200 hover:border-slate-300 bg-white text-slate-700 font-bold text-xs rounded-xl flex items-center gap-1.5 transition-colors">
+              <Link href={isToolsPath ? "/tools/profilemitraa/complete-profile" : "/complete-profile"} className="px-5 py-2.5 border border-slate-200 hover:border-slate-300 bg-white text-slate-700 font-bold text-xs rounded-xl flex items-center gap-1.5 transition-colors">
                 Edit Profile
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125" />

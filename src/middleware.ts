@@ -23,6 +23,29 @@ export function middleware(request: NextRequest) {
 
   const reservedSubdomains = ['www', 'admin', 'api', 'shridevfreelance', 'shrikeshdevfreelance', 'app'];
 
+  // Check if pathname starts with /tools/[slug]
+  const pathParts = url.pathname.split('/');
+  if (pathParts.length > 2 && pathParts[1] === 'tools') {
+    const toolSlug = pathParts[2];
+    if (toolSlug && !reservedSubdomains.includes(toolSlug.toLowerCase())) {
+      // We want to redirect all "/tools/[toolSlug]" paths to the "[toolSlug]" subdomain
+      const remainingPath = '/' + pathParts.slice(3).join('/');
+      const searchParams = url.search;
+
+      let targetHost = `${toolSlug}.shridevfreelance.online`;
+      if (currentHost.endsWith('localhost') || currentHost.endsWith('127.0.0.1')) {
+        const port = hostname.split(':')[1] || '3000';
+        targetHost = `${toolSlug}.localhost:${port}`;
+      }
+
+      const protocol = request.headers.get('x-forwarded-proto') || (request.url.startsWith('https') ? 'https' : 'http');
+      const redirectUrl = new URL(`${protocol}://${targetHost}${remainingPath}${searchParams}`);
+
+      console.log(`[MIDDLEWARE REDIRECT] Redirecting ${request.url} -> ${redirectUrl.href}`);
+      return NextResponse.redirect(redirectUrl, 307);
+    }
+  }
+
   if (subdomain && !reservedSubdomains.includes(subdomain.toLowerCase())) {
     // If the path does not already begin with /tools/[subdomain]
     if (!url.pathname.startsWith(`/tools/${subdomain}`)) {

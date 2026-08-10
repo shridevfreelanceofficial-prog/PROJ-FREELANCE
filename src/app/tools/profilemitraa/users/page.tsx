@@ -19,6 +19,7 @@ interface UserCard {
 
 export default function ProfileMitraaUsersPage() {
   const router = useRouter();
+  const isToolsPath = typeof window !== 'undefined' && window.location.pathname.startsWith('/tools/profilemitraa');
   const [users, setUsers] = useState<UserCard[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -34,8 +35,8 @@ export default function ProfileMitraaUsersPage() {
   // Get current user info
   useEffect(() => {
     fetch('/api/profilemitraa/profile')
-      .then(async r => {
-        if (r.status === 401) { router.push('/tools/profilemitraa/login'); return; }
+      .then(async (r) => {
+        if (r.status === 401) { router.push(isToolsPath ? '/tools/profilemitraa/login' : '/login'); return; }
         const d = await r.json();
         if (d.success) setCurrentUsername(d.user?.username ?? null);
       })
@@ -66,17 +67,17 @@ export default function ProfileMitraaUsersPage() {
     <div className="min-h-screen bg-[#F8FAFC] text-slate-800 font-sans">
       {/* Header */}
       <header className="sticky top-0 z-40 bg-white border-b border-slate-100 shadow-sm px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        <Link href="/tools/profilemitraa/dashboard" className="flex items-center gap-2.5">
+        <Link href={isToolsPath ? "/tools/profilemitraa/dashboard" : "/dashboard"} className="flex items-center gap-2.5">
           <img src="/images/tools/ProfileMitraa/logo/profilemitraalogo.png" alt="Logo" className="h-8 w-auto" />
           <span className="text-lg font-black text-slate-900 tracking-tight">
             Profile<span className="text-[#009670]">Mitraa</span>
           </span>
         </Link>
         <nav className="hidden md:flex items-center gap-6 text-sm font-bold text-slate-600">
-          <Link href="/tools/profilemitraa/dashboard" className="hover:text-[#009670]">Dashboard</Link>
-          <Link href="/tools/profilemitraa/users" className="text-[#009670] border-b-2 border-[#009670] pb-4 pt-4">Users</Link>
+          <Link href={isToolsPath ? "/tools/profilemitraa/dashboard" : "/dashboard"} className="hover:text-[#009670]">Dashboard</Link>
+          <Link href={isToolsPath ? "/tools/profilemitraa/users" : "/users"} className="text-[#009670] border-b-2 border-[#009670] pb-4 pt-4">Users</Link>
         </nav>
-        <Link href="/tools/profilemitraa/dashboard" className="text-xs font-bold text-slate-500 hover:text-[#009670] transition-colors">
+        <Link href={isToolsPath ? "/tools/profilemitraa/dashboard" : "/dashboard"} className="text-xs font-bold text-slate-500 hover:text-[#009670] transition-colors">
           ← Back to Dashboard
         </Link>
       </header>

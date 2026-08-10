@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 
 export default function ProfileMitraaLoginPage() {
   const router = useRouter();
+  const isToolsPath = typeof window !== 'undefined' && window.location.pathname.startsWith('/tools/profilemitraa');
   const [emailOrUsername, setEmailOrUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -39,7 +40,7 @@ export default function ProfileMitraaLoginPage() {
         if (!res.ok) {
           throw new Error(data.error || 'Login failed.');
         }
-        router.push('/tools/profilemitraa/dashboard');
+        router.push(isToolsPath ? '/tools/profilemitraa/dashboard' : '/dashboard');
       })
       .catch((err) => {
         setErrorMsg(err.message || 'Invalid credentials or something went wrong.');
@@ -229,7 +230,7 @@ export default function ProfileMitraaLoginPage() {
           {/* Form Footer */}
           <p className="text-center font-bold text-xs text-slate-500 select-none pt-0.5">
             Don&apos;t have an account?{' '}
-            <Link href="/tools/profilemitraa/register" className="text-[#009670] hover:underline font-extrabold">
+            <Link href={isToolsPath ? "/tools/profilemitraa/register" : "/register"} className="text-[#009670] hover:underline font-extrabold">
               Sign Up
             </Link>
           </p>

@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 
 export default function ProfileMitraaDashboardPage() {
   const router = useRouter();
+  const isToolsPath = typeof window !== 'undefined' && window.location.pathname.startsWith('/tools/profilemitraa');
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
   const [portfolios, setPortfolios] = useState<any[]>([]);
@@ -41,7 +42,7 @@ export default function ProfileMitraaDashboardPage() {
       .then(async (res) => {
         if (!res.ok) {
           if (res.status === 401) {
-            router.push('/tools/profilemitraa/login');
+            router.push(isToolsPath ? '/tools/profilemitraa/login' : '/login');
           }
           return;
         }
@@ -179,7 +180,7 @@ export default function ProfileMitraaDashboardPage() {
   const handleLogout = async () => {
     // Basic logout logic by resetting cookie and redirecting to login page
     document.cookie = 'profilemitraa_authToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-    router.push('/tools/profilemitraa/login');
+    router.push(isToolsPath ? '/tools/profilemitraa/login' : '/login');
   };
 
   if (loading) {
@@ -207,7 +208,7 @@ export default function ProfileMitraaDashboardPage() {
       {/* ─── Header topbar ─── */}
       <header className="sticky top-0 z-40 bg-white border-b border-slate-100 shadow-sm px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Link href="/tools/profilemitraa" className="flex items-center gap-2.5">
+          <Link href={isToolsPath ? "/tools/profilemitraa" : "/"} className="flex items-center gap-2.5">
             <img
               src="/images/tools/ProfileMitraa/logo/profilemitraalogo.png"
               alt="ProfileMitraa Logo"
@@ -221,15 +222,15 @@ export default function ProfileMitraaDashboardPage() {
 
         {/* Desktop Navbar menu */}
         <nav className="hidden md:flex items-center gap-7 text-[13.5px] font-bold text-slate-600">
-          <Link href="/tools/profilemitraa" className="text-[#009670] border-b-2 border-[#009670] pb-5 pt-5 hover:text-[#009670]">Home</Link>
+          <Link href={isToolsPath ? "/tools/profilemitraa" : "/"} className="text-[#009670] border-b-2 border-[#009670] pb-5 pt-5 hover:text-[#009670]">Home</Link>
           <div className="relative group cursor-pointer flex items-center gap-1 hover:text-[#009670] py-5">
             <span>Create</span>
             <svg className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#009670]" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
             </svg>
           </div>
-          <Link href="/tools/profilemitraa/users" className="hover:text-[#009670]">Users</Link>
-          <Link href="/tools/profilemitraa" className="hover:text-[#009670]">Explore</Link>
+          <Link href={isToolsPath ? "/tools/profilemitraa/users" : "/users"} className="hover:text-[#009670]">Users</Link>
+          <Link href={isToolsPath ? "/tools/profilemitraa" : "/"} className="hover:text-[#009670]">Explore</Link>
         </nav>
 
         {/* User profile session */}
@@ -269,14 +270,14 @@ export default function ProfileMitraaDashboardPage() {
         {/* ─── Left sidebar navigation ─── */}
         <aside className="w-full md:w-[220px] shrink-0 flex flex-col justify-between self-start gap-6">
           <div className="bg-white rounded-2xl border border-slate-100 p-4 space-y-1 shadow-sm">
-            <Link href="/tools/profilemitraa/dashboard" className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-emerald-50 text-[#009670] font-bold text-[13px] transition-all">
+            <Link href={isToolsPath ? "/tools/profilemitraa/dashboard" : "/dashboard"} className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-emerald-50 text-[#009670] font-bold text-[13px] transition-all">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
               </svg>
               Dashboard
             </Link>
 
-            <Link href="/tools/profilemitraa/create-portfolio" className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-slate-50 text-slate-600 hover:text-slate-900 font-bold text-[13px] transition-all">
+            <Link href={isToolsPath ? "/tools/profilemitraa/create-portfolio" : "/create-portfolio"} className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-slate-50 text-slate-600 hover:text-slate-900 font-bold text-[13px] transition-all">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 00.75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 00-3.413-.387m4.5 8.006c-.194.165-.42.295-.673.38A23.978 23.978 0 0112 15.75c-2.648 0-5.195-.429-7.577-1.22a2.016 2.016 0 01-.673-.38m0 0A2.18 2.18 0 013 12.489V8.706c0-1.081.768-2.015 1.837-2.175a48.111 48.111 0 013.413-.387m7.5 0V5.25A2.25 2.25 0 0013.5 3h-3a2.25 2.25 0 00-2.25 2.25v.894m7.5 0a48.667 48.667 0 00-7.5 0" />
               </svg>
@@ -297,14 +298,14 @@ export default function ProfileMitraaDashboardPage() {
               Projects
             </Link>
 
-            <Link href="/tools/profilemitraa/complete-profile/step-3" className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-slate-50 text-slate-600 hover:text-slate-900 font-bold text-[13px] transition-all">
+            <Link href={isToolsPath ? "/tools/profilemitraa/complete-profile/step-3" : "/complete-profile/step-3"} className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-slate-50 text-slate-600 hover:text-slate-900 font-bold text-[13px] transition-all">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               Certificates
             </Link>
 
-            <Link href="/tools/profilemitraa/users" className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-slate-50 text-slate-600 hover:text-slate-900 font-bold text-[13px] transition-all">
+            <Link href={isToolsPath ? "/tools/profilemitraa/users" : "/users"} className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-slate-50 text-slate-600 hover:text-slate-900 font-bold text-[13px] transition-all">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
               </svg>
@@ -318,7 +319,7 @@ export default function ProfileMitraaDashboardPage() {
               Analytics
             </Link>
 
-            <Link href="/tools/profilemitraa/complete-profile" className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-slate-50 text-slate-600 hover:text-slate-900 font-bold text-[13px] transition-all">
+            <Link href={isToolsPath ? "/tools/profilemitraa/complete-profile" : "/complete-profile"} className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-slate-50 text-slate-600 hover:text-slate-900 font-bold text-[13px] transition-all">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9.59 4.59A2 2 0 1111 8H9m10.59 11.41A2 2 0 1119 18h-2M9 18H5a2 2 0 01-2-2V5a2 2 0 012-2h12a2 2 0 012 2v3m-6 10h6m-3-3v6" />
               </svg>
@@ -466,7 +467,7 @@ export default function ProfileMitraaDashboardPage() {
                 </div>
               </div>
               <div className="flex justify-between items-center text-[11px] font-bold">
-                <Link href="/tools/profilemitraa/complete-profile" className="text-[#009670] hover:underline flex items-center gap-1 mt-1">
+                <Link href={isToolsPath ? "/tools/profilemitraa/complete-profile" : "/complete-profile"} className="text-[#009670] hover:underline flex items-center gap-1 mt-1">
                   Improve Profile
                   <span>➔</span>
                 </Link>
@@ -507,7 +508,7 @@ export default function ProfileMitraaDashboardPage() {
                       </div>
                     </div>
                     <Link
-                      href="/tools/profilemitraa/create-portfolio"
+                      href={isToolsPath ? "/tools/profilemitraa/create-portfolio" : "/create-portfolio"}
                       className="w-full py-2 bg-[#009670] hover:bg-[#047857] text-white font-bold text-xs rounded-lg text-center transition-all flex items-center justify-center gap-1.5 shadow-sm shadow-emerald-700/10"
                     >
                       Create Portfolio
@@ -531,7 +532,7 @@ export default function ProfileMitraaDashboardPage() {
                       </div>
                     </div>
                     <Link
-                      href="/tools/profilemitraa/complete-profile"
+                      href={isToolsPath ? "/tools/profilemitraa/complete-profile" : "/complete-profile"}
                       className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-lg text-center transition-all flex items-center justify-center gap-1.5 shadow-sm shadow-blue-700/10"
                     >
                       Build Resume
@@ -574,7 +575,7 @@ export default function ProfileMitraaDashboardPage() {
                       </p>
                     </div>
                     <Link
-                      href="/tools/profilemitraa/create-portfolio"
+                      href={isToolsPath ? "/tools/profilemitraa/create-portfolio" : "/create-portfolio"}
                       className="px-4 py-1.5 bg-[#009670] hover:bg-[#047857] text-white font-bold text-xs rounded-lg transition-all shadow-sm"
                     >
                       + Create My First Portfolio
@@ -645,7 +646,7 @@ export default function ProfileMitraaDashboardPage() {
                             </a>
                           )}
                           <Link
-                            href={`/tools/profilemitraa/create-portfolio?id=${p.id}`}
+                            href={isToolsPath ? `/tools/profilemitraa/create-portfolio?id=${p.id}` : `/create-portfolio?id=${p.id}`}
                             className="flex-1 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-lg text-center transition-all flex items-center justify-center gap-1"
                           >
                             <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
@@ -788,7 +789,7 @@ export default function ProfileMitraaDashboardPage() {
                 {alignmentProgressList(profile, completionPercent)}
 
                 <Link
-                  href="/tools/profilemitraa/complete-profile"
+                  href={isToolsPath ? "/tools/profilemitraa/complete-profile" : "/complete-profile"}
                   className="w-full py-2 border border-slate-100 hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl flex items-center justify-center gap-1 transition-all"
                 >
                   Improve Profile
@@ -861,7 +862,7 @@ export default function ProfileMitraaDashboardPage() {
                       )}
                     </button>
                   </div>
-                  <Link href="/tools/profilemitraa/complete-profile" className="text-[10px] font-bold text-[#009670] hover:underline block">
+                  <Link href={isToolsPath ? "/tools/profilemitraa/complete-profile" : "/complete-profile"} className="text-[10px] font-bold text-[#009670] hover:underline block">
                     Customize URL
                   </Link>
                 </div>

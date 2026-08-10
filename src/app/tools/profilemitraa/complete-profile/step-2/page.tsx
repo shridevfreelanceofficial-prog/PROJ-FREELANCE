@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 
 export default function Step2ProfessionalInfoPage() {
   const router = useRouter();
+  const isToolsPath = typeof window !== 'undefined' && window.location.pathname.startsWith('/tools/profilemitraa');
 
   // Form states
   const [professionalTitle, setProfessionalTitle] = useState('');
@@ -36,7 +37,7 @@ export default function Step2ProfessionalInfoPage() {
       .then(async (res) => {
         if (!res.ok) {
           if (res.status === 401) {
-            router.push('/tools/profilemitraa/login');
+            router.push(isToolsPath ? '/tools/profilemitraa/login' : '/login');
           }
           return;
         }

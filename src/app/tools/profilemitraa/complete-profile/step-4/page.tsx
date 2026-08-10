@@ -7,10 +7,11 @@ import { useRouter } from 'next/navigation';
 
 export default function Step4ReviewPage() {
   const router = useRouter();
+  const isToolsPath = typeof window !== 'undefined' && window.location.pathname.startsWith('/tools/profilemitraa');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [prevRoute, setPrevRoute] = useState('/complete-profile/step-3');
-  const [dashboardRoute, setDashboardRoute] = useState('/tools/profilemitraa/dashboard');
+  const [dashboardRoute, setDashboardRoute] = useState('/dashboard');
   const [editRoutes, setEditRoutes] = useState({
     step1: '/complete-profile',
     step2: '/complete-profile/step-2',
@@ -63,13 +64,21 @@ export default function Step4ReviewPage() {
         step2: '/tools/profilemitraa/complete-profile/step-2',
         step3: '/tools/profilemitraa/complete-profile/step-3',
       });
+    } else {
+      setPrevRoute('/complete-profile/step-3');
+      setDashboardRoute('/dashboard');
+      setEditRoutes({
+        step1: '/complete-profile',
+        step2: '/complete-profile/step-2',
+        step3: '/complete-profile/step-3',
+      });
     }
 
     fetch('/api/profilemitraa/profile')
       .then(async (res) => {
         if (!res.ok) {
           if (res.status === 401) {
-            router.push('/tools/profilemitraa/login');
+            router.push(isToolsPath ? '/tools/profilemitraa/login' : '/login');
           }
           return;
         }

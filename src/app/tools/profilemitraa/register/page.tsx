@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 export default function ProfileMitraaRegisterPage() {
+  const isToolsPath = typeof window !== 'undefined' && window.location.pathname.startsWith('/tools/profilemitraa');
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
@@ -72,7 +73,7 @@ export default function ProfileMitraaRegisterPage() {
         if (!res.ok) {
           throw new Error(data.error || 'Registration failed.');
         }
-        router.push('/tools/profilemitraa/dashboard');
+        router.push(isToolsPath ? '/tools/profilemitraa/dashboard' : '/dashboard');
       })
       .catch((err) => {
         setErrorMsg(err.message || 'Something went wrong. Please try again.');
@@ -442,7 +443,7 @@ export default function ProfileMitraaRegisterPage() {
           {/* Form Footer */}
           <p className="text-center font-bold text-xs text-slate-500 select-none pt-0.5">
             Already have an account?{' '}
-            <Link href="/tools/profilemitraa/login" className="text-[#009670] hover:underline font-extrabold">
+            <Link href={isToolsPath ? "/tools/profilemitraa/login" : "/login"} className="text-[#009670] hover:underline font-extrabold">
               Sign In
             </Link>
           </p>
