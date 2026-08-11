@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@imgly/background-removal": "^1.7.0",
     "@neondatabase/serverless": "^1.0.2",
     "@tsparticles/react": "^3.0.0",
     "@types/bcryptjs": "^2.4.6",

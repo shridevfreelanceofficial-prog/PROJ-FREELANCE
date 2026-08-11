@@ -308,6 +308,432 @@ export default async function PublicPortfolioPage({ params }: { params: Promise<
     );
   }
 
+  // ── TEMPLATE 4: Aesthetic Violet (Emmy Rose Hero + Dominic About) ─────────
+  if (themeKey === 'aesthetic_violet') {
+    const bgColor = isLightMode ? '#F8FAFC' : '#0B0713';
+    const textColor = isLightMode ? '#0F172A' : '#F1F5F9';
+    const cardBg = isLightMode ? 'rgba(255, 255, 255, 0.95)' : 'rgba(20, 14, 33, 0.7)';
+    const cardBorder = isLightMode ? 'rgba(0, 0, 0, 0.08)' : 'rgba(255, 255, 255, 0.1)';
+
+    let calculatedAge = 'N/A';
+    if (profile.dob) {
+      try {
+        const birthDate = new Date(profile.dob);
+        const today = new Date();
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const m = today.getMonth() - birthDate.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
+        calculatedAge = String(age);
+      } catch { }
+    }
+
+    const transparentHeroPic = customData.hero_image_url_transparent || heroPic;
+    const transparentAboutPic = customData.about_image_url_transparent || customData.hero_image_url_transparent || aboutPic;
+
+    return (
+      <div className="min-h-screen font-sans selection:bg-purple-500/30 pb-24 relative overflow-x-hidden" style={{ backgroundColor: bgColor, color: textColor }}>
+        <style>{`
+          @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;900&display=swap');
+          body { 
+            background-color: ${bgColor}; 
+            color: ${textColor};
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+          }
+          .av-card {
+            background: ${cardBg};
+            border: 1px solid ${cardBorder};
+            backdrop-filter: blur(16px);
+            transition: all 300ms cubic-bezier(0.16, 1, 0.3, 1);
+          }
+          .av-card:hover {
+            border-color: ${themeColor};
+            transform: translateY(-3px);
+            box-shadow: 0 16px 36px -10px rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.2);
+          }
+        `}</style>
+
+        {/* Ambient backdrop glow */}
+        <div className="fixed top-0 right-1/4 w-[600px] h-[600px] rounded-full blur-[140px] pointer-events-none z-0 opacity-25" style={{ backgroundColor: themeColor }} />
+
+        <div className="max-w-5xl mx-auto px-6 pt-12 md:pt-20 space-y-24 relative z-10">
+
+          {/* 1. HERO SECTION (Emmy Rose Design) */}
+          <header className="flex flex-col-reverse md:flex-row items-center justify-between gap-10 md:gap-16 pt-4">
+            {/* Left Content */}
+            <div className={`space-y-6 flex-1 text-center ${heroPos === 'right' ? 'md:text-right' : heroPos === 'center' ? 'md:text-center' : 'md:text-left'}`}>
+              <div className="space-y-2">
+                <p className="text-lg md:text-xl font-bold tracking-wide opacity-90">
+                  Hi, I&apos;m <span className="font-extrabold">{user.full_name || user.username}</span>!
+                </p>
+                <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black uppercase tracking-tight leading-none" style={{ color: themeColor }}>
+                  {getVal('hero', 'headline', profile.current_job_role || profile.professional_title || portfolio.tagline || 'WEB DESIGNER')}
+                </h1>
+              </div>
+
+              <p className={`text-sm md:text-base leading-relaxed max-w-xl mx-auto ${heroPos === 'right' ? 'md:mr-0' : heroPos === 'left' ? 'md:ml-0' : ''} ${isLightMode ? 'text-slate-600' : 'text-slate-300'}`}>
+                {getVal('hero', 'description', portfolio.description || profile.about_me || 'Passionate professional known for crafting visually stunning, user-friendly digital experiences and scalable applications.')}
+              </p>
+
+              {/* Action Buttons */}
+              <div className={`flex flex-wrap items-center gap-4 justify-center ${heroPos === 'right' ? 'md:justify-end' : heroPos === 'center' ? 'md:justify-center' : 'md:justify-start'}`}>
+                <a
+                  href="#projects"
+                  className="px-7 py-3.5 rounded-xl font-black text-xs uppercase tracking-wider text-white shadow-lg transition-all duration-300 hover:scale-105 active:scale-95 flex items-center gap-2"
+                  style={{ backgroundColor: isLightMode ? '#334155' : themeColor }}
+                >
+                  PROJECTS &lt;/&gt;
+                </a>
+                <a
+                  href="#contact"
+                  className="px-7 py-3.5 rounded-xl font-black text-xs uppercase tracking-wider border-2 transition-all duration-300 hover:scale-105 active:scale-95 flex items-center gap-2"
+                  style={{ borderColor: themeColor, color: themeColor }}
+                >
+                  HIRE ME ↗
+                </a>
+              </div>
+
+              {/* Social Outline Circles */}
+              <div className={`flex items-center gap-3 pt-2 justify-center ${heroPos === 'right' ? 'md:justify-end' : heroPos === 'center' ? 'md:justify-center' : 'md:justify-start'}`}>
+                {[
+                  { name: 'Facebook', icon: 'f', href: `https://facebook.com` },
+                  { name: 'Instagram', icon: '📷', href: `https://instagram.com` },
+                  { name: 'LinkedIn', icon: 'in', href: `https://linkedin.com` },
+                ].map((s, idx) => (
+                  <a
+                    key={idx}
+                    href={s.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="w-10 h-10 rounded-full border-2 flex items-center justify-center text-xs font-black transition-all hover:scale-110"
+                    style={{ borderColor: isLightMode ? '#CBD5E1' : '#334155', color: isLightMode ? '#475569' : '#94A3B8' }}
+                  >
+                    {s.icon}
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            {/* Right Transparent Photo (No Background) — large & dominant */}
+            <div className="shrink-0 relative group flex-shrink-0">
+              <div className="w-72 h-[420px] sm:w-[420px] sm:h-[560px] lg:w-[480px] lg:h-[630px] relative flex items-end justify-center">
+                {/* Soft radial glow behind person */}
+                <div className="absolute inset-x-0 bottom-0 top-12 rounded-full blur-3xl opacity-20 group-hover:opacity-35 transition-opacity duration-500" style={{ backgroundColor: themeColor }} />
+
+                {transparentHeroPic ? (
+                  <img
+                    src={transparentHeroPic}
+                    alt={user.full_name || 'Hero Avatar'}
+                    className="relative w-full h-full object-contain z-10 transition-transform duration-700 group-hover:scale-[1.03]"
+                    style={{ filter: 'drop-shadow(0 24px 48px rgba(0,0,0,0.4))' }}
+                  />
+                ) : (
+                  <div className="w-full h-full rounded-3xl av-card flex items-center justify-center text-9xl relative z-10">👩‍💻</div>
+                )}
+              </div>
+            </div>
+          </header>
+
+          {/* DYNAMIC SECTIONS LIST */}
+          {sectionsArr.filter((sec: any) => { const secId = sec.id || sec; const enabled = sec.enabled !== undefined ? sec.enabled : true; return enabled; }).map((sec: any, index: number) => {
+            const secId = sec.id || sec;
+            switch (secId) {
+              case 'hero': return null;
+
+              {/* 2. ABOUT SECTION (Light Blue Diamond Shape + Background Removed Cutout) */}
+              case 'about': return (
+                <section id="about" key="about" className="space-y-6 pt-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+                    {/* Left Stylized Photo Card with Light Blue Diamond Shape */}
+                    <div className="lg:col-span-5 flex justify-center py-4">
+                      <div className="relative w-[300px] h-[320px] sm:w-[340px] sm:h-[360px] flex items-center justify-center">
+                        
+                        {/* Soft Cyan/Light Blue Glow */}
+                        <div 
+                          className="absolute w-56 h-56 sm:w-64 sm:h-64 rounded-[40px] rotate-45 blur-2xl opacity-40 transition-opacity" 
+                          style={{ backgroundColor: '#38BDF8' }} 
+                        />
+
+                        {/* Light Blue Diamond Background Container */}
+                        <div 
+                          className="absolute w-52 h-52 sm:w-60 sm:h-60 rounded-[36px] rotate-45 shadow-2xl border-4 overflow-hidden flex items-center justify-center transition-transform hover:rotate-[47deg] duration-500"
+                          style={{ 
+                            background: 'linear-gradient(135deg, #7DD3FC 0%, #38BDF8 50%, #0284C7 100%)', 
+                            borderColor: themeColor 
+                          }}
+                        >
+                          {/* Decorative inner diamond ring */}
+                          <div className="w-44 h-44 sm:w-48 sm:h-48 rounded-[28px] border-2 border-white/40" />
+                          <div className="absolute inset-0 bg-gradient-to-tr from-white/25 to-transparent pointer-events-none" />
+                        </div>
+
+                        {/* Vertical Rotated Name Tag */}
+                        <div className="absolute left-[-10px] sm:left-[-15px] top-1/2 -translate-y-1/2 origin-center -rotate-90 text-white font-black tracking-[0.25em] text-xs sm:text-sm uppercase select-none whitespace-nowrap z-20 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                          {(user.full_name || user.username).split('').join(' ')}
+                        </div>
+
+                        {/* Cutout Portrait Image with Background Removed */}
+                        <div className="relative z-10 w-60 h-72 sm:w-68 sm:h-80 flex items-end justify-center">
+                          {transparentAboutPic ? (
+                            <img
+                              src={transparentAboutPic}
+                              alt={user.full_name || 'About Avatar'}
+                              className="w-full h-full object-contain transition-transform duration-500 hover:scale-105"
+                              style={{ filter: 'drop-shadow(0 16px 28px rgba(0, 0, 0, 0.45))' }}
+                            />
+                          ) : (
+                            <div className="w-44 h-44 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center text-6xl text-white border border-white/20">
+                              📸
+                            </div>
+                          )}
+                        </div>
+
+                      </div>
+                    </div>
+
+                    {/* Right Info Content */}
+                    <div className="lg:col-span-7 space-y-5">
+                      <div>
+                        <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+                          Hello, I Am <span style={{ color: themeColor }}>{profile.current_job_role || profile.professional_title || 'Photographer'}</span>
+                        </h2>
+                      </div>
+
+                      <p className={`text-sm leading-relaxed whitespace-pre-wrap ${isLightMode ? 'text-slate-600' : 'text-slate-300'}`}>
+                        {getVal('about', 'text', profile.about_me || 'Passionate digital creator focused on building responsive web solutions, user experiences, and innovative digital designs.')}
+                      </p>
+
+                      {/* Details Table */}
+                      <div className={`grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-6 text-xs sm:text-sm border-t border-b py-4 my-4 font-mono ${isLightMode ? 'border-slate-200 text-slate-700' : 'border-slate-800 text-slate-300'}`}>
+                        <div className="flex justify-between sm:justify-start gap-2">
+                          <span className="w-24 font-bold opacity-60">Name</span>
+                          <span>: {user.full_name || user.username}</span>
+                        </div>
+                        <div className="flex justify-between sm:justify-start gap-2">
+                          <span className="w-24 font-bold opacity-60">Age</span>
+                          <span>: {calculatedAge}</span>
+                        </div>
+                        <div className="flex justify-between sm:justify-start gap-2">
+                          <span className="w-24 font-bold opacity-60">Address</span>
+                          <span className="truncate">: {portfolio.location || profile.location || 'Not set'}</span>
+                        </div>
+                        <div className="flex justify-between sm:justify-start gap-2">
+                          <span className="w-24 font-bold opacity-60">Phone</span>
+                          <span>: {profile.phone || '+(00) 223 126 499'}</span>
+                        </div>
+                        <div className="flex justify-between sm:justify-start gap-2">
+                          <span className="w-24 font-bold opacity-60">e-mail</span>
+                          <span className="truncate">: {user.email}</span>
+                        </div>
+                        <div className="flex justify-between sm:justify-start gap-2">
+                          <span className="w-24 font-bold opacity-60">Freelance</span>
+                          <span>: {profile.employment_type || 'Available'}</span>
+                        </div>
+                      </div>
+
+                      {/* Download CV button */}
+                      <div>
+                        <a
+                          href="#contact"
+                          className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-extrabold text-xs text-white uppercase tracking-wider shadow-md transition-all hover:scale-105"
+                          style={{ backgroundColor: themeColor }}
+                        >
+                          Download CV
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+              );
+
+              {/* 3. SKILLS SECTION */}
+              case 'skills': return (
+                <section id="skills" key="skills" className="space-y-4 pt-4">
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-black tracking-widest uppercase" style={{ color: themeColor }}>02 //</span>
+                    <h2 className="text-lg font-extrabold uppercase tracking-wider">Skills &amp; Tools</h2>
+                    <div className="h-px flex-1 bg-slate-500/20" />
+                  </div>
+                  <div className="av-card rounded-2xl p-6 sm:p-8 space-y-6">
+                    <p className={`text-xs italic ${isLightMode ? 'text-slate-500' : 'text-slate-400'}`}>
+                      {getVal('skills', 'description', 'Specialized technical competencies and productivity platforms:')}
+                    </p>
+                    <div className="space-y-4">
+                      {Array.isArray(profile.tech_skills) && profile.tech_skills.length > 0 && (
+                        <div className="flex flex-wrap gap-2.5">
+                          {profile.tech_skills.map((s: string, i: number) => (
+                            <span key={i} className="px-4 py-2 rounded-xl text-xs font-bold border transition-all" style={{ backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.12)`, borderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.3)`, color: themeColor }}>
+                              {s}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      {Array.isArray(profile.tools) && profile.tools.length > 0 && (
+                        <div className="flex flex-wrap gap-2.5">
+                          {profile.tools.map((t: string, i: number) => (
+                            <span key={i} className={`px-4 py-2 rounded-xl text-xs font-semibold border ${isLightMode ? 'bg-slate-100 border-slate-200 text-slate-700' : 'bg-slate-900 border-slate-800 text-slate-300'}`}>
+                              ⚡ {t}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </section>
+              );
+
+              {/* 4. PROJECTS SECTION */}
+              case 'projects': return (
+                <section id="projects" key="projects" className="space-y-4 pt-4">
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-black tracking-widest uppercase" style={{ color: themeColor }}>03 //</span>
+                    <h2 className="text-lg font-extrabold uppercase tracking-wider">Featured Projects</h2>
+                    <div className="h-px flex-1 bg-slate-500/20" />
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    {projects.length > 0 ? projects.map((p: any, i: number) => (
+                      <div key={i} className="av-card rounded-2xl overflow-hidden flex flex-col group">
+                        {p.bannerUrl && (
+                          <div className="w-full h-40 overflow-hidden relative border-b border-slate-800/30">
+                            <img src={p.bannerUrl} alt={p.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                          </div>
+                        )}
+                        <div className="p-6 space-y-3 flex-1 flex flex-col justify-between">
+                          <div className="space-y-2">
+                            <div className="flex justify-between items-start gap-2">
+                              <h3 className="text-sm sm:text-base font-extrabold tracking-tight">{p.title}</h3>
+                              {p.projectUrl && (
+                                <a href={p.projectUrl} target="_blank" rel="noreferrer" className="text-xs font-bold hover:underline shrink-0" style={{ color: themeColor }}>
+                                  LINK ↗
+                                </a>
+                              )}
+                            </div>
+                            <p className={`text-xs leading-relaxed line-clamp-3 ${isLightMode ? 'text-slate-600' : 'text-slate-400'}`}>{p.description}</p>
+                          </div>
+                          {p.technologies && (
+                            <div className="flex flex-wrap gap-1.5 pt-3 border-t border-slate-800/20">
+                              {p.technologies.split(',').map((t: string, idx: number) => (
+                                <span key={idx} className={`px-2.5 py-0.5 rounded-lg text-[9px] font-semibold ${isLightMode ? 'bg-slate-100 text-slate-600' : 'bg-slate-900 text-slate-400'}`}>{t.trim()}</span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )) : (
+                      <div className="col-span-2 av-card rounded-2xl p-8 text-center text-xs text-slate-400">No projects added.</div>
+                    )}
+                  </div>
+                </section>
+              );
+
+              {/* 5. WORK EXPERIENCE SECTION */}
+              case 'experience': return (
+                <section id="experience" key="experience" className="space-y-4 pt-4">
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-black tracking-widest uppercase" style={{ color: themeColor }}>04 //</span>
+                    <h2 className="text-lg font-extrabold uppercase tracking-wider">Experience</h2>
+                    <div className="h-px flex-1 bg-slate-500/20" />
+                  </div>
+                  <div className="av-card rounded-2xl p-6 sm:p-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div className="space-y-1">
+                      <h3 className="text-base font-extrabold">{profile.current_job_role || profile.current_role || 'Senior Professional'}</h3>
+                      <p className={`text-xs ${isLightMode ? 'text-slate-600' : 'text-slate-400'}`}>{profile.company || 'Enterprise / Independent Studio'}</p>
+                    </div>
+                    <span className="px-4 py-1.5 rounded-full text-xs font-extrabold border shrink-0" style={{ backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.15)`, borderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.3)`, color: themeColor }}>
+                      {profile.experience_years || 'N/A'} Years Exp &bull; {profile.employment_type || 'Full-time'}
+                    </span>
+                  </div>
+                </section>
+              );
+
+              {/* 6. EDUCATION SECTION */}
+              case 'education': return (
+                <section id="education" key="education" className="space-y-4 pt-4">
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-black tracking-widest uppercase" style={{ color: themeColor }}>05 //</span>
+                    <h2 className="text-lg font-extrabold uppercase tracking-wider">Academic Record</h2>
+                    <div className="h-px flex-1 bg-slate-500/20" />
+                  </div>
+                  <div className="space-y-3">
+                    {education.length > 0 ? education.map((e: any, i: number) => (
+                      <div key={i} className="av-card rounded-2xl p-5 flex flex-col sm:flex-row justify-between sm:items-center gap-3">
+                        <div>
+                          <h3 className="text-xs sm:text-sm font-extrabold">{e.degree} in {e.fieldOfStudy}</h3>
+                          <p className={`text-xs mt-0.5 ${isLightMode ? 'text-slate-600' : 'text-slate-400'}`}>{e.school}</p>
+                        </div>
+                        <span className="text-[10px] font-mono px-3 py-1 rounded-full border border-slate-700/30 opacity-70 shrink-0">
+                          {e.startYear} - {e.endYear}
+                        </span>
+                      </div>
+                    )) : (
+                      <div className="av-card rounded-2xl p-6 text-xs text-slate-400 text-center">No education records added.</div>
+                    )}
+                  </div>
+                </section>
+              );
+
+              {/* 7. CERTIFICATIONS SECTION */}
+              case 'certifications': return (
+                <section id="certifications" key="certifications" className="space-y-4 pt-4">
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-black tracking-widest uppercase" style={{ color: themeColor }}>06 //</span>
+                    <h2 className="text-lg font-extrabold uppercase tracking-wider">Certifications</h2>
+                    <div className="h-px flex-1 bg-slate-500/20" />
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {Array.isArray(profile.certifications) && profile.certifications.length > 0 ? profile.certifications.map((c: any, i: number) => (
+                      <div key={i} className="av-card rounded-2xl p-4 flex items-center gap-3.5">
+                        <span className="text-2xl shrink-0">🏆</span>
+                        <div>
+                          <p className="text-xs font-extrabold">{c.name || c}</p>
+                          <p className="text-[10px] font-semibold mt-0.5" style={{ color: themeColor }}>{c.issuer || 'Verified Credential'}</p>
+                        </div>
+                      </div>
+                    )) : (
+                      <div className="av-card rounded-2xl p-6 text-xs text-slate-400 text-center col-span-2">No certificates added.</div>
+                    )}
+                  </div>
+                </section>
+              );
+
+              {/* 8. CONTACT SECTION */}
+              case 'contact': return (
+                <section id="contact" key="contact" className="space-y-4 pt-4">
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-black tracking-widest uppercase" style={{ color: themeColor }}>07 //</span>
+                    <h2 className="text-lg font-extrabold uppercase tracking-wider">Get In Touch</h2>
+                    <div className="h-px flex-1 bg-slate-500/20" />
+                  </div>
+                  <div className="av-card rounded-2xl p-6 sm:p-8 space-y-5 max-w-xl">
+                    <p className={`text-xs ${isLightMode ? 'text-slate-600' : 'text-slate-400'}`}>
+                      {getVal('contact', 'prompt', 'Have a project in mind or want to collaborate? Send a message directly:')}
+                    </p>
+                    <form action={`mailto:${user.email || ''}`} method="post" className="space-y-3">
+                      <div className="grid grid-cols-2 gap-3">
+                        <input required type="text" placeholder="Your Name" className={`w-full px-4 py-3 rounded-xl text-xs border ${isLightMode ? 'bg-slate-100 border-slate-200 text-slate-800' : 'bg-slate-900 border-slate-800 text-slate-200'}`} />
+                        <input required type="email" placeholder="Your Email" className={`w-full px-4 py-3 rounded-xl text-xs border ${isLightMode ? 'bg-slate-100 border-slate-200 text-slate-800' : 'bg-slate-900 border-slate-800 text-slate-200'}`} />
+                      </div>
+                      <textarea required rows={3} placeholder="Your Message..." className={`w-full px-4 py-3 rounded-xl text-xs border resize-none ${isLightMode ? 'bg-slate-100 border-slate-200 text-slate-800' : 'bg-slate-900 border-slate-800 text-slate-200'}`} />
+                      <button type="submit" className="w-full py-3.5 text-white font-extrabold text-xs uppercase tracking-widest rounded-xl transition-all shadow-md hover:scale-[1.01]" style={{ backgroundColor: themeColor }}>
+                        Send Message ➔
+                      </button>
+                    </form>
+                  </div>
+                </section>
+              );
+
+              default: return null;
+            }
+          })}
+
+        </div>
+        <footer className="mt-24 border-t py-8 text-center relative z-10" style={{ borderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.15)` }}>
+          <p className="text-[10px] text-slate-500 tracking-wider uppercase">Built with <span className="font-bold" style={{ color: themeColor }}>ProfileMitraa</span> &bull; {user.full_name || user.username} &bull; All Rights Reserved</p>
+        </footer>
+      </div>
+    );
+  }
+
   // ── TEMPLATE 2 & 3: Creative / Corporate ──────────────────────────────────
   const bgStyle = isLightMode ? '#F1F5F9' : '#070514';
   const textStyle = isLightMode ? '#0F172A' : '#FFFFFF';

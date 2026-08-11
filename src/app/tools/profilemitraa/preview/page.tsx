@@ -521,6 +521,289 @@ export default function ProfileMitraaPreviewPage() {
     );
   }
 
+  // ── TEMPLATE 4: Aesthetic Violet (Emmy Rose Hero + Dominic About) ──────────
+  if (themeKey === 'aesthetic_violet') {
+    const bgColor = isLightMode ? '#F8FAFC' : '#0B0713';
+    const textColor = isLightMode ? '#0F172A' : '#F1F5F9';
+
+    let calculatedAge = 'N/A';
+    if (profileDetails?.dob) {
+      try {
+        const birthDate = new Date(profileDetails.dob);
+        const today = new Date();
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const m = today.getMonth() - birthDate.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
+        calculatedAge = String(age);
+      } catch { }
+    }
+
+    const transparentHeroPic = customData.hero_image_url_transparent || heroPic;
+    const transparentAboutPic = customData.about_image_url_transparent || customData.hero_image_url_transparent || aboutPic;
+    const avCardBg = isLightMode ? 'rgba(255,255,255,0.95)' : 'rgba(20,14,33,0.7)';
+    const avCardBorder = isLightMode ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.1)';
+
+    return (
+      <div className="min-h-screen font-sans selection:bg-purple-500/30 pb-24 relative overflow-x-hidden" style={{ backgroundColor: bgColor, color: textColor }}>
+        <style>{`
+          @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;900&display=swap');
+          body { background-color: ${bgColor}; color: ${textColor}; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
+          .av-card {
+            background: ${avCardBg};
+            border: 1px solid ${avCardBorder};
+            backdrop-filter: blur(16px);
+            transition: all 300ms cubic-bezier(0.16, 1, 0.3, 1);
+          }
+          .av-card:hover {
+            border-color: ${themeColor};
+            transform: translateY(-3px);
+            box-shadow: 0 16px 36px -10px rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.2);
+          }
+        `}</style>
+
+        {/* Ambient backdrop glow */}
+        <div className="fixed top-0 right-1/4 w-[600px] h-[600px] rounded-full blur-[140px] pointer-events-none z-0 opacity-25" style={{ backgroundColor: themeColor }} />
+
+        <div className="max-w-5xl mx-auto px-6 pt-12 md:pt-20 space-y-20 relative z-10">
+
+          {/* HERO SECTION */}
+          <header className="flex flex-col-reverse md:flex-row items-center justify-between gap-10 md:gap-8 pt-4 min-h-[70vh]">
+            {/* Left Content */}
+            <div className="space-y-6 flex-1 text-center md:text-left">
+              <div className="space-y-2">
+                <p className="text-lg md:text-xl font-bold tracking-wide opacity-90">
+                  Hi, I&apos;m <span className="font-extrabold">{userObj.fullName || userObj.username || 'Creator'}</span>!
+                </p>
+                <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black uppercase tracking-tight leading-none" style={{ color: themeColor }}>
+                  {getVal('hero', 'headline', profileDetails?.current_job_role || profileDetails?.professional_title || portfolio?.tagline || 'WEB DESIGNER')}
+                </h1>
+              </div>
+              <p className={`text-sm md:text-base leading-relaxed max-w-xl ${isLightMode ? 'text-slate-600' : 'text-slate-300'}`}>
+                {getVal('hero', 'description', portfolio?.description || profileDetails?.about_me || 'Passionate professional creating visually stunning digital experiences.')}
+              </p>
+              <div className="flex flex-wrap items-center gap-4 justify-center md:justify-start">
+                <a href="#projects" className="px-7 py-3.5 rounded-xl font-black text-xs uppercase tracking-wider text-white shadow-lg" style={{ backgroundColor: themeColor }}>
+                  PROJECTS &lt;/&gt;
+                </a>
+                <a href="#contact" className="px-7 py-3.5 rounded-xl font-black text-xs uppercase tracking-wider border-2" style={{ borderColor: themeColor, color: themeColor }}>
+                  HIRE ME ↗
+                </a>
+              </div>
+              <div className="flex items-center gap-3 pt-2 justify-center md:justify-start">
+                {[{ icon: 'f' }, { icon: '📷' }, { icon: 'in' }].map((s, idx) => (
+                  <span key={idx} className="w-10 h-10 rounded-full border-2 flex items-center justify-center text-xs font-black" style={{ borderColor: isLightMode ? '#CBD5E1' : '#334155', color: isLightMode ? '#475569' : '#94A3B8' }}>
+                    {s.icon}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Right Image — large & dominant */}
+            <div className="shrink-0 relative group flex-shrink-0">
+              <div className="w-72 h-[420px] sm:w-[380px] sm:h-[520px] lg:w-[440px] lg:h-[600px] relative flex items-end justify-center">
+                <div className="absolute inset-x-0 bottom-0 top-12 rounded-full blur-3xl opacity-20" style={{ backgroundColor: themeColor }} />
+                {transparentHeroPic ? (
+                  <img
+                    src={transparentHeroPic}
+                    alt={userObj.fullName || 'Hero'}
+                    className="relative w-full h-full object-contain z-10"
+                    style={{ filter: 'drop-shadow(0 24px 48px rgba(0,0,0,0.4))' }}
+                  />
+                ) : (
+                  <div className="w-full h-full rounded-3xl av-card flex items-center justify-center text-9xl relative z-10">👩‍💻</div>
+                )}
+              </div>
+            </div>
+          </header>
+
+          {/* DYNAMIC SECTIONS */}
+          {sectionsToShow.filter((sec: any) => (sec.enabled !== undefined ? sec.enabled : true)).map((sec: any) => {
+            const secId = sec.id || sec;
+            switch (secId) {
+              case 'hero': return null;
+
+              case 'about': return (
+                <section id="about" key="about" className="space-y-6 pt-4">
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+                    {/* Left Stylized Photo Card with Light Blue Diamond Shape */}
+                    <div className="lg:col-span-5 flex justify-center py-4">
+                      <div className="relative w-[300px] h-[320px] sm:w-[340px] sm:h-[360px] flex items-center justify-center">
+                        
+                        {/* Soft Cyan/Light Blue Glow */}
+                        <div 
+                          className="absolute w-56 h-56 sm:w-64 sm:h-64 rounded-[40px] rotate-45 blur-2xl opacity-40 transition-opacity" 
+                          style={{ backgroundColor: '#38BDF8' }} 
+                        />
+
+                        {/* Light Blue Diamond Background Container */}
+                        <div 
+                          className="absolute w-52 h-52 sm:w-60 sm:h-60 rounded-[36px] rotate-45 shadow-2xl border-4 overflow-hidden flex items-center justify-center transition-transform hover:rotate-[47deg] duration-500"
+                          style={{ 
+                            background: 'linear-gradient(135deg, #7DD3FC 0%, #38BDF8 50%, #0284C7 100%)', 
+                            borderColor: themeColor 
+                          }}
+                        >
+                          {/* Decorative inner diamond ring */}
+                          <div className="w-44 h-44 sm:w-48 sm:h-48 rounded-[28px] border-2 border-white/40" />
+                          <div className="absolute inset-0 bg-gradient-to-tr from-white/25 to-transparent pointer-events-none" />
+                        </div>
+
+                        {/* Vertical Rotated Name Tag */}
+                        <div className="absolute left-[-10px] sm:left-[-15px] top-1/2 -translate-y-1/2 origin-center -rotate-90 text-white font-black tracking-[0.25em] text-xs sm:text-sm uppercase select-none whitespace-nowrap z-20 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                          {(userObj.fullName || userObj.username || 'USER').split('').join(' ')}
+                        </div>
+
+                        {/* Cutout Portrait Image with Background Removed */}
+                        <div className="relative z-10 w-60 h-72 sm:w-68 sm:h-80 flex items-end justify-center">
+                          {transparentAboutPic ? (
+                            <img
+                              src={transparentAboutPic}
+                              alt={userObj.fullName || 'About Avatar'}
+                              className="w-full h-full object-contain transition-transform duration-500 hover:scale-105"
+                              style={{ filter: 'drop-shadow(0 16px 28px rgba(0, 0, 0, 0.45))' }}
+                            />
+                          ) : (
+                            <div className="w-44 h-44 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center text-6xl text-white border border-white/20">
+                              📸
+                            </div>
+                          )}
+                        </div>
+
+                      </div>
+                    </div>
+                    <div className="lg:col-span-7 space-y-5">
+                      <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+                        Hello, I Am <span style={{ color: themeColor }}>{profileDetails?.current_job_role || profileDetails?.professional_title || 'Photographer'}</span>
+                      </h2>
+                      <p className={`text-sm leading-relaxed whitespace-pre-wrap ${isLightMode ? 'text-slate-600' : 'text-slate-300'}`}>
+                        {getVal('about', 'text', profileDetails?.about_me || 'Passionate digital creator focused on building responsive web solutions.')}
+                      </p>
+                      <div className={`grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-6 text-xs sm:text-sm border-t border-b py-4 font-mono ${isLightMode ? 'border-slate-200 text-slate-700' : 'border-slate-800 text-slate-300'}`}>
+                        {[
+                          ['Name', userObj.fullName || userObj.username || 'User'],
+                          ['Age', calculatedAge],
+                          ['Address', portfolio?.location || profileDetails?.location || 'Not set'],
+                          ['Phone', profileDetails?.phone || '+(00) 000 000 000'],
+                          ['e-mail', userObj.email || 'user@example.com'],
+                          ['Freelance', profileDetails?.employment_type || 'Available'],
+                        ].map(([label, val]) => (
+                          <div key={label} className="flex gap-2">
+                            <span className="w-24 font-bold opacity-60">{label}</span>
+                            <span className="truncate">: {val}</span>
+                          </div>
+                        ))}
+                      </div>
+                      <a href="#contact" className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-extrabold text-xs text-white uppercase tracking-wider shadow-md" style={{ backgroundColor: themeColor }}>
+                        Download CV
+                      </a>
+                    </div>
+                  </div>
+                </section>
+              );
+
+              case 'skills': return (
+                <section id="skills" key="skills" className="space-y-4 pt-4">
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-black tracking-widest uppercase" style={{ color: themeColor }}>02 //</span>
+                    <h2 className="text-lg font-extrabold uppercase tracking-wider">Skills &amp; Tools</h2>
+                    <div className="h-px flex-1 bg-slate-500/20" />
+                  </div>
+                  <div className="av-card rounded-2xl p-6 space-y-4">
+                    <div className="flex flex-wrap gap-2.5">
+                      {Array.isArray(profileDetails?.tech_skills) && profileDetails.tech_skills.map((s: string, i: number) => (
+                        <span key={i} className="px-4 py-2 rounded-xl text-xs font-bold border" style={{ backgroundColor: `rgba(${rgb.r},${rgb.g},${rgb.b},0.12)`, borderColor: `rgba(${rgb.r},${rgb.g},${rgb.b},0.3)`, color: themeColor }}>{s}</span>
+                      ))}
+                      {Array.isArray(profileDetails?.tools) && profileDetails.tools.map((t: string, i: number) => (
+                        <span key={i} className={`px-4 py-2 rounded-xl text-xs font-semibold border ${isLightMode ? 'bg-slate-100 border-slate-200 text-slate-700' : 'bg-slate-900 border-slate-800 text-slate-300'}`}>⚡ {t}</span>
+                      ))}
+                    </div>
+                  </div>
+                </section>
+              );
+
+              case 'projects': return (
+                <section id="projects" key="projects" className="space-y-4 pt-4">
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-black tracking-widest uppercase" style={{ color: themeColor }}>03 //</span>
+                    <h2 className="text-lg font-extrabold uppercase tracking-wider">Featured Projects</h2>
+                    <div className="h-px flex-1 bg-slate-500/20" />
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    {projectsList.length > 0 ? projectsList.map((p: any, i: number) => (
+                      <div key={i} className="av-card rounded-2xl overflow-hidden flex flex-col">
+                        {p.bannerUrl && <img src={p.bannerUrl} alt={p.title} className="w-full h-40 object-cover" />}
+                        <div className="p-5 space-y-2 flex-1">
+                          <h3 className="text-sm font-extrabold">{p.title}</h3>
+                          <p className={`text-xs leading-relaxed line-clamp-3 ${isLightMode ? 'text-slate-600' : 'text-slate-400'}`}>{p.description}</p>
+                        </div>
+                      </div>
+                    )) : (
+                      <div className="col-span-2 av-card rounded-2xl p-8 text-center text-xs text-slate-400">No projects added.</div>
+                    )}
+                  </div>
+                </section>
+              );
+
+              case 'education': return (
+                <section id="education" key="education" className="space-y-4 pt-4">
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-black tracking-widest uppercase" style={{ color: themeColor }}>04 //</span>
+                    <h2 className="text-lg font-extrabold uppercase tracking-wider">Academic Record</h2>
+                    <div className="h-px flex-1 bg-slate-500/20" />
+                  </div>
+                  <div className="space-y-3">
+                    {educationList.length > 0 ? educationList.map((e: any, i: number) => (
+                      <div key={i} className="av-card rounded-2xl p-5 flex flex-col sm:flex-row justify-between sm:items-center gap-3">
+                        <div>
+                          <h3 className="text-xs sm:text-sm font-extrabold">{e.degree} in {e.fieldOfStudy}</h3>
+                          <p className={`text-xs mt-0.5 ${isLightMode ? 'text-slate-600' : 'text-slate-400'}`}>{e.school}</p>
+                        </div>
+                        <span className="text-[10px] font-mono px-3 py-1 rounded-full border border-slate-700/30 opacity-70 shrink-0">{e.startYear} – {e.endYear}</span>
+                      </div>
+                    )) : (
+                      <div className="av-card rounded-2xl p-6 text-xs text-slate-400 text-center">No education records added.</div>
+                    )}
+                  </div>
+                </section>
+              );
+
+              case 'contact': return (
+                <section id="contact" key="contact" className="space-y-4 pt-4">
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-black tracking-widest uppercase" style={{ color: themeColor }}>05 //</span>
+                    <h2 className="text-lg font-extrabold uppercase tracking-wider">Get In Touch</h2>
+                    <div className="h-px flex-1 bg-slate-500/20" />
+                  </div>
+                  <div className="av-card rounded-2xl p-6 sm:p-8 space-y-4 max-w-xl">
+                    <p className={`text-xs ${isLightMode ? 'text-slate-600' : 'text-slate-400'}`}>Have a project in mind? Send a message directly:</p>
+                    <form className="space-y-3">
+                      <div className="grid grid-cols-2 gap-3">
+                        <input type="text" placeholder="Your Name" className={`w-full px-4 py-3 rounded-xl text-xs border ${isLightMode ? 'bg-slate-100 border-slate-200 text-slate-800' : 'bg-slate-900 border-slate-800 text-slate-200'}`} />
+                        <input type="email" placeholder="Your Email" className={`w-full px-4 py-3 rounded-xl text-xs border ${isLightMode ? 'bg-slate-100 border-slate-200 text-slate-800' : 'bg-slate-900 border-slate-800 text-slate-200'}`} />
+                      </div>
+                      <textarea rows={3} placeholder="Your Message..." className={`w-full px-4 py-3 rounded-xl text-xs border resize-none ${isLightMode ? 'bg-slate-100 border-slate-200 text-slate-800' : 'bg-slate-900 border-slate-800 text-slate-200'}`} />
+                      <button type="submit" className="w-full py-3.5 text-white font-extrabold text-xs uppercase tracking-widest rounded-xl shadow-md" style={{ backgroundColor: themeColor }}>
+                        Send Message ➔
+                      </button>
+                    </form>
+                  </div>
+                </section>
+              );
+
+              default: return null;
+            }
+          })}
+        </div>
+
+        <footer className="mt-20 border-t py-8 text-center relative z-10" style={{ borderColor: `rgba(${rgb.r},${rgb.g},${rgb.b},0.15)` }}>
+          <p className="text-[10px] text-slate-500 tracking-wider uppercase">
+            Built with <span className="font-bold" style={{ color: themeColor }}>ProfileMitraa</span> &bull; {userObj.fullName || userObj.username || 'User'} &bull; All Rights Reserved
+          </p>
+        </footer>
+      </div>
+    );
+  }
+
   // Render Template 2 & 3 with Dynamic Theme Color + Light/Dark mode
   const bgStyle = isLightMode ? '#F1F5F9' : '#070514';
   const textStyle = isLightMode ? '#0F172A' : '#FFFFFF';

@@ -70,12 +70,169 @@ function CreatePortfolioContent() {
   // Step 3: Design
   const [designTheme, setDesignTheme] = useState<string | null>(null);
   const [adminTemplates, setAdminTemplates] = useState<any[]>([]);
+  const [removingBg, setRemovingBg] = useState(false);
+  const [bgRemovedNotice, setBgRemovedNotice] = useState<string | null>(null);
 
-  // Step 4: Real-time editor customization overrides
+  // Step 4: Real-time editor customization overrides (declared before useEffect that references them)
   const [customizedData, setCustomizedData] = useState<any>({});
   const [previewMode, setPreviewMode] = useState<'laptop' | 'mobile'>('laptop');
   const iframeRef = React.useRef<HTMLIFrameElement>(null);
   const [selectedEditorSection, setSelectedEditorSection] = useState<string>('hero');
+
+  // Image compression utility to downscale transparent base64 Data URLs and prevent SQL query payload timeouts
+  const compressTransparentBase64 = (dataUrl: string, maxDim = 800): Promise<string> => {
+    return new Promise((resolve) => {
+      if (!dataUrl || typeof dataUrl !== 'string' || !dataUrl.startsWith('data:image')) {
+        resolve(dataUrl);
+        return;
+      }
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxDim || height > maxDim) {
+          if (width > height) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          resolve(dataUrl);
+          return;
+        }
+
+        ctx.clearRect(0, 0, width, height);
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const compressed = canvas.toDataURL('image/png');
+        resolve(compressed.length < dataUrl.length ? compressed : dataUrl);
+      };
+      img.onerror = () => resolve(dataUrl);
+      img.src = dataUrl;
+    });
+  };
+
+  // Helper for safe background removal without throwing unhandled exceptions on non-image HTML responses
+  const removeBgSafely = async (source: any): Promise<string | null> => {
+    try {
+      let imageBlob: Blob | null = null;
+
+      if (source && typeof source === 'object' && ('type' in source || source instanceof Blob)) {
+        if (source.type && !source.type.startsWith('image/')) {
+          console.warn('Background removal skipped: Input blob is not an image type:', source.type);
+          return null;
+        }
+        imageBlob = source;
+      } else if (typeof source === 'string') {
+        const trimmed = source.trim();
+        if (!trimmed) return null;
+
+        if (trimmed.startsWith('data:')) {
+          if (!trimmed.startsWith('data:image/')) return null;
+          const r = await fetch(trimmed);
+          imageBlob = await r.blob();
+        } else if (trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('/')) {
+          try {
+            const resp = await fetch(trimmed, { cache: 'no-store' });
+            const cType = resp.headers.get('content-type') || '';
+            if (resp.ok && cType.includes('image/')) {
+              imageBlob = await resp.blob();
+            } else {
+              // Try blob download proxy if direct fetch returned non-image or CORS
+              const proxied = await fetch(`/api/blob/download?url=${encodeURIComponent(trimmed)}`, { cache: 'no-store' });
+              const pType = proxied.headers.get('content-type') || '';
+              if (proxied.ok && pType.includes('image/')) {
+                imageBlob = await proxied.blob();
+              }
+            }
+          } catch (fetchErr) {
+            console.warn('Fetch image failed for bg removal:', fetchErr);
+          }
+        }
+      }
+
+      if (!imageBlob || (imageBlob.type && !imageBlob.type.startsWith('image/') && imageBlob.type !== '')) {
+        console.warn('Background removal skipped: Could not resolve a valid image Blob.');
+        return null;
+      }
+
+      const { removeBackground } = await import('@imgly/background-removal');
+      const processedBlob = await removeBackground(imageBlob);
+
+      const rawBase64 = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (ev) => resolve((ev.target?.result as string) || '');
+        reader.onerror = () => resolve('');
+        reader.readAsDataURL(processedBlob);
+      });
+
+      const compressed = await compressTransparentBase64(rawBase64, 800);
+      return compressed;
+    } catch (err) {
+      console.warn('Background removal engine warning:', err);
+      return null;
+    }
+  };
+
+  // Auto-remove background when selecting aesthetic_violet if hero/about photo is set
+  useEffect(() => {
+    if (designTheme === 'aesthetic_violet' && !removingBg) {
+      const processExisting = async () => {
+        const heroSource = customizedData.hero_image_url || profileImageUrl;
+        const aboutSource = customizedData.about?.image_url || customizedData.hero_image_url || profileImageUrl;
+
+        const needHero = heroSource && !customizedData.hero_image_url_transparent;
+        const needAbout = aboutSource && !customizedData.about_image_url_transparent;
+
+        if (!needHero && !needAbout) return;
+
+        setRemovingBg(true);
+        setBgRemovedNotice('\u2728 System is removing image background...');
+
+        let heroRes = customizedData.hero_image_url_transparent;
+        let aboutRes = customizedData.about_image_url_transparent;
+
+        if (needHero) {
+          const res = await removeBgSafely(heroSource);
+          if (res) heroRes = res;
+        }
+
+        if (needAbout) {
+          const res = await removeBgSafely(aboutSource);
+          if (res) aboutRes = res;
+        }
+
+        setCustomizedData((prev: any) => {
+          const updated = {
+            ...prev,
+            hero_image_url_transparent: heroRes || prev.hero_image_url_transparent,
+            about_image_url_transparent: aboutRes || prev.about_image_url_transparent
+          };
+          iframeRef.current?.contentWindow?.postMessage({
+            type: 'portfolio-update',
+            data: { title, tagline, description, profile_image_url: profileImageUrl, design_theme: designTheme, sections, customized_data: updated }
+          }, '*');
+          return updated;
+        });
+
+        setBgRemovedNotice('\u2705 Background removed successfully!');
+        setTimeout(() => setBgRemovedNotice(null), 4000);
+        setRemovingBg(false);
+      };
+      processExisting();
+    }
+  }, [designTheme, profileImageUrl, customizedData.hero_image_url, customizedData.about?.image_url]);
 
   // Step 5: Publish overrides
   const [showFullScreenPreview, setShowFullScreenPreview] = useState(false);
@@ -279,6 +436,15 @@ function CreatePortfolioContent() {
   const handleFinish = async () => {
     setSaving(true);
     try {
+      // Compress transparent base64 images before publishing to keep request payload tiny (<200KB vs 15MB)
+      const sanitizedCustomData = { ...customizedData };
+      if (sanitizedCustomData.hero_image_url_transparent) {
+        sanitizedCustomData.hero_image_url_transparent = await compressTransparentBase64(sanitizedCustomData.hero_image_url_transparent, 800);
+      }
+      if (sanitizedCustomData.about_image_url_transparent) {
+        sanitizedCustomData.about_image_url_transparent = await compressTransparentBase64(sanitizedCustomData.about_image_url_transparent, 800);
+      }
+
       const res = await fetch('/api/profilemitraa/portfolio', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -293,7 +459,7 @@ function CreatePortfolioContent() {
           profile_image_url: profileImageUrl,
           sections: sections,
           design_theme: designTheme || 'minimal_dark',
-          customized_data: customizedData,
+          customized_data: sanitizedCustomData,
           status: 'published'
         })
       });
@@ -911,11 +1077,12 @@ function CreatePortfolioContent() {
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                 {(adminTemplates.length > 0 ? adminTemplates : [
                   { key: 'minimal_dark', name: 'Tech Minimalist (Dark Mode)', banner_url: null },
                   { key: 'creative_glass', name: 'Creative Portfolio (Glassmorphism)', banner_url: null },
-                  { key: 'corporate_blue', name: 'Corporate Grid (Professional Blue)', banner_url: null }
+                  { key: 'corporate_blue', name: 'Corporate Grid (Professional Blue)', banner_url: null },
+                  { key: 'aesthetic_violet', name: 'Aesthetic Violet (Design Portfolio)', banner_url: null }
                 ]).map(th => {
                   const isActive = designTheme === th.key;
                   // Private blob URLs must be proxied; public blob/external URLs served directly
@@ -928,6 +1095,7 @@ function CreatePortfolioContent() {
                     minimal_dark: 'linear-gradient(135deg, #070C14 0%, #0F172A 50%, #064E3B 100%)',
                     creative_glass: 'linear-gradient(135deg, #1E1B4B 0%, #3B0764 50%, #881337 100%)',
                     corporate_blue: 'linear-gradient(135deg, #F8FAFC 0%, #E0F2FE 50%, #1E293B 100%)',
+                    aesthetic_violet: 'linear-gradient(135deg, #1E0B36 0%, #3B0764 60%, #0F081D 100%)',
                   };
                   return (
                     <div
@@ -1184,6 +1352,11 @@ function CreatePortfolioContent() {
                             <span>🖼️ Hero Image</span>
                             <span className="text-[8.5px] text-slate-400 font-normal">Dedicated Hero Banner/Photo</span>
                           </label>
+                          {bgRemovedNotice && (
+                            <div className={`p-2.5 rounded-lg text-xs font-bold transition-all ${removingBg ? 'bg-amber-50 text-amber-800 border border-amber-200 animate-pulse' : 'bg-emerald-50 text-emerald-800 border border-emerald-200'}`}>
+                              {bgRemovedNotice}
+                            </div>
+                          )}
                           <div className="flex gap-2 items-center">
                             <label className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-lg cursor-pointer border border-slate-200 transition-colors shrink-0">
                               Upload Image
@@ -1191,14 +1364,34 @@ function CreatePortfolioContent() {
                                 type="file"
                                 accept="image/*"
                                 className="hidden"
-                                onChange={(e) => {
+                                onChange={async (e) => {
                                   const file = e.target.files?.[0];
                                   if (!file) return;
+
+                                  let transparentBase64: string | null = null;
+
+                                  if (designTheme === 'aesthetic_violet') {
+                                    setRemovingBg(true);
+                                    setBgRemovedNotice('✨ System is removing image background...');
+                                    transparentBase64 = await removeBgSafely(file);
+                                    if (transparentBase64) {
+                                      setBgRemovedNotice('✅ Background removed successfully!');
+                                      setTimeout(() => setBgRemovedNotice(null), 4000);
+                                    } else {
+                                      setBgRemovedNotice(null);
+                                    }
+                                    setRemovingBg(false);
+                                  }
+
                                   const reader = new FileReader();
                                   reader.onload = (ev) => {
                                     const imgUrl = ev.target?.result as string;
                                     setProfileImageUrl(imgUrl);
-                                    const updated = { ...customizedData, hero_image_url: imgUrl };
+                                    const updated = {
+                                      ...customizedData,
+                                      hero_image_url: imgUrl,
+                                      hero_image_url_transparent: transparentBase64 || imgUrl
+                                    };
                                     setCustomizedData(updated);
                                     iframeRef.current?.contentWindow?.postMessage({
                                       type: 'portfolio-update',

@@ -9,7 +9,7 @@ fs.writeFileSync(logFile, '');
 const envPath = path.resolve(process.cwd(), '.env.local');
 const envContent = fs.readFileSync(envPath, 'utf-8');
 const env = {};
-envContent.split('\n').forEach(line => {
+envContent.split(/\r?\n/).forEach(line => {
   const match = line.match(/^\s*([^#=]+)\s*=\s*(.*)$/);
   if (match) {
     let key = match[1].trim(), val = match[2].trim();
@@ -72,6 +72,16 @@ async function init() {
         VALUES ('Corporate Grid (Professional Blue)', 'corporate_blue', '/images/tools/ProfileMitraa/templates/corporate-blue-banner.png')
       `;
       log('✓ Seeded: Corporate Grid (Professional Blue)');
+    }
+
+    // Check and seed Template 4: Aesthetic Violet
+    const t4 = await sql`SELECT id FROM profilemitraa_templates WHERE key = 'aesthetic_violet'`;
+    if (t4.length === 0) {
+      await sql`
+        INSERT INTO profilemitraa_templates (name, key, banner_url)
+        VALUES ('Aesthetic Violet (Design Portfolio)', 'aesthetic_violet', '/images/tools/ProfileMitraa/templates/aesthetic-violet-banner.png')
+      `;
+      log('✓ Seeded: Aesthetic Violet (Design Portfolio)');
     }
 
     log('✅ Database updates complete!');
