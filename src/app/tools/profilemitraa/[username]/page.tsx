@@ -328,7 +328,8 @@ export default async function PublicPortfolioPage({ params }: { params: Promise<
     }
 
     const transparentHeroPic = customData.hero_image_url_transparent || heroPic;
-    const transparentAboutPic = customData.about_image_url_transparent || customData.hero_image_url_transparent || aboutPic;
+    // About pic uses ONLY its own transparent image — never inherit the hero image
+    const transparentAboutPic = customData.about_image_url_transparent || aboutPic;
 
     return (
       <div className="min-h-screen font-sans selection:bg-purple-500/30 pb-24 relative overflow-x-hidden" style={{ backgroundColor: bgColor, color: textColor }}>

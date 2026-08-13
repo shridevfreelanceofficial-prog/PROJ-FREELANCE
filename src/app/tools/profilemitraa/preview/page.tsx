@@ -539,7 +539,8 @@ export default function ProfileMitraaPreviewPage() {
     }
 
     const transparentHeroPic = customData.hero_image_url_transparent || heroPic;
-    const transparentAboutPic = customData.about_image_url_transparent || customData.hero_image_url_transparent || aboutPic;
+    // About pic uses ONLY its own transparent image — never inherit the hero image
+    const transparentAboutPic = customData.about_image_url_transparent || aboutPic;
     const avCardBg = isLightMode ? 'rgba(255,255,255,0.95)' : 'rgba(20,14,33,0.7)';
     const avCardBorder = isLightMode ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.1)';
 

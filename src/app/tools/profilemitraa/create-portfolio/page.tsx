@@ -32,7 +32,8 @@ function CreatePortfolioContent() {
   const [description, setDescription] = useState('');
   const [location, setLocation] = useState('Mumbai, Maharashtra, India');
   const [language, setLanguage] = useState('English');
-  const [profileImageUrl, setProfileImageUrl] = useState('');
+  const [profileImageUrl, setProfileImageUrl] = useState(''); // Account avatar (from server)
+  const [heroImageUrl, setHeroImageUrl] = useState(''); // Portfolio hero image (local, editable)
 
   // Slug dynamic verification
   const [checkingSlug, setCheckingSlug] = useState(false);
@@ -189,8 +190,10 @@ function CreatePortfolioContent() {
   useEffect(() => {
     if (designTheme === 'aesthetic_violet' && !removingBg) {
       const processExisting = async () => {
-        const heroSource = customizedData.hero_image_url || profileImageUrl;
-        const aboutSource = customizedData.about?.image_url || customizedData.hero_image_url || profileImageUrl;
+        // Use heroImageUrl (portfolio banner) as the primary source; fall back to customized_data override
+        const heroSource = customizedData.hero_image_url || heroImageUrl;
+        // About image is ONLY its dedicated image — never fall back to hero image
+        const aboutSource = customizedData.about?.image_url || null;
 
         const needHero = heroSource && !customizedData.hero_image_url_transparent;
         const needAbout = aboutSource && !customizedData.about_image_url_transparent;
@@ -221,7 +224,7 @@ function CreatePortfolioContent() {
           };
           iframeRef.current?.contentWindow?.postMessage({
             type: 'portfolio-update',
-            data: { title, tagline, description, profile_image_url: profileImageUrl, design_theme: designTheme, sections, customized_data: updated }
+            data: { title, tagline, description, profile_image_url: heroImageUrl, design_theme: designTheme, sections, customized_data: updated }
           }, '*');
           return updated;
         });
@@ -232,7 +235,7 @@ function CreatePortfolioContent() {
       };
       processExisting();
     }
-  }, [designTheme, profileImageUrl, customizedData.hero_image_url, customizedData.about?.image_url]);
+  }, [designTheme, heroImageUrl, customizedData.hero_image_url, customizedData.about?.image_url]);
 
   // Step 5: Publish overrides
   const [showFullScreenPreview, setShowFullScreenPreview] = useState(false);
@@ -304,7 +307,11 @@ function CreatePortfolioContent() {
           setDescription(pt.description || '');
           setLocation(pt.location || 'Mumbai, Maharashtra, India');
           setLanguage(pt.language || 'English');
-          if (pt.profile_image_url) setProfileImageUrl(pt.profile_image_url);
+          if (pt.profile_image_url) setHeroImageUrl(pt.profile_image_url);
+          // Also pre-fill customized_data hero_image_url so the preview picks it up
+          if (pt.profile_image_url && !pt.customized_data?.hero_image_url) {
+            setCustomizedData((prev: any) => ({ ...prev, hero_image_url: pt.profile_image_url }));
+          }
           const dbTheme = pt.design_theme;
           setDesignTheme(dbTheme === 'minimal' ? 'minimal_dark' : (dbTheme || null));
           if (pt.customized_data) {
@@ -382,33 +389,28 @@ function CreatePortfolioContent() {
     return () => clearTimeout(delayDebounce);
   }, [slug]);
 
-  // Image Upload helper
-  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Hero image upload — stored locally as base64 (no server upload needed in Step 1)
+  const handleHeroImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 2 * 1024 * 1024) {
-      alert('Max size is 2MB');
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Max size is 5MB');
       return;
     }
 
-    const formData = new FormData();
-    formData.append('file', file);
-
-    try {
-      const res = await fetch('/api/profilemitraa/profile', {
-        method: 'POST',
-        body: formData,
-      });
-      const data = await res.json();
-      if (data.success && data.avatarUrl) {
-        setProfileImageUrl(data.avatarUrl);
-      } else {
-        alert(data.error || 'Failed to upload photo.');
-      }
-    } catch {
-      alert('Error uploading photo.');
-    }
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const dataUrl = ev.target?.result as string;
+      setHeroImageUrl(dataUrl);
+      // Also pre-fill into customized_data so the preview iframe gets it immediately
+      setCustomizedData((prev: any) => ({
+        ...prev,
+        hero_image_url: dataUrl,
+        hero_image_url_transparent: undefined, // Reset so bg removal re-triggers
+      }));
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleNextStep = () => {
@@ -456,7 +458,8 @@ function CreatePortfolioContent() {
           description,
           location,
           language,
-          profile_image_url: profileImageUrl,
+          // heroImageUrl is the portfolio banner image (separate from account profile photo)
+          profile_image_url: heroImageUrl,
           sections: sections,
           design_theme: designTheme || 'minimal_dark',
           customized_data: sanitizedCustomData,
@@ -486,14 +489,15 @@ function CreatePortfolioContent() {
           title,
           tagline,
           description,
-          profile_image_url: profileImageUrl,
+          // heroImageUrl is the portfolio banner (separate from account avatar profileImageUrl)
+          profile_image_url: heroImageUrl,
           design_theme: designTheme || 'minimal_dark',
           sections,
           customized_data: customizedData
         }
       }, '*');
     } catch (err) { }
-  }, [title, tagline, description, profileImageUrl, designTheme, sections, customizedData, previewMode]);
+  }, [title, tagline, description, heroImageUrl, designTheme, sections, customizedData, previewMode]);
 
   const toggleSection = (id: string) => {
     setSections(prev =>
@@ -839,26 +843,49 @@ function CreatePortfolioContent() {
                 </div>
               </div>
 
-              {/* Profile Image upload box */}
-              <div className="space-y-2">
-                <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Profile Image / Logo</label>
-                <div className="flex items-center justify-between border border-slate-100 bg-slate-50/50 rounded-2xl p-4">
-                  <div className="flex items-center gap-4">
+              {/* Two separate image fields */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+                {/* Account Profile Photo — read-only from server */}
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Account Profile Photo</label>
+                  <p className="text-[10px] font-semibold text-slate-400">Your account avatar set in profile settings. Go to <strong>Resume → Profile Setup</strong> to change it.</p>
+                  <div className="flex items-center gap-4 border border-slate-100 bg-slate-50/50 rounded-2xl p-4">
                     {profileImageUrl ? (
-                      <img src={profileImageUrl} alt="Upload preview" className="w-14 h-14 rounded-xl object-cover border border-slate-200 shadow-sm" />
+                      <img src={profileImageUrl} alt="Account avatar" className="w-14 h-14 rounded-full object-cover border border-slate-200 shadow-sm" />
                     ) : (
-                      <div className="w-14 h-14 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400">📷</div>
+                      <div className="w-14 h-14 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 text-lg">👤</div>
                     )}
                     <div>
-                      <p className="text-xs font-black text-slate-800">profile-photo.jpg</p>
-                      <p className="text-[10px] font-bold text-slate-400 mt-0.5">JPG, PNG or WebP. Max size 2MB</p>
+                      <p className="text-xs font-black text-slate-800">{profileImageUrl ? 'Profile photo set ✅' : 'No profile photo yet'}</p>
+                      <p className="text-[10px] font-bold text-slate-400 mt-0.5">Used in portfolio contact &amp; header</p>
                     </div>
                   </div>
-                  <label className="px-5 py-2 border border-slate-200 hover:border-[#009670] hover:text-[#009670] bg-white text-slate-700 text-xs font-black rounded-xl cursor-pointer transition-all">
-                    Change
-                    <input type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />
-                  </label>
                 </div>
+
+                {/* Portfolio Hero Image — editable here */}
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Portfolio Hero Image <span className="text-[10px] font-normal text-slate-400 normal-case">(shown large in hero section)</span></label>
+                  <p className="text-[10px] font-semibold text-slate-400">Upload a high-res photo of yourself for the portfolio hero banner. JPG, PNG or WebP. Max 5MB.</p>
+                  <div className="flex items-center justify-between border border-slate-100 bg-slate-50/50 rounded-2xl p-4">
+                    <div className="flex items-center gap-4">
+                      {heroImageUrl ? (
+                        <img src={heroImageUrl} alt="Hero preview" className="w-14 h-14 rounded-xl object-cover border border-slate-200 shadow-sm" />
+                      ) : (
+                        <div className="w-14 h-14 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 text-lg">🖼️</div>
+                      )}
+                      <div>
+                        <p className="text-xs font-black text-slate-800">{heroImageUrl ? 'Hero image set ✅' : 'No hero image yet'}</p>
+                        <p className="text-[10px] font-bold text-slate-400 mt-0.5">Background auto-removed for aesthetic_violet template</p>
+                      </div>
+                    </div>
+                    <label className="px-4 py-2 border border-slate-200 hover:border-[#009670] hover:text-[#009670] bg-white text-slate-700 text-xs font-black rounded-xl cursor-pointer transition-all shrink-0">
+                      {heroImageUrl ? 'Change' : 'Upload'}
+                      <input type="file" accept="image/*" className="hidden" onChange={handleHeroImageUpload} />
+                    </label>
+                  </div>
+                </div>
+
               </div>
 
               {/* Buttons */}
@@ -1324,7 +1351,7 @@ function CreatePortfolioContent() {
                               setTagline(e.target.value);
                               iframeRef.current?.contentWindow?.postMessage({
                                 type: 'portfolio-update',
-                                data: { title, tagline: e.target.value, description, profile_image_url: profileImageUrl, design_theme: designTheme, sections, customized_data: customizedData }
+                                data: { title, tagline: e.target.value, description, profile_image_url: heroImageUrl, design_theme: designTheme, sections, customized_data: customizedData }
                               }, '*');
                             }}
                             className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold focus:outline-none focus:border-[#009670] bg-white text-slate-800"
@@ -1339,7 +1366,7 @@ function CreatePortfolioContent() {
                               setDescription(e.target.value);
                               iframeRef.current?.contentWindow?.postMessage({
                                 type: 'portfolio-update',
-                                data: { title, tagline, description: e.target.value, profile_image_url: profileImageUrl, design_theme: designTheme, sections, customized_data: customizedData }
+                                data: { title, tagline, description: e.target.value, profile_image_url: heroImageUrl, design_theme: designTheme, sections, customized_data: customizedData }
                               }, '*');
                             }}
                             className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold focus:outline-none focus:border-[#009670] bg-white text-slate-800 resize-none"
@@ -1386,7 +1413,7 @@ function CreatePortfolioContent() {
                                   const reader = new FileReader();
                                   reader.onload = (ev) => {
                                     const imgUrl = ev.target?.result as string;
-                                    setProfileImageUrl(imgUrl);
+                                    setHeroImageUrl(imgUrl);
                                     const updated = {
                                       ...customizedData,
                                       hero_image_url: imgUrl,
@@ -1405,10 +1432,10 @@ function CreatePortfolioContent() {
                             <input
                               type="text"
                               placeholder="Or paste Image URL..."
-                              value={customizedData.hero_image_url || profileImageUrl || ''}
+                              value={customizedData.hero_image_url || heroImageUrl || ''}
                               onChange={(e) => {
                                 const imgUrl = e.target.value;
-                                setProfileImageUrl(imgUrl);
+                                setHeroImageUrl(imgUrl);
                                 const updated = { ...customizedData, hero_image_url: imgUrl };
                                 setCustomizedData(updated);
                                 iframeRef.current?.contentWindow?.postMessage({
@@ -1436,7 +1463,7 @@ function CreatePortfolioContent() {
                                     setCustomizedData(updated);
                                     iframeRef.current?.contentWindow?.postMessage({
                                       type: 'portfolio-update',
-                                      data: { title, tagline, description, profile_image_url: profileImageUrl, design_theme: designTheme, sections, customized_data: updated }
+                                      data: { title, tagline, description, profile_image_url: heroImageUrl, design_theme: designTheme, sections, customized_data: updated }
                                     }, '*');
                                   }}
                                   className={`py-1 text-[10px] font-bold rounded border transition-all ${
@@ -1472,7 +1499,7 @@ function CreatePortfolioContent() {
                               setCustomizedData(updated);
                               iframeRef.current?.contentWindow?.postMessage({
                                 type: 'portfolio-update',
-                                data: { title, tagline, description, profile_image_url: profileImageUrl, design_theme: designTheme, sections, customized_data: updated }
+                                data: { title, tagline, description, profile_image_url: heroImageUrl, design_theme: designTheme, sections, customized_data: updated }
                               }, '*');
                             }}
                             className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold focus:outline-none focus:border-[#009670] bg-white text-slate-800 resize-none"
@@ -1505,7 +1532,7 @@ function CreatePortfolioContent() {
                                     setCustomizedData(updated);
                                     iframeRef.current?.contentWindow?.postMessage({
                                       type: 'portfolio-update',
-                                      data: { title, tagline, description, profile_image_url: profileImageUrl, design_theme: designTheme, sections, customized_data: updated }
+                                      data: { title, tagline, description, profile_image_url: heroImageUrl, design_theme: designTheme, sections, customized_data: updated }
                                     }, '*');
                                   };
                                   reader.readAsDataURL(file);
@@ -1524,7 +1551,7 @@ function CreatePortfolioContent() {
                                 setCustomizedData(updated);
                                 iframeRef.current?.contentWindow?.postMessage({
                                   type: 'portfolio-update',
-                                  data: { title, tagline, description, profile_image_url: profileImageUrl, design_theme: designTheme, sections, customized_data: updated }
+                                  data: { title, tagline, description, profile_image_url: heroImageUrl, design_theme: designTheme, sections, customized_data: updated }
                                 }, '*');
                               }}
                               className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold focus:outline-none focus:border-[#009670]"
@@ -1550,7 +1577,7 @@ function CreatePortfolioContent() {
                                     setCustomizedData(updated);
                                     iframeRef.current?.contentWindow?.postMessage({
                                       type: 'portfolio-update',
-                                      data: { title, tagline, description, profile_image_url: profileImageUrl, design_theme: designTheme, sections, customized_data: updated }
+                                      data: { title, tagline, description, profile_image_url: heroImageUrl, design_theme: designTheme, sections, customized_data: updated }
                                     }, '*');
                                   }}
                                   className={`py-1 text-[10px] font-bold rounded border transition-all ${
