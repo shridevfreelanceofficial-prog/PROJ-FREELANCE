@@ -40,15 +40,27 @@ export default function HeroNavbar() {
     pathname?.startsWith('/content-collection') ||
     isTool;
   const [isScrolledPastHero, setIsScrolledPastHero] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
+    const mainEl = document.querySelector('main');
     const handleScroll = () => {
-      setIsScrolledPastHero(window.scrollY > window.innerHeight * 0.85);
+      const scrollPos = (mainEl ? mainEl.scrollTop : 0) || window.scrollY || 0;
+      setIsScrolled(scrollPos > 20);
+      setIsScrolledPastHero(scrollPos > window.innerHeight * 0.85);
     };
     handleScroll();
     window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+    if (mainEl) {
+      mainEl.addEventListener('scroll', handleScroll);
+    }
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (mainEl) {
+        mainEl.removeEventListener('scroll', handleScroll);
+      }
+    };
+  }, [pathname]);
 
   const isCertificateVerificationPage = pathname === '/certificate-verification';
   const useWhiteText = isCertificateVerificationPage || (pathname === '/' && !isScrolledPastHero);
@@ -70,11 +82,11 @@ export default function HeroNavbar() {
       <div className="fixed top-6 left-0 right-0 z-50 flex justify-center pointer-events-none px-4">
         <motion.nav
           style={{
-            backgroundColor: navBackground,
-            borderColor: navBorder,
-            boxShadow: navShadow,
-            backdropFilter: navBackdropBlur,
-            WebkitBackdropFilter: navBackdropBlur,
+            backgroundColor: isScrolled ? 'rgba(255, 255, 255, 0.85)' : navBackground,
+            borderColor: isScrolled ? 'rgba(209, 250, 229, 0.5)' : navBorder,
+            boxShadow: isScrolled ? '0 10px 30px -10px rgba(16, 185, 129, 0.15)' : navShadow,
+            backdropFilter: isScrolled ? 'blur(16px)' : navBackdropBlur,
+            WebkitBackdropFilter: isScrolled ? 'blur(16px)' : navBackdropBlur,
           }}
           className="pointer-events-auto border rounded-full transition-all duration-300 ease-out w-full max-w-5xl"
         >
@@ -133,7 +145,13 @@ export default function HeroNavbar() {
 
             {/* Mobile Hamburger Button */}
             <button 
-              className={`lg:hidden p-2 transition-colors focus:outline-none ${isOpen ? 'text-white' : 'text-[#0F172A] hover:text-[#00C896]'}`}
+              className={`lg:hidden p-2.5 rounded-xl transition-all duration-200 focus:outline-none ${
+                isOpen 
+                  ? 'text-white bg-white/10' 
+                  : useWhiteText 
+                    ? 'text-white hover:text-[#00C896] hover:bg-white/10 active:scale-95' 
+                    : 'text-[#0F172A] hover:text-[#00C896] hover:bg-black/5 active:scale-95'
+              }`}
               onClick={() => setIsOpen(!isOpen)}
               aria-label="Toggle Navigation Menu"
             >
