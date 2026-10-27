@@ -287,3 +287,24 @@ CREATE TABLE IF NOT EXISTS tools (
 
 CREATE INDEX IF NOT EXISTS idx_tools_slug ON tools(slug);
 
+-- Service Packages table
+CREATE TABLE IF NOT EXISTS service_packages (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    service_type VARCHAR(50) NOT NULL, -- 'website' | 'app'
+    name VARCHAR(100) NOT NULL,
+    slug VARCHAR(100) NOT NULL,
+    price VARCHAR(100) NOT NULL,
+    price_period VARCHAR(50) DEFAULT '/ project',
+    description TEXT NOT NULL,
+    features JSONB NOT NULL DEFAULT '[]',
+    popular BOOLEAN DEFAULT FALSE,
+    popular_badge_text VARCHAR(100),
+    icon_type VARCHAR(50) DEFAULT 'sparkles',
+    sort_order INTEGER DEFAULT 0,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_service_packages_type_order ON service_packages(service_type, sort_order);
+

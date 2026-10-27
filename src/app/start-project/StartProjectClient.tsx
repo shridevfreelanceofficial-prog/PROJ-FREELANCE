@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const PLANS = [
+const DEFAULT_PLANS = [
   'Website - Starter',
   'Website - Professional',
   'Website - E-Commerce',
@@ -14,6 +14,7 @@ const PLANS = [
 ];
 
 export default function StartProjectClient() {
+  const [plansList, setPlansList] = useState<string[]>(DEFAULT_PLANS);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -22,6 +23,21 @@ export default function StartProjectClient() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch('/api/service-packages')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.packages && Array.isArray(data.packages) && data.packages.length > 0) {
+          const formatted = data.packages.map(
+            (p: { service_type: string; name: string }) =>
+              `${p.service_type === 'website' ? 'Website' : 'App'} - ${p.name}`
+          );
+          setPlansList(formatted);
+        }
+      })
+      .catch((err) => console.error('Error fetching plans in start project:', err));
+  }, []);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -149,7 +165,7 @@ export default function StartProjectClient() {
                         required
                       >
                         <option value="" className="text-gray-900">Choose a plan</option>
-                        {PLANS.map((p) => (
+                        {plansList.map((p) => (
                           <option key={p} value={p} className="text-gray-900">
                             {p}
                           </option>
