@@ -144,21 +144,39 @@ function CreatePortfolioContent() {
           const r = await fetch(trimmed);
           imageBlob = await r.blob();
         } else if (trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('/')) {
-          try {
-            const resp = await fetch(trimmed, { cache: 'no-store' });
-            const cType = resp.headers.get('content-type') || '';
-            if (resp.ok && cType.includes('image/')) {
-              imageBlob = await resp.blob();
-            } else {
-              // Try blob download proxy if direct fetch returned non-image or CORS
+          // If it's a vercel-storage URL or relative path, try via our download proxy first
+          // to bypass CORS restrictions on external or blob domains in the browser
+          if (trimmed.includes('vercel-storage.com') || trimmed.startsWith('/')) {
+            try {
               const proxied = await fetch(`/api/blob/download?url=${encodeURIComponent(trimmed)}`, { cache: 'no-store' });
               const pType = proxied.headers.get('content-type') || '';
               if (proxied.ok && pType.includes('image/')) {
                 imageBlob = await proxied.blob();
               }
+            } catch (pErr) {
+              console.warn('Proxy fetch failed, attempting direct fetch:', pErr);
             }
-          } catch (fetchErr) {
-            console.warn('Fetch image failed for bg removal:', fetchErr);
+          }
+
+          if (!imageBlob) {
+            try {
+              const resp = await fetch(trimmed, { cache: 'no-store' });
+              const cType = resp.headers.get('content-type') || '';
+              if (resp.ok && cType.includes('image/')) {
+                imageBlob = await resp.blob();
+              }
+            } catch (fetchErr) {
+              console.warn('Direct fetch failed (likely CORS), attempting proxy:', fetchErr);
+              try {
+                const proxied = await fetch(`/api/blob/download?url=${encodeURIComponent(trimmed)}`, { cache: 'no-store' });
+                const pType = proxied.headers.get('content-type') || '';
+                if (proxied.ok && pType.includes('image/')) {
+                  imageBlob = await proxied.blob();
+                }
+              } catch (secondErr) {
+                console.warn('Proxy fallback failed as well:', secondErr);
+              }
+            }
           }
         }
       }
@@ -186,56 +204,82 @@ function CreatePortfolioContent() {
     }
   };
 
-  // Auto-remove background when selecting aesthetic_violet if hero/about photo is set
+  // Keep track of the last processed source URL to avoid redundant background removals
+  const processedHeroBgUrlRef = React.useRef<string | null>(null);
+  const processedAboutBgUrlRef = React.useRef<string | null>(null);
+
+  // Auto-remove background when selecting aesthetic_violet if hero/about photo is set (including default profile photo)
   useEffect(() => {
     if (designTheme === 'aesthetic_violet' && !removingBg) {
       const processExisting = async () => {
-        // Use heroImageUrl (portfolio banner) as the primary source; fall back to customized_data override
-        const heroSource = customizedData.hero_image_url || heroImageUrl;
-        // About image is ONLY its dedicated image — never fall back to hero image
-        const aboutSource = customizedData.about?.image_url || null;
+        // Use heroImageUrl as primary source; fall back to customized_data override or default profile photo
+        const heroSource = customizedData.hero_image_url || heroImageUrl || profileImageUrl;
+        // About image source: dedicated about image or default profile photo
+        const aboutSource = customizedData.about?.image_url || profileImageUrl;
 
-        const needHero = heroSource && !customizedData.hero_image_url_transparent;
-        const needAbout = aboutSource && !customizedData.about_image_url_transparent;
+        const needHero = Boolean(heroSource && (!customizedData.hero_image_url_transparent || processedHeroBgUrlRef.current !== heroSource));
+        const needAbout = Boolean(aboutSource && (!customizedData.about_image_url_transparent || processedAboutBgUrlRef.current !== aboutSource));
 
         if (!needHero && !needAbout) return;
 
         setRemovingBg(true);
-        setBgRemovedNotice('\u2728 System is removing image background...');
+        setBgRemovedNotice('✨ System is removing image background...');
 
         let heroRes = customizedData.hero_image_url_transparent;
         let aboutRes = customizedData.about_image_url_transparent;
 
-        if (needHero) {
+        if (needHero && heroSource) {
           const res = await removeBgSafely(heroSource);
-          if (res) heroRes = res;
+          if (res) {
+            heroRes = res;
+            processedHeroBgUrlRef.current = heroSource;
+            if (!heroImageUrl) {
+              setHeroImageUrl(heroSource);
+            }
+            if (needAbout && aboutSource === heroSource) {
+              aboutRes = res;
+              processedAboutBgUrlRef.current = aboutSource;
+            }
+          }
         }
 
-        if (needAbout) {
+        if (needAbout && aboutSource && (!aboutRes || aboutSource !== heroSource)) {
           const res = await removeBgSafely(aboutSource);
-          if (res) aboutRes = res;
+          if (res) {
+            aboutRes = res;
+            processedAboutBgUrlRef.current = aboutSource;
+          }
         }
 
         setCustomizedData((prev: any) => {
           const updated = {
             ...prev,
+            hero_image_url: prev.hero_image_url || heroSource,
             hero_image_url_transparent: heroRes || prev.hero_image_url_transparent,
             about_image_url_transparent: aboutRes || prev.about_image_url_transparent
           };
           iframeRef.current?.contentWindow?.postMessage({
             type: 'portfolio-update',
-            data: { title, tagline, description, profile_image_url: heroImageUrl, design_theme: designTheme, sections, customized_data: updated }
+            data: {
+              title,
+              tagline,
+              description,
+              profile_image_url: heroImageUrl || heroSource || profileImageUrl,
+              design_theme: designTheme,
+              sections,
+              customized_data: updated
+            }
           }, '*');
           return updated;
         });
 
-        setBgRemovedNotice('\u2705 Background removed successfully!');
+        setBgRemovedNotice('✅ Background removed successfully!');
         setTimeout(() => setBgRemovedNotice(null), 4000);
         setRemovingBg(false);
       };
       processExisting();
     }
-  }, [designTheme, heroImageUrl, customizedData.hero_image_url, customizedData.about?.image_url]);
+  }, [designTheme, heroImageUrl, profileImageUrl, customizedData.hero_image_url, customizedData.hero_image_url_transparent, customizedData.about?.image_url, customizedData.about_image_url_transparent]);
 
   // Step 5: Publish overrides
   const [showFullScreenPreview, setShowFullScreenPreview] = useState(false);
@@ -273,7 +317,10 @@ function CreatePortfolioContent() {
             setTagline(data.profile?.headline || '');
             setDescription(data.profile?.about_me || '');
             if (data.profile?.location) setLocation(data.profile.location);
-            if (data.profile?.profile_photo_url) setProfileImageUrl(data.profile.profile_photo_url);
+            if (data.profile?.profile_photo_url) {
+              setProfileImageUrl(data.profile.profile_photo_url);
+              setHeroImageUrl(data.profile.profile_photo_url);
+            }
             setDesignTheme(null);
             setSections(defaultSections);
             setCustomizedData({});
@@ -400,14 +447,29 @@ function CreatePortfolioContent() {
     }
 
     const reader = new FileReader();
-    reader.onload = (ev) => {
+    reader.onload = async (ev) => {
       const dataUrl = ev.target?.result as string;
       setHeroImageUrl(dataUrl);
+
+      let transparentBase64: string | null = null;
+      if (designTheme === 'aesthetic_violet') {
+        setRemovingBg(true);
+        setBgRemovedNotice('✨ System is removing image background...');
+        transparentBase64 = await removeBgSafely(file);
+        if (transparentBase64) {
+          setBgRemovedNotice('✅ Background removed successfully!');
+          setTimeout(() => setBgRemovedNotice(null), 4000);
+        } else {
+          setBgRemovedNotice(null);
+        }
+        setRemovingBg(false);
+      }
+
       // Also pre-fill into customized_data so the preview iframe gets it immediately
       setCustomizedData((prev: any) => ({
         ...prev,
         hero_image_url: dataUrl,
-        hero_image_url_transparent: undefined, // Reset so bg removal re-triggers
+        hero_image_url_transparent: transparentBase64 || undefined,
       }));
     };
     reader.readAsDataURL(file);
@@ -438,8 +500,12 @@ function CreatePortfolioContent() {
   const handleFinish = async () => {
     setSaving(true);
     try {
+      const effectiveHeroImage = heroImageUrl || customizedData.hero_image_url || profileImageUrl || '';
       // Compress transparent base64 images before publishing to keep request payload tiny (<200KB vs 15MB)
-      const sanitizedCustomData = { ...customizedData };
+      const sanitizedCustomData = {
+        ...customizedData,
+        hero_image_url: customizedData.hero_image_url || effectiveHeroImage,
+      };
       if (sanitizedCustomData.hero_image_url_transparent) {
         sanitizedCustomData.hero_image_url_transparent = await compressTransparentBase64(sanitizedCustomData.hero_image_url_transparent, 800);
       }
@@ -458,8 +524,8 @@ function CreatePortfolioContent() {
           description,
           location,
           language,
-          // heroImageUrl is the portfolio banner image (separate from account profile photo)
-          profile_image_url: heroImageUrl,
+          // Save heroImageUrl or fallback to default profile photo
+          profile_image_url: effectiveHeroImage,
           sections: sections,
           design_theme: designTheme || 'minimal_dark',
           customized_data: sanitizedCustomData,
@@ -483,21 +549,22 @@ function CreatePortfolioContent() {
   useEffect(() => {
     if (!iframeRef.current || !iframeRef.current.contentWindow) return;
     try {
+      const effectiveProfileImg = heroImageUrl || customizedData.hero_image_url || profileImageUrl || '';
       iframeRef.current.contentWindow.postMessage({
         type: 'portfolio-update',
         data: {
           title,
           tagline,
           description,
-          // heroImageUrl is the portfolio banner (separate from account avatar profileImageUrl)
-          profile_image_url: heroImageUrl,
+          // effectiveProfileImg ensures the preview receives the image even if only profileImageUrl was set
+          profile_image_url: effectiveProfileImg,
           design_theme: designTheme || 'minimal_dark',
           sections,
           customized_data: customizedData
         }
       }, '*');
     } catch (err) { }
-  }, [title, tagline, description, heroImageUrl, designTheme, sections, customizedData, previewMode]);
+  }, [title, tagline, description, heroImageUrl, profileImageUrl, designTheme, sections, customizedData, previewMode]);
 
   const toggleSection = (id: string) => {
     setSections(prev =>
@@ -869,20 +936,42 @@ function CreatePortfolioContent() {
                   <p className="text-[10px] font-semibold text-slate-400">Upload a high-res photo of yourself for the portfolio hero banner. JPG, PNG or WebP. Max 5MB.</p>
                   <div className="flex items-center justify-between border border-slate-100 bg-slate-50/50 rounded-2xl p-4">
                     <div className="flex items-center gap-4">
-                      {heroImageUrl ? (
-                        <img src={heroImageUrl} alt="Hero preview" className="w-14 h-14 rounded-xl object-cover border border-slate-200 shadow-sm" />
+                      {heroImageUrl || profileImageUrl ? (
+                        <img src={heroImageUrl || profileImageUrl} alt="Hero preview" className="w-14 h-14 rounded-xl object-cover border border-slate-200 shadow-sm" />
                       ) : (
                         <div className="w-14 h-14 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 text-lg">🖼️</div>
                       )}
                       <div>
-                        <p className="text-xs font-black text-slate-800">{heroImageUrl ? 'Hero image set ✅' : 'No hero image yet'}</p>
+                        <p className="text-xs font-black text-slate-800">
+                          {heroImageUrl
+                            ? (heroImageUrl === profileImageUrl ? 'Using Profile Photo ✅' : 'Custom hero image set ✅')
+                            : (profileImageUrl ? 'Defaulting to Profile Photo ✅' : 'No hero image yet')}
+                        </p>
                         <p className="text-[10px] font-bold text-slate-400 mt-0.5">Background auto-removed for aesthetic_violet template</p>
                       </div>
                     </div>
-                    <label className="px-4 py-2 border border-slate-200 hover:border-[#009670] hover:text-[#009670] bg-white text-slate-700 text-xs font-black rounded-xl cursor-pointer transition-all shrink-0">
-                      {heroImageUrl ? 'Change' : 'Upload'}
-                      <input type="file" accept="image/*" className="hidden" onChange={handleHeroImageUpload} />
-                    </label>
+                    <div className="flex items-center gap-2">
+                      {profileImageUrl && heroImageUrl && heroImageUrl !== profileImageUrl && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setHeroImageUrl(profileImageUrl);
+                            setCustomizedData((prev: any) => ({
+                              ...prev,
+                              hero_image_url: profileImageUrl,
+                              hero_image_url_transparent: undefined,
+                            }));
+                          }}
+                          className="px-3 py-2 border border-slate-200 hover:border-[#009670] hover:text-[#009670] bg-white text-slate-700 text-xs font-bold rounded-xl cursor-pointer transition-all shrink-0"
+                        >
+                          Use Profile Photo
+                        </button>
+                      )}
+                      <label className="px-4 py-2 border border-slate-200 hover:border-[#009670] hover:text-[#009670] bg-white text-slate-700 text-xs font-black rounded-xl cursor-pointer transition-all shrink-0">
+                        {heroImageUrl ? 'Change' : 'Upload'}
+                        <input type="file" accept="image/*" className="hidden" onChange={handleHeroImageUpload} />
+                      </label>
+                    </div>
                   </div>
                 </div>
 
@@ -1384,7 +1473,7 @@ function CreatePortfolioContent() {
                               {bgRemovedNotice}
                             </div>
                           )}
-                          <div className="flex gap-2 items-center">
+                          <div className="flex flex-wrap gap-2 items-center">
                             <label className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-lg cursor-pointer border border-slate-200 transition-colors shrink-0">
                               Upload Image
                               <input
@@ -1429,6 +1518,40 @@ function CreatePortfolioContent() {
                                 }}
                               />
                             </label>
+                            {profileImageUrl && (
+                              <button
+                                type="button"
+                                onClick={async () => {
+                                  setHeroImageUrl(profileImageUrl);
+                                  let transparentBase64: string | null = null;
+                                  if (designTheme === 'aesthetic_violet') {
+                                    setRemovingBg(true);
+                                    setBgRemovedNotice('✨ System is removing image background...');
+                                    transparentBase64 = await removeBgSafely(profileImageUrl);
+                                    if (transparentBase64) {
+                                      setBgRemovedNotice('✅ Background removed successfully!');
+                                      setTimeout(() => setBgRemovedNotice(null), 4000);
+                                    } else {
+                                      setBgRemovedNotice(null);
+                                    }
+                                    setRemovingBg(false);
+                                  }
+                                  const updated = {
+                                    ...customizedData,
+                                    hero_image_url: profileImageUrl,
+                                    hero_image_url_transparent: transparentBase64 || customizedData.hero_image_url_transparent
+                                  };
+                                  setCustomizedData(updated);
+                                  iframeRef.current?.contentWindow?.postMessage({
+                                    type: 'portfolio-update',
+                                    data: { title, tagline, description, profile_image_url: profileImageUrl, design_theme: designTheme, sections, customized_data: updated }
+                                  }, '*');
+                                }}
+                                className="px-3 py-1.5 bg-purple-50 hover:bg-purple-100 text-purple-700 text-xs font-bold rounded-lg border border-purple-200 transition-colors shrink-0 flex items-center gap-1"
+                              >
+                                👤 Use Profile Photo
+                              </button>
+                            )}
                             <input
                               type="text"
                               placeholder="Or paste Image URL..."
@@ -1436,14 +1559,14 @@ function CreatePortfolioContent() {
                               onChange={(e) => {
                                 const imgUrl = e.target.value;
                                 setHeroImageUrl(imgUrl);
-                                const updated = { ...customizedData, hero_image_url: imgUrl };
+                                const updated = { ...customizedData, hero_image_url: imgUrl, hero_image_url_transparent: undefined };
                                 setCustomizedData(updated);
                                 iframeRef.current?.contentWindow?.postMessage({
                                   type: 'portfolio-update',
                                   data: { title, tagline, description, profile_image_url: imgUrl, design_theme: designTheme, sections, customized_data: updated }
                                 }, '*');
                               }}
-                              className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold focus:outline-none focus:border-[#009670]"
+                              className="flex-1 min-w-[140px] px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold focus:outline-none focus:border-[#009670]"
                             />
                           </div>
                           {/* Image Placement Shifter */}
@@ -1512,22 +1635,44 @@ function CreatePortfolioContent() {
                             <span>📷 About Us Image</span>
                             <span className="text-[8.5px] text-slate-400 font-normal">Dedicated About Photo</span>
                           </label>
-                          <div className="flex gap-2 items-center">
+                          {bgRemovedNotice && (
+                            <div className={`p-2.5 rounded-lg text-xs font-bold transition-all ${removingBg ? 'bg-amber-50 text-amber-800 border border-amber-200 animate-pulse' : 'bg-emerald-50 text-emerald-800 border border-emerald-200'}`}>
+                              {bgRemovedNotice}
+                            </div>
+                          )}
+                          <div className="flex flex-wrap gap-2 items-center">
                             <label className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-lg cursor-pointer border border-slate-200 transition-colors shrink-0">
                               Upload Image
                               <input
                                 type="file"
                                 accept="image/*"
                                 className="hidden"
-                                onChange={(e) => {
+                                onChange={async (e) => {
                                   const file = e.target.files?.[0];
                                   if (!file) return;
+
+                                  let transparentBase64: string | null = null;
+
+                                  if (designTheme === 'aesthetic_violet') {
+                                    setRemovingBg(true);
+                                    setBgRemovedNotice('✨ System is removing about image background...');
+                                    transparentBase64 = await removeBgSafely(file);
+                                    if (transparentBase64) {
+                                      setBgRemovedNotice('✅ About background removed successfully!');
+                                      setTimeout(() => setBgRemovedNotice(null), 4000);
+                                    } else {
+                                      setBgRemovedNotice(null);
+                                    }
+                                    setRemovingBg(false);
+                                  }
+
                                   const reader = new FileReader();
                                   reader.onload = (ev) => {
                                     const imgUrl = ev.target?.result as string;
                                     const updated = {
                                       ...customizedData,
-                                      about: { ...customizedData.about, image_url: imgUrl }
+                                      about: { ...customizedData.about, image_url: imgUrl },
+                                      about_image_url_transparent: transparentBase64 || imgUrl
                                     };
                                     setCustomizedData(updated);
                                     iframeRef.current?.contentWindow?.postMessage({
@@ -1539,14 +1684,49 @@ function CreatePortfolioContent() {
                                 }}
                               />
                             </label>
+                            {profileImageUrl && (
+                              <button
+                                type="button"
+                                onClick={async () => {
+                                  let transparentBase64: string | null = null;
+                                  if (designTheme === 'aesthetic_violet') {
+                                    setRemovingBg(true);
+                                    setBgRemovedNotice('✨ System is removing about image background...');
+                                    transparentBase64 = await removeBgSafely(profileImageUrl);
+                                    if (transparentBase64) {
+                                      setBgRemovedNotice('✅ About background removed successfully!');
+                                      setTimeout(() => setBgRemovedNotice(null), 4000);
+                                    } else {
+                                      setBgRemovedNotice(null);
+                                    }
+                                    setRemovingBg(false);
+                                  }
+                                  const updated = {
+                                    ...customizedData,
+                                    about: { ...customizedData.about, image_url: profileImageUrl },
+                                    about_image_url_transparent: transparentBase64 || customizedData.about_image_url_transparent
+                                  };
+                                  setCustomizedData(updated);
+                                  iframeRef.current?.contentWindow?.postMessage({
+                                    type: 'portfolio-update',
+                                    data: { title, tagline, description, profile_image_url: heroImageUrl, design_theme: designTheme, sections, customized_data: updated }
+                                  }, '*');
+                                }}
+                                className="px-3 py-1.5 bg-purple-50 hover:bg-purple-100 text-purple-700 text-xs font-bold rounded-lg border border-purple-200 transition-colors shrink-0 flex items-center gap-1"
+                              >
+                                👤 Use Profile Photo
+                              </button>
+                            )}
                             <input
                               type="text"
                               placeholder="Or paste Image URL..."
                               value={customizedData.about?.image_url || ''}
                               onChange={(e) => {
+                                const imgUrl = e.target.value;
                                 const updated = {
                                   ...customizedData,
-                                  about: { ...customizedData.about, image_url: e.target.value }
+                                  about: { ...customizedData.about, image_url: imgUrl },
+                                  about_image_url_transparent: undefined
                                 };
                                 setCustomizedData(updated);
                                 iframeRef.current?.contentWindow?.postMessage({
@@ -1554,7 +1734,7 @@ function CreatePortfolioContent() {
                                   data: { title, tagline, description, profile_image_url: heroImageUrl, design_theme: designTheme, sections, customized_data: updated }
                                 }, '*');
                               }}
-                              className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold focus:outline-none focus:border-[#009670]"
+                              className="flex-1 min-w-[140px] px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold focus:outline-none focus:border-[#009670]"
                             />
                           </div>
                           {/* Image Placement Shifter */}
