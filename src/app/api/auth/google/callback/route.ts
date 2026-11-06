@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
     requestHost.includes('127.0.0.1');
 
   // Default values
-  let returnTo = '/dashboard';
+  let returnTo = '/complete-profile';
   let targetOrigin = isLocal ? 'http://localhost:3000' : 'https://profilemitraa.shridevfreelance.online';
 
   if (state) {

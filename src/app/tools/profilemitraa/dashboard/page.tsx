@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -19,6 +19,19 @@ export default function ProfileMitraaDashboardPage() {
   const [greeting, setGreeting] = useState('Good Morning');
   const [domainPrefix, setDomainPrefix] = useState('profilemitraa.shridevfreelance.online/');
   const [stats, setStats] = useState({ profileViews: 0, resumeDownloads: 0, certificates: 0, followers: 0, following: 0 });
+  const [activities, setActivities] = useState<any[]>([]);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setShowUserMenu(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -67,11 +80,18 @@ export default function ProfileMitraaDashboardPage() {
       .then(r => r.json())
       .then(d => { if (d.success) setStats(d.stats); })
       .catch(() => {});
-  }, [router]);
+
+    // Fetch real activities
+    fetch('/api/profilemitraa/activities')
+      .then(r => r.json())
+      .then(d => { if (d.success) setActivities(d.activities || []); })
+      .catch(() => {});
+  }, [router, isToolsPath]);
 
   // Calculate dynamic profile completion percentage
   const getCompletionPercentage = () => {
     if (!profile) return 0;
+    if (profile.is_completed) return 100;
     let filledFields = 0;
     
     // Step 1: Basic Info (max 40%)
@@ -115,6 +135,23 @@ export default function ProfileMitraaDashboardPage() {
   };
 
   const completionPercent = getCompletionPercentage();
+  const isProfileCompleted = Boolean(profile?.is_completed || completionPercent >= 100);
+
+  const formatTimeAgo = (dateStr: string) => {
+    if (!dateStr) return 'Just now';
+    const now = new Date();
+    const date = new Date(dateStr);
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+    if (diffInSeconds < 60) return 'Just now';
+    const minutes = Math.floor(diffInSeconds / 60);
+    if (minutes < 60) return `${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ago`;
+    const days = Math.floor(hours / 24);
+    if (days < 7) return `${days}d ago`;
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  };
 
   // Get portfolio public URL
   const getPortfolioUrl = (slug: string) => {
@@ -244,22 +281,109 @@ export default function ProfileMitraaDashboardPage() {
           </button>
 
           {/* User profile menu dropdown */}
-          <div className="flex items-center gap-2">
-            {profile?.profile_photo_url ? (
-              <img
-                src={profile.profile_photo_url}
-                alt="Profile Avatar"
-                className="w-9.5 h-9.5 rounded-full object-cover border border-slate-100"
-              />
-            ) : (
-              <div className="w-9.5 h-9.5 rounded-full bg-emerald-50 text-[#009670] flex items-center justify-center text-xs font-bold font-sans">
-                {initials}
+          <div className="relative" ref={userMenuRef}>
+            <button
+              type="button"
+              onClick={() => setShowUserMenu(!showUserMenu)}
+              className="flex items-center gap-1.5 p-1 rounded-full hover:ring-2 hover:ring-[#009670]/30 transition-all cursor-pointer focus:outline-none"
+            >
+              {profile?.profile_photo_url ? (
+                <img
+                  src={profile.profile_photo_url}
+                  alt="Profile Avatar"
+                  className="w-9.5 h-9.5 rounded-full object-cover border border-slate-100 shadow-xs"
+                />
+              ) : (
+                <div className="w-9.5 h-9.5 rounded-full bg-emerald-50 text-[#009670] flex items-center justify-center text-xs font-black font-sans shadow-xs">
+                  {initials}
+                </div>
+              )}
+              <svg className={`w-3.5 h-3.5 text-slate-400 transition-transform ${showUserMenu ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+              </svg>
+            </button>
+
+            {/* Dropdown Menu */}
+            {showUserMenu && (
+              <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50 animate-in fade-in zoom-in-95 duration-100 select-none">
+                {/* User info card */}
+                <div className="px-4 py-3 border-b border-slate-100 flex items-center gap-3">
+                  {profile?.profile_photo_url ? (
+                    <img
+                      src={profile.profile_photo_url}
+                      alt="Avatar"
+                      className="w-10 h-10 rounded-full object-cover shrink-0"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-emerald-50 text-[#009670] flex items-center justify-center text-xs font-black shrink-0">
+                      {initials}
+                    </div>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-black text-slate-900 truncate">{user?.fullName || 'User'}</p>
+                    <p className="text-[11px] text-[#009670] font-bold truncate">@{user?.username || 'username'}</p>
+                    <p className="text-[10px] text-slate-400 truncate">{user?.email}</p>
+                  </div>
+                </div>
+
+                <div className="py-1">
+                  {/* Option 1: View Profile */}
+                  <Link
+                    href={isToolsPath ? `/tools/profilemitraa/${user?.username}/profile` : `/${user?.username}/profile`}
+                    onClick={() => setShowUserMenu(false)}
+                    className="flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-[#009670] transition-colors"
+                  >
+                    <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    View Profile
+                  </Link>
+
+                  {/* Option 2: Settings */}
+                  <Link
+                    href={isToolsPath ? '/tools/profilemitraa/settings' : '/settings'}
+                    onClick={() => setShowUserMenu(false)}
+                    className="flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-[#009670] transition-colors"
+                  >
+                    <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    Settings
+                  </Link>
+
+                  {!isProfileCompleted && (
+                    <Link
+                      href={isToolsPath ? '/tools/profilemitraa/complete-profile' : '/complete-profile'}
+                      onClick={() => setShowUserMenu(false)}
+                      className="flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-amber-600 hover:bg-amber-50 transition-colors"
+                    >
+                      <svg className="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                      </svg>
+                      Complete Profile ({completionPercent}%)
+                    </Link>
+                  )}
+                </div>
+
+                <div className="pt-1 border-t border-slate-100">
+                  {/* Option 3: Logout */}
+                  <button
+                    onClick={() => {
+                      setShowUserMenu(false);
+                      handleLogout();
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-xs font-bold text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer text-left"
+                  >
+                    <svg className="w-4 h-4 text-rose-500" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+                    </svg>
+                    Logout
+                  </button>
+                </div>
               </div>
             )}
-            {/* Logout button */}
-            <button onClick={handleLogout} className="text-xs font-bold text-slate-500 hover:text-rose-600 transition-colors hidden sm:block">
-              Logout
-            </button>
           </div>
         </div>
       </header>
@@ -319,27 +443,15 @@ export default function ProfileMitraaDashboardPage() {
               Analytics
             </Link>
 
-            <Link href={isToolsPath ? "/tools/profilemitraa/complete-profile" : "/complete-profile"} className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-slate-50 text-slate-600 hover:text-slate-900 font-bold text-[13px] transition-all">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9.59 4.59A2 2 0 1111 8H9m10.59 11.41A2 2 0 1119 18h-2M9 18H5a2 2 0 01-2-2V5a2 2 0 012-2h12a2 2 0 012 2v3m-6 10h6m-3-3v6" />
-              </svg>
-              Settings
-            </Link>
-          </div>
-
-          {/* Premium banner box */}
-          <div className="bg-gradient-to-br from-slate-900 to-emerald-950 rounded-2xl p-4.5 text-white space-y-3 relative overflow-hidden shadow-md hidden md:block">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-700/25 rounded-full blur-xl pointer-events-none" />
-            <div className="flex items-center gap-2 text-amber-400">
-              <span className="text-sm">👑</span>
-              <span className="text-[12px] font-black tracking-wider uppercase">Go Premium</span>
-            </div>
-            <p className="text-[11px] text-emerald-100/90 leading-relaxed font-semibold">
-              Unlock premium styled templates, custom domains, resume designs, and advanced analytics.
-            </p>
-            <button className="w-full py-2 bg-[#009670] hover:bg-[#047857] text-white font-bold text-xs rounded-xl transition-all shadow-sm">
-              Upgrade Now
-            </button>
+            {/* Complete Profile link in sidebar (only if not yet completed) */}
+            {!isProfileCompleted && (
+              <Link href={isToolsPath ? "/tools/profilemitraa/complete-profile" : "/complete-profile"} className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-emerald-50 text-[#009670] font-bold text-[13px] transition-all">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Complete Profile
+              </Link>
+            )}
           </div>
         </aside>
 
@@ -409,8 +521,8 @@ export default function ProfileMitraaDashboardPage() {
                   <p className="text-xl font-black text-slate-900 mt-0.5">{stats.resumeDownloads.toLocaleString()}</p>
                 </div>
               </div>
-              <div className="flex items-center justify-between text-[11px] font-semibold text-emerald-600">
-                <span>↑ 12.4% this week</span>
+              <div className="flex items-center justify-between text-[11px] font-semibold text-blue-600">
+                <span>{stats.resumeDownloads > 0 ? `${stats.resumeDownloads} total downloaded` : 'Ready for recruiters'}</span>
                 <svg className="w-14 h-5 text-blue-600" fill="none" stroke="currentColor" strokeWidth={2.5}>
                   <path d="M0,15 Q5,10 10,5 T20,12 T30,8 T40,16 T50,5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
@@ -431,7 +543,7 @@ export default function ProfileMitraaDashboardPage() {
                 </div>
               </div>
               <div className="flex items-center justify-between text-[11px] font-semibold text-purple-600">
-                <span>↑ 2 new this month</span>
+                <span>{stats.certificates > 0 ? `${stats.certificates} verified` : 'Add certificates'}</span>
                 <svg className="w-14 h-5 text-purple-600" fill="none" stroke="currentColor" strokeWidth={2.5}>
                   <path d="M0,15 T10,10 T20,14 T30,5 T40,10 T50,3" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
@@ -463,14 +575,23 @@ export default function ProfileMitraaDashboardPage() {
                 </div>
                 <div className="text-right">
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Profile Completion</p>
-                  <p className="text-xs font-bold text-[#009670] mt-0.5">Keep it up!</p>
+                  <p className="text-xs font-bold text-[#009670] mt-0.5">
+                    {isProfileCompleted ? 'Fully Completed ✓' : 'Keep it up!'}
+                  </p>
                 </div>
               </div>
               <div className="flex justify-between items-center text-[11px] font-bold">
-                <Link href={isToolsPath ? "/tools/profilemitraa/complete-profile" : "/complete-profile"} className="text-[#009670] hover:underline flex items-center gap-1 mt-1">
-                  Improve Profile
-                  <span>➔</span>
-                </Link>
+                {isProfileCompleted ? (
+                  <Link href={isToolsPath ? "/tools/profilemitraa/settings" : "/settings"} className="text-[#009670] hover:underline flex items-center gap-1 mt-1">
+                    Edit Details
+                    <span>➔</span>
+                  </Link>
+                ) : (
+                  <Link href={isToolsPath ? "/tools/profilemitraa/complete-profile" : "/complete-profile"} className="text-[#009670] hover:underline flex items-center gap-1 mt-1">
+                    Improve Profile
+                    <span>➔</span>
+                  </Link>
+                )}
               </div>
             </div>
 
@@ -676,126 +797,161 @@ export default function ProfileMitraaDashboardPage() {
               {/* Recent activity log list */}
               <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm space-y-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-[14.5px] font-black text-slate-900">Recent Activity</h3>
-                  <button className="text-[11.5px] font-bold text-[#009670] hover:underline">View All</button>
+                  <div>
+                    <h3 className="text-[14.5px] font-black text-slate-900">Recent Activity</h3>
+                    <p className="text-[11px] font-semibold text-slate-400 mt-0.5">Live profile interactions</p>
+                  </div>
+                  <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+                    Real-time
+                  </span>
                 </div>
 
-                <div className="divide-y divide-slate-100">
-                  {/* Activity Item 1 */}
-                  <div className="flex items-center justify-between py-3.5 first:pt-0 last:pb-0">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8.5 h-8.5 rounded-lg bg-emerald-50 text-[#009670] flex items-center justify-center shrink-0">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-                        </svg>
-                      </div>
-                      <div>
-                        <p className="text-xs font-bold text-slate-800 leading-snug">
-                          Your portfolio <span className="text-[#009670] font-black">&quot;{user?.fullName || 'My'} Portfolio&quot;</span> was viewed by Sarah Johnson
-                        </p>
-                      </div>
+                {activities.length === 0 ? (
+                  <div className="py-8 text-center space-y-2">
+                    <div className="w-10 h-10 rounded-full bg-slate-50 text-slate-300 flex items-center justify-center mx-auto">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
                     </div>
-                    <span className="text-[10px] font-bold text-slate-400 ml-4 shrink-0">2h ago</span>
+                    <p className="text-xs font-bold text-slate-600">No recent activity yet</p>
+                    <p className="text-[11px] text-slate-400 font-medium max-w-xs mx-auto">
+                      When someone views your profile, downloads your resume, or follows you, accurate updates will appear here automatically.
+                    </p>
                   </div>
+                ) : (
+                  <div className="divide-y divide-slate-100">
+                    {activities.map((act) => {
+                      const icon =
+                        act.activity_type === 'view' ? (
+                          <div className="w-8.5 h-8.5 rounded-lg bg-emerald-50 text-[#009670] flex items-center justify-center shrink-0">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                          </div>
+                        ) : act.activity_type === 'download' ? (
+                          <div className="w-8.5 h-8.5 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                            </svg>
+                          </div>
+                        ) : act.activity_type === 'follow' ? (
+                          <div className="w-8.5 h-8.5 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 0110.374 21c-2.331 0-4.512-.645-6.374-1.766z" />
+                            </svg>
+                          </div>
+                        ) : (
+                          <div className="w-8.5 h-8.5 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125" />
+                            </svg>
+                          </div>
+                        );
 
-                  {/* Activity Item 2 */}
-                  <div className="flex items-center justify-between py-3.5 last:pb-0">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8.5 h-8.5 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                        </svg>
-                      </div>
-                      <div>
-                        <p className="text-xs font-bold text-slate-800 leading-snug">
-                          Your resume was downloaded by TechNova Solutions
-                        </p>
-                      </div>
-                    </div>
-                    <span className="text-[10px] font-bold text-slate-400 ml-4 shrink-0">5h ago</span>
+                      return (
+                        <div key={act.id} className="flex items-center justify-between py-3.5 first:pt-0 last:pb-0">
+                          <div className="flex items-center gap-3">
+                            {icon}
+                            <div>
+                              <p className="text-xs font-bold text-slate-800 leading-snug">
+                                {act.actor_name ? (
+                                  <span className="font-black text-slate-900">{act.actor_name} </span>
+                                ) : null}
+                                <span className="text-slate-600 font-semibold">{act.details || 'interacted with your profile'}</span>
+                              </p>
+                              {act.actor_username && (
+                                <p className="text-[10px] text-slate-400 font-bold">@{act.actor_username}</p>
+                              )}
+                            </div>
+                          </div>
+                          <span className="text-[10px] font-bold text-slate-400 ml-4 shrink-0">
+                            {formatTimeAgo(act.created_at)}
+                          </span>
+                        </div>
+                      );
+                    })}
                   </div>
-
-                  {/* Activity Item 3 */}
-                  <div className="flex items-center justify-between py-3.5 last:pb-0">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8.5 h-8.5 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
-                        </svg>
-                      </div>
-                      <div>
-                        <p className="text-xs font-bold text-slate-800 leading-snug">
-                          Certificate <span className="font-bold text-purple-600">&quot;{lastCertName}&quot;</span> was added
-                        </p>
-                      </div>
-                    </div>
-                    <span className="text-[10px] font-bold text-slate-400 ml-4 shrink-0">1d ago</span>
-                  </div>
-
-                  {/* Activity Item 4 */}
-                  <div className="flex items-center justify-between py-3.5 last:pb-0">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8.5 h-8.5 rounded-lg bg-emerald-50 text-[#009670] flex items-center justify-center shrink-0">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                        </svg>
-                      </div>
-                      <div>
-                        <p className="text-xs font-bold text-slate-800 leading-snug">
-                          Profile information was updated successfully
-                        </p>
-                      </div>
-                    </div>
-                    <span className="text-[10px] font-bold text-slate-400 ml-4 shrink-0">2d ago</span>
-                  </div>
-                </div>
+                )}
               </div>
             </div>
 
-            {/* Right section: Profile Completion bar, QR code share link, and premium standouts */}
+            {/* Right section: Profile Completion bar and QR code */}
             <div className="lg:col-span-4 space-y-6">
               
-              {/* Profile Completion details */}
-              <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm space-y-4">
-                <h3 className="text-[13.5px] font-black text-slate-900">Profile Completion</h3>
-                <div className="flex items-center gap-3.5">
-                  <div className="relative w-12 h-12 shrink-0">
-                    <svg className="w-full h-full transform -rotate-90">
-                      <circle cx="24" cy="24" r="20" stroke="#F1F5F9" strokeWidth="4.5" fill="transparent" />
-                      <circle
-                        cx="24"
-                        cy="24"
-                        r="20"
-                        stroke="#009670"
-                        strokeWidth="4.5"
-                        fill="transparent"
-                        strokeDasharray={`${2 * Math.PI * 20}`}
-                        strokeDashoffset={`${2 * Math.PI * 20 * (1 - completionPercent / 100)}`}
-                        strokeLinecap="round"
-                      />
-                    </svg>
-                    <span className="absolute inset-0 flex items-center justify-center text-[10.5px] font-black text-slate-800">
-                      {completionPercent}%
-                    </span>
+              {/* Profile Completion details — conditional */}
+              {isProfileCompleted ? (
+                <div className="bg-emerald-50/70 border border-emerald-100 rounded-2xl p-5 shadow-xs space-y-3.5">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full bg-[#009670] text-white flex items-center justify-center font-black text-sm shadow-sm shadow-emerald-700/20">
+                      ✓
+                    </div>
+                    <div>
+                      <h4 className="text-[13.5px] font-black text-slate-900 leading-tight">Profile 100% Complete!</h4>
+                      <p className="text-[11px] text-[#009670] font-bold mt-0.5">Your profile is fully verified &amp; live</p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="text-[11.5px] font-bold text-slate-800 leading-snug">You&apos;re almost there!</h4>
-                    <p className="text-[10.5px] text-slate-400 font-semibold leading-relaxed mt-0.5">
-                      Complete your profile detail requirements to get better job opportunities.
-                    </p>
+                  <p className="text-[11px] text-slate-500 leading-relaxed font-medium">
+                    All profile detail requirements are complete. Recruiters and clients can now discover your work and connect with you directly.
+                  </p>
+                  <div className="flex items-center gap-2 pt-1">
+                    <Link
+                      href={isToolsPath ? `/tools/profilemitraa/${user?.username}/profile` : `/${user?.username}/profile`}
+                      target="_blank"
+                      className="px-3.5 py-2 bg-[#009670] hover:bg-[#047857] text-white font-bold text-xs rounded-xl transition-all shadow-xs"
+                    >
+                      View Live Profile
+                    </Link>
+                    <Link
+                      href={isToolsPath ? "/tools/profilemitraa/settings" : "/settings"}
+                      className="px-3.5 py-2 bg-white border border-slate-200 hover:border-slate-300 text-slate-700 font-bold text-xs rounded-xl transition-all shadow-xs"
+                    >
+                      Edit Profile
+                    </Link>
                   </div>
                 </div>
-                
-                {alignmentProgressList(profile, completionPercent)}
+              ) : (
+                <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm space-y-4">
+                  <h3 className="text-[13.5px] font-black text-slate-900">Profile Completion</h3>
+                  <div className="flex items-center gap-3.5">
+                    <div className="relative w-12 h-12 shrink-0">
+                      <svg className="w-full h-full transform -rotate-90">
+                        <circle cx="24" cy="24" r="20" stroke="#F1F5F9" strokeWidth="4.5" fill="transparent" />
+                        <circle
+                          cx="24"
+                          cy="24"
+                          r="20"
+                          stroke="#009670"
+                          strokeWidth="4.5"
+                          fill="transparent"
+                          strokeDasharray={`${2 * Math.PI * 20}`}
+                          strokeDashoffset={`${2 * Math.PI * 20 * (1 - completionPercent / 100)}`}
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                      <span className="absolute inset-0 flex items-center justify-center text-[10.5px] font-black text-slate-800">
+                        {completionPercent}%
+                      </span>
+                    </div>
+                    <div>
+                      <h4 className="text-[11.5px] font-bold text-slate-800 leading-snug">You&apos;re almost there!</h4>
+                      <p className="text-[10.5px] text-slate-400 font-semibold leading-relaxed mt-0.5">
+                        Complete your profile detail requirements to get better job opportunities.
+                      </p>
+                    </div>
+                  </div>
+                  
+                  {alignmentProgressList(profile, completionPercent)}
 
-                <Link
-                  href={isToolsPath ? "/tools/profilemitraa/complete-profile" : "/complete-profile"}
-                  className="w-full py-2 border border-slate-100 hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl flex items-center justify-center gap-1 transition-all"
-                >
-                  Improve Profile
-                  <span>➔</span>
-                </Link>
-              </div>
+                  <Link
+                    href={isToolsPath ? "/tools/profilemitraa/complete-profile" : "/complete-profile"}
+                    className="w-full py-2 border border-slate-100 hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl flex items-center justify-center gap-1 transition-all"
+                  >
+                    Improve Profile
+                    <span>➔</span>
+                  </Link>
+                </div>
+              )}
 
               {/* Your Profile QR */}
               <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm space-y-4">
@@ -866,19 +1022,6 @@ export default function ProfileMitraaDashboardPage() {
                     Customize URL
                   </Link>
                 </div>
-              </div>
-
-              {/* Standout upgrade advertisement */}
-              <div className="bg-[#FAF5FF] border border-purple-100 rounded-2xl p-4.5 space-y-3 relative overflow-hidden">
-                <div className="flex items-center gap-2">
-                  <span className="text-[13px] font-bold text-purple-700">Premium Rocket 🚀</span>
-                </div>
-                <p className="text-[10.5px] text-purple-600/90 leading-relaxed font-semibold">
-                  Upgrade to Premium, unlock custom templates, premium document outputs, and stand out from the crowd!
-                </p>
-                <button className="text-xs font-bold text-purple-700 hover:text-purple-900 underline block cursor-pointer">
-                  Upgrade Now &rarr;
-                </button>
               </div>
 
             </div>

@@ -28,7 +28,7 @@ export default function ProfileMitraaLoginPage() {
 
   const handleGoogleLogin = () => {
     setIsGoogleLoading(true);
-    const returnTo = isToolsPath ? '/tools/profilemitraa/dashboard' : '/dashboard';
+    const returnTo = isToolsPath ? '/tools/profilemitraa/complete-profile' : '/complete-profile';
     const origin = typeof window !== 'undefined' ? window.location.origin : '';
     window.location.href = `/api/auth/google?returnTo=${encodeURIComponent(returnTo)}&origin=${encodeURIComponent(origin)}`;
   };

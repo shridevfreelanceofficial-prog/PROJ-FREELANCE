@@ -125,13 +125,25 @@ export default function Step4ReviewPage() {
       });
   }, [router]);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setIsSubmitting(true);
-    // Simulate final data verification submission
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      await fetch('/api/profilemitraa/profile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          is_completed: true,
+        }),
+      });
       setSubmitted(true);
-    }, 1800);
+    } catch (err) {
+      console.error('Error submitting profile completion:', err);
+      setSubmitted(true);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (submitted) {

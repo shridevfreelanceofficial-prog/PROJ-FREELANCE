@@ -106,6 +106,27 @@ export async function POST(
       [authUser.userId, target.id]
     );
 
+    // Record follow activity
+    try {
+      const followerInfo = await queryOne<{ full_name: string; username: string; avatar_url: string | null }>(
+        'SELECT full_name, username, avatar_url FROM profilemitraa_users WHERE id = $1',
+        [authUser.userId]
+      );
+      await query(
+        `INSERT INTO profilemitraa_activities (user_id, actor_id, activity_type, actor_name, actor_username, actor_avatar_url, details)
+         VALUES ($1, $2, 'follow', $3, $4, $5, 'started following you')`,
+        [
+          target.id,
+          authUser.userId,
+          followerInfo?.full_name || authUser.username,
+          followerInfo?.username || authUser.username,
+          followerInfo?.avatar_url || null,
+        ]
+      );
+    } catch (actErr) {
+      console.warn('Could not record follow activity:', actErr);
+    }
+
     const followerCount = await queryOne<{ count: string }>(
       'SELECT COUNT(*)::int as count FROM profilemitraa_follows WHERE following_id = $1',
       [target.id]

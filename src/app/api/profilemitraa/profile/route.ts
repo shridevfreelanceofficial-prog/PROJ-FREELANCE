@@ -138,6 +138,17 @@ export async function POST(request: NextRequest) {
       const projectsStr = formData.get('projects');
       body.projects = projectsStr ? JSON.parse(projectsStr as string) : undefined;
 
+      const isCompletedVal = formData.get('is_completed');
+      if (isCompletedVal !== null) {
+        body.is_completed = isCompletedVal === 'true' || isCompletedVal === '1';
+      }
+
+      const fullNameVal = formData.get('full_name') || formData.get('fullName');
+      if (fullNameVal) body.full_name = fullNameVal as string;
+
+      const usernameVal = formData.get('username');
+      if (usernameVal) body.username = usernameVal as string;
+
       // Handle file upload if present — store via Vercel Blob (private, proxied on serve)
       const photoFile = formData.get('profile_photo') as File | null;
       if (photoFile && photoFile.size > 0) {
@@ -166,8 +177,8 @@ export async function POST(request: NextRequest) {
           user_id, phone, dob, location, headline, profile_photo_url,
           professional_title, experience_level, current_job_role, experience_years,
           employment_type, company, about_me, tech_skills, tools, soft_skills,
-          languages, certifications, education, projects
-         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)`,
+          languages, certifications, education, projects, is_completed
+         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)`,
         [
           user.userId,
           body.phone || null,
@@ -188,7 +199,8 @@ export async function POST(request: NextRequest) {
           body.languages ? JSON.stringify(body.languages) : '[]',
           body.certifications ? JSON.stringify(body.certifications) : '[]',
           body.education ? JSON.stringify(body.education) : '[]',
-          body.projects ? JSON.stringify(body.projects) : '[]'
+          body.projects ? JSON.stringify(body.projects) : '[]',
+          body.is_completed !== undefined ? Boolean(body.is_completed) : false
         ]
       );
     } else {
@@ -218,6 +230,7 @@ export async function POST(request: NextRequest) {
              certifications = COALESCE($18, certifications),
              education = COALESCE($19, education),
              projects = COALESCE($20, projects),
+             is_completed = COALESCE($21, is_completed),
              updated_at = CURRENT_TIMESTAMP
          WHERE user_id = $1`,
         [
@@ -240,9 +253,58 @@ export async function POST(request: NextRequest) {
           body.languages !== undefined ? JSON.stringify(body.languages) : null,
           body.certifications !== undefined ? JSON.stringify(body.certifications) : null,
           body.education !== undefined ? JSON.stringify(body.education) : null,
-          body.projects !== undefined ? JSON.stringify(body.projects) : null
+          body.projects !== undefined ? JSON.stringify(body.projects) : null,
+          body.is_completed !== undefined ? Boolean(body.is_completed) : null
         ]
       );
+    }
+
+    // Sync user table fields if provided
+    if (body.full_name || body.fullName) {
+      await query(
+        'UPDATE profilemitraa_users SET full_name = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
+        [body.full_name || body.fullName, user.userId]
+      );
+    }
+    if (body.username) {
+      const cleanUsername = String(body.username).toLowerCase().trim().replace(/[^a-z0-9_]/g, '');
+      if (cleanUsername.length >= 3) {
+        const existingUsername = await queryOne(
+          'SELECT id FROM profilemitraa_users WHERE LOWER(username) = LOWER($1) AND id != $2',
+          [cleanUsername, user.userId]
+        );
+        if (!existingUsername) {
+          await query(
+            'UPDATE profilemitraa_users SET username = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
+            [cleanUsername, user.userId]
+          );
+        }
+      }
+    }
+    if (body.profile_photo_url) {
+      await query(
+        'UPDATE profilemitraa_users SET avatar_url = $1 WHERE id = $2',
+        [body.profile_photo_url, user.userId]
+      );
+    }
+
+    // Log recent activity for the user
+    try {
+      if (body.is_completed) {
+        await query(
+          `INSERT INTO profilemitraa_activities (user_id, activity_type, details)
+           VALUES ($1, 'profile_complete', 'Profile completed successfully (100%)')`,
+          [user.userId]
+        );
+      } else {
+        await query(
+          `INSERT INTO profilemitraa_activities (user_id, activity_type, details)
+           VALUES ($1, 'profile_update', 'Profile information was updated')`,
+          [user.userId]
+        );
+      }
+    } catch (actErr) {
+      console.warn('Could not record activity:', actErr);
     }
 
     return NextResponse.json({

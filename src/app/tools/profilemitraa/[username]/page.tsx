@@ -536,6 +536,9 @@ export default async function PublicPortfolioPage({ params }: { params: Promise<
                       <div>
                         <a
                           href="#contact"
+                          onClick={() => {
+                            fetch(`/api/profilemitraa/profile/${username}/download`, { method: 'POST' }).catch(() => {});
+                          }}
                           className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-extrabold text-xs text-white uppercase tracking-wider shadow-md transition-all hover:scale-105"
                           style={{ backgroundColor: themeColor }}
                         >

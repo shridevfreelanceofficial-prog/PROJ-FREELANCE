@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
   }
 
   const { searchParams } = new URL(request.url);
-  const returnTo = searchParams.get('returnTo') || '/dashboard';
+  const returnTo = searchParams.get('returnTo') || '/complete-profile';
   const clientOrigin = searchParams.get('origin') || '';
 
   const host = request.headers.get('x-forwarded-host') || request.headers.get('host') || '';

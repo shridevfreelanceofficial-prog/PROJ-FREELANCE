@@ -251,22 +251,37 @@ export default function ProfileMitraaPublicProfilePage({ params }: { params: Pro
           {/* Follow / Edit button */}
           <div className="z-10 shrink-0">
             {isSelf ? (
-              <Link href={isToolsPath ? "/tools/profilemitraa/complete-profile" : "/complete-profile"} className="px-5 py-2.5 border border-slate-200 hover:border-slate-300 bg-white text-slate-700 font-bold text-xs rounded-xl flex items-center gap-1.5 transition-colors">
+              <Link href={isToolsPath ? "/tools/profilemitraa/settings" : "/settings"} className="px-5 py-2.5 border border-slate-200 hover:border-slate-300 bg-white text-slate-700 font-bold text-xs rounded-xl flex items-center gap-1.5 transition-colors shadow-xs">
                 Edit Profile
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125" />
                 </svg>
               </Link>
             ) : (
-              <button
-                onClick={handleFollow}
-                disabled={followLoading}
-                className={`px-5 py-2.5 font-bold text-xs rounded-xl transition-all flex items-center gap-1.5 ${
-                  isFollowing
-                    ? 'bg-slate-100 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 border border-slate-200 text-slate-700'
-                    : 'bg-[#009670] hover:bg-[#047857] text-white shadow-sm shadow-emerald-700/20'
-                } disabled:opacity-60`}
-              >
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    fetch(`/api/profilemitraa/profile/${username}/download`, { method: 'POST' }).catch(() => {});
+                    window.print();
+                  }}
+                  className="px-4 py-2.5 border border-slate-200 hover:border-slate-300 bg-white text-slate-700 font-bold text-xs rounded-xl flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer"
+                  title="Download / Print Resume"
+                >
+                  <svg className="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                  </svg>
+                  Resume
+                </button>
+
+                <button
+                  onClick={handleFollow}
+                  disabled={followLoading}
+                  className={`px-5 py-2.5 font-bold text-xs rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ${
+                    isFollowing
+                      ? 'bg-slate-100 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 border border-slate-200 text-slate-700'
+                      : 'bg-[#009670] hover:bg-[#047857] text-white shadow-sm shadow-emerald-700/20'
+                  } disabled:opacity-60`}
+                >
                 {followLoading ? (
                   <div className="w-3.5 h-3.5 border-2 border-current/30 border-t-current rounded-full animate-spin" />
                 ) : isFollowing ? (
@@ -285,7 +300,8 @@ export default function ProfileMitraaPublicProfilePage({ params }: { params: Pro
                   </>
                 )}
               </button>
-            )}
+            </div>
+          )}
           </div>
         </div>
 
